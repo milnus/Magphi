@@ -4,6 +4,8 @@ import check_inputs
 import commandline_interface
 import split_gff_file
 import primer_handling
+import search_insertion_sites
+import json
 
 
 # Test for printing help function upon no inputs
@@ -106,6 +108,114 @@ class TestPrimerFunctions(unittest.TestCase):
     def test_uneven_primer_number(self):
         with self.assertRaises(SystemExit):
             primer_handling.check_number_of_primers('/Users/mjespersen/Documents/Phupa_test_data/Unittest_uneven_primer_number/Untitled_primers.txt')
+
+class TestFlankingRegion(unittest.TestCase):
+
+    def test_multiple_hit_single_contig_no_limit(self):
+        with open('/Users/mjespersen/Documents/Phupa_test_data/Unitest_flanking_regions/single_contig_multi_hit.json', 'r') as primer_hit_json:
+            primer_hit_dict = json.load(primer_hit_json)
+        flanking_return = search_insertion_sites.examine_flanking_regions(primer_hit_dict, 0, 'test')
+
+        self.assertEqual(3, flanking_return)
+
+    def test_multiple_hit_single_contig_w_single_overlap(self):
+        with open('/Users/mjespersen/Documents/Phupa_test_data/Unitest_flanking_regions/single_contig_multi_hit.json', 'r') as primer_hit_json:
+            primer_hit_dict = json.load(primer_hit_json)
+        flanking_return = search_insertion_sites.examine_flanking_regions(primer_hit_dict, 201, '/Users/mjespersen/Documents/Phupa_test_data/Unitest_flanking_regions/single_contig_1200N.fasta.fai')
+
+        self.assertEqual(5, flanking_return)
+
+    def test_multiple_hit_single_contig_w_multiple_overlaps(self):
+        with open('/Users/mjespersen/Documents/Phupa_test_data/Unitest_flanking_regions/single_contig_multi_hit.json', 'r') as primer_hit_json:
+            primer_hit_dict = json.load(primer_hit_json)
+        flanking_return = search_insertion_sites.examine_flanking_regions(primer_hit_dict, 300, '/Users/mjespersen/Documents/Phupa_test_data/Unitest_flanking_regions/single_contig_1200N.fasta.fai')
+
+        self.assertEqual(3, flanking_return)
+
+    def test_multiple_hit_single_contig_w_no_overlaps(self):
+        with open('/Users/mjespersen/Documents/Phupa_test_data/Unitest_flanking_regions/single_contig_multi_hit.json', 'r') as primer_hit_json:
+            primer_hit_dict = json.load(primer_hit_json)
+        flanking_return = search_insertion_sites.examine_flanking_regions(primer_hit_dict, 1, '/Users/mjespersen/Documents/Phupa_test_data/Unitest_flanking_regions/single_contig_1200N.fasta.fai')
+
+        self.assertEqual(2, flanking_return)
+
+    def test_multiple_hit_single_contig_w_same_primer_overlap(self):
+        with open('/Users/mjespersen/Documents/Phupa_test_data/Unitest_flanking_regions/single_contig_multi_hit_sampe_overlap.json', 'r') as primer_hit_json:
+            primer_hit_dict = json.load(primer_hit_json)
+        flanking_return = search_insertion_sites.examine_flanking_regions(primer_hit_dict, 1, '/Users/mjespersen/Documents/Phupa_test_data/Unitest_flanking_regions/single_contig_1200N.fasta.fai')
+
+        self.assertEqual(2, flanking_return)
+
+
+    def test_multiple_hit_single_contig_w_same_primer_overlap_and_mix_pair(self):
+        with open('/Users/mjespersen/Documents/Phupa_test_data/Unitest_flanking_regions/single_contig_multi_hit_sampe_overlap_n_mix_pair.json', 'r') as primer_hit_json:
+            primer_hit_dict = json.load(primer_hit_json)
+        flanking_return = search_insertion_sites.examine_flanking_regions(primer_hit_dict, 1, '/Users/mjespersen/Documents/Phupa_test_data/Unitest_flanking_regions/single_contig_1200N.fasta.fai')
+
+        self.assertEqual(5, flanking_return)
+
+    def test_multiple_hit_single_contig_w_same_primer_neighbour_and_mate(self):
+        with open('/Users/mjespersen/Documents/Phupa_test_data/Unitest_flanking_regions/single_contig_multi_hit_same_neighbours.json', 'r') as primer_hit_json:
+            primer_hit_dict = json.load(primer_hit_json)
+        flanking_return = search_insertion_sites.examine_flanking_regions(primer_hit_dict, 200, '/Users/mjespersen/Documents/Phupa_test_data/Unitest_flanking_regions/single_contig_1200N.fasta.fai')
+
+        self.assertEqual(5, flanking_return)
+
+    def test_multiple_hit_single_contig_w_same_primer_neighbour_and_mate_multi_hit(self):
+        with open('/Users/mjespersen/Documents/Phupa_test_data/Unitest_flanking_regions/single_contig_multi_hit_same_neighbours.json', 'r') as primer_hit_json:
+            primer_hit_dict = json.load(primer_hit_json)
+        flanking_return = search_insertion_sites.examine_flanking_regions(primer_hit_dict, 400, '/Users/mjespersen/Documents/Phupa_test_data/Unitest_flanking_regions/single_contig_1200N.fasta.fai')
+
+        self.assertEqual(3, flanking_return)
+
+
+    def test_multiple_hits_multiple_contigs_overlap_across_contig(self):
+        with open('/Users/mjespersen/Documents/Phupa_test_data/Unitest_flanking_regions/multi_contig_multi_hit_overlap_across_contig.json', 'r') as primer_hit_json:
+            primer_hit_dict = json.load(primer_hit_json)
+        flanking_return = search_insertion_sites.examine_flanking_regions(primer_hit_dict, 101, '/Users/mjespersen/Documents/Phupa_test_data/Unitest_flanking_regions/double_contig.fasta.fai')
+
+        self.assertEqual(6, flanking_return)
+
+    def test_multiple_hits_multiple_contigs_no_end_reaced(self):
+        with open('/Users/mjespersen/Documents/Phupa_test_data/Unitest_flanking_regions/multi_contig_multi_hit_overlap_across_contig.json', 'r') as primer_hit_json:
+            primer_hit_dict = json.load(primer_hit_json)
+        flanking_return = search_insertion_sites.examine_flanking_regions(primer_hit_dict, 100, '/Users/mjespersen/Documents/Phupa_test_data/Unitest_flanking_regions/double_contig.fasta.fai')
+
+        self.assertEqual(2, flanking_return)
+
+    def test_multiple_hits_multiple_contigs_all_ends_reaced(self):
+        with open('/Users/mjespersen/Documents/Phupa_test_data/Unitest_flanking_regions/multi_contig_multi_hit_overlap_across_contig.json', 'r') as primer_hit_json:
+            primer_hit_dict = json.load(primer_hit_json)
+        flanking_return = search_insertion_sites.examine_flanking_regions(primer_hit_dict, 10000, '/Users/mjespersen/Documents/Phupa_test_data/Unitest_flanking_regions/double_contig.fasta.fai')
+
+        self.assertEqual(3, flanking_return)
+
+    def test_multiple_hits_multiple_contigs_two_and_one_ends_reaced(self):
+        with open('/Users/mjespersen/Documents/Phupa_test_data/Unitest_flanking_regions/multi_contig_multi_hit_overlap_across_contig.json', 'r') as primer_hit_json:
+            primer_hit_dict = json.load(primer_hit_json)
+        flanking_return = search_insertion_sites.examine_flanking_regions(primer_hit_dict, 300, '/Users/mjespersen/Documents/Phupa_test_data/Unitest_flanking_regions/double_contig.fasta.fai')
+
+        self.assertEqual(4, flanking_return)
+
+    # TODO - Write a unittest with only one primer that has hit.
+
+    # TODO - Write a unittest with only one primer reaching one end of a contig
+    def test_one_primer_reaching_one_end(self):
+        with open('/Users/mjespersen/Documents/Phupa_test_data/Unitest_flanking_regions/multi_contig_multi_hit_single_primer_reaching_one_end.json', 'r') as primer_hit_json:
+            primer_hit_dict = json.load(primer_hit_json)
+        flanking_return = search_insertion_sites.examine_flanking_regions(primer_hit_dict, 101, '/Users/mjespersen/Documents/Phupa_test_data/Unitest_flanking_regions/double_contig.fasta.fai')
+
+        self.assertEqual(6, flanking_return)
+
+    # TODO - Write a unit test with only one primer reaching both ends of a contig
+    def test_one_primer_reaching_two_ends(self):
+        with open('/Users/mjespersen/Documents/Phupa_test_data/Unitest_flanking_regions/multi_contig_multi_hit_single_primer_reaching_one_end.json', 'r') as primer_hit_json:
+            primer_hit_dict = json.load(primer_hit_json)
+        flanking_return = search_insertion_sites.examine_flanking_regions(primer_hit_dict, 400, '/Users/mjespersen/Documents/Phupa_test_data/Unitest_flanking_regions/double_contig.fasta.fai')
+
+        self.assertEqual(6, flanking_return)
+
+    # TODO - test warning return - if you can figure out how to do it ;-)
 
 if __name__ == '__main__':
     unittest.main()

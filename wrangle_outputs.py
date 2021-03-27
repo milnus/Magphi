@@ -17,10 +17,22 @@ def partition_outputs(primer_pairs, out_path):
 
         # find and move files into folder
         for i, file in enumerate(out_folder_content_paths):
-            # Check if a file in the output folder contain the primer name and is a fasta or gff file.
-            if primer in file and ('.gff' in file or '.fasta' in file):
-                # Move the file into the primer folder
-                os.rename(file, os.path.join(primer_out_path, out_folder_content[i]))
+
+            # Check that the marker of a output file is present (--)
+            if '--' in file and ('.gff' in file or '.fasta' in file):
+                # Isolate the primer from the file name
+                file_primer = file.rsplit('.', 1)[0]
+                file_primer = file_primer.rsplit('--', 1)[-1]
+                # Check if break is present
+                if 'break' in file_primer:
+                    file_primer = file_primer.rsplit('_', 2)[0]
+
+                # Check if a file in the output folder contain the primer name and is a fasta or gff file.
+                if primer in file_primer:
+                    # Replace the double hyphen with a single.
+                    file_new = out_folder_content[i].replace('--', '-')
+                    # Move the file into the primer folder
+                    os.rename(file, os.path.join(primer_out_path, file_new))
 
 
 def write_paired_primers(primer_pairs, out_path):

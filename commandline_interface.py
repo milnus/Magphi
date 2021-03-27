@@ -52,7 +52,16 @@ def get_commandline_arguments(args):
                         metavar='path/to/output',
                         default='.',
                         dest='out_path')
-    # TODO - See if the nargs works if you set the type expected to something (str)
+
+    # Add the flag to control max CPUs
+    parser.add_argument('-c',
+                        '--cpu',
+                        help='Give max number of CPUs [default: 1]',
+                        required=False,
+                        metavar='',
+                        default=1,
+                        type=int,
+                        dest='cpu')
 
     # Check if there are no arguments given or the user ask for the help message
     if len(args) < 1 or '-help' in args:

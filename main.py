@@ -66,7 +66,7 @@ def main():
     master_inter_primer_dist = {}
 
     # TODO - add a command line argument that allows the user to set the number of workers.
-    with concurrent.futures.ProcessPoolExecutor(max_workers=1) as executor:
+    with concurrent.futures.ProcessPoolExecutor(max_workers=cmd_args.cpu) as executor:
         results = [executor.submit(screen_genome_for_primers, genomes[i], primer_pairs, cmd_args.primers,
                                    tmp_folder, cmd_args.include_primers, file_type, annotations[i],
                                    cmd_args.out_path, cmd_args.max_primer_dist) for i, genome in enumerate(genomes)]

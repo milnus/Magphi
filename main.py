@@ -1,3 +1,4 @@
+#!/usr/bin/python
 import os
 from sys import argv
 from commandline_interface import get_commandline_arguments

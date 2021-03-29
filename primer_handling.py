@@ -84,12 +84,12 @@ def construct_pair_primers(primer_names):
 def handle_primers(primer_file):
     num_primers = check_number_of_primers(primer_file)
 
-    # TODO - make verbose controlled:
-    print(f'{num_primers} primers found in primer file.\n'
-          f'This leads to {num_primers//2} pairs of primers.')
-
     primer_dict = extract_primer_info(primer_file)
 
     primer_pairs = construct_pair_primers(list(primer_dict.keys()))
+
+    # TODO - make verbose controlled:
+    print(f'{num_primers} primers found in primer file.\n'
+          f'This leads to {len(primer_pairs)} pairs of primers.')
 
     return primer_pairs, primer_dict

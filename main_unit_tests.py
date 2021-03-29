@@ -71,6 +71,7 @@ class TestFileRecognition(unittest.TestCase):
         with self.assertRaises(SystemExit):
             check_inputs.check_inputs(files)
 
+
 # Test splitting of gff file
 class TestSplittingGff(unittest.TestCase):
 
@@ -108,6 +109,15 @@ class TestPrimerFunctions(unittest.TestCase):
     def test_uneven_primer_number(self):
         with self.assertRaises(SystemExit):
             primer_handling.check_number_of_primers('/Users/mjespersen/Documents/Phupa_test_data/Unittest_uneven_primer_number/Untitled_primers.txt')
+
+    def test_primer_pairing(self):
+        with open('/Users/mjespersen/Documents/Phupa_test_data/Unitest_primer_pairing/single_letter_primer_pairs.txt', 'r') as primer_names_file:
+            primer_names = json.load(primer_names_file)
+        primer_pairs = primer_handling.construct_pair_primers(primer_names)
+
+        expected_names = {'D': ['D_1', 'D_2'], 'mutsD': ['mutsD_1', 'mutsD_2']}
+        self.assertEqual(expected_names , primer_pairs)
+
 
 class TestFlankingRegion(unittest.TestCase):
 

@@ -57,9 +57,11 @@ def blast_out_to_sorted_bed(blast_xml_output, include_primers, genome_name, prim
 
     # Split up the bed lines into each primer and write a bed file for each primer
     for primer_pair in primer_pairs.keys():
+        print(primer_pairs[primer_pair][0])
+        print(primer_pairs[primer_pair][1])
         # Find bed lines for primer pair
         primer_bed_lines = [line for line in bed_list
-                            if primer_pairs[primer_pair][0] in line[3] or primer_pairs[primer_pair][1] in line[3]]
+                            if primer_pairs[primer_pair][0] == line[3] or primer_pairs[primer_pair][1] == line[3]]
 
         # Record the number of hits in a genome by a set of primers
         primer_hits[primer_pair] = len(primer_bed_lines)

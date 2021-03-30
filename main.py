@@ -65,11 +65,14 @@ def main():
     primers_w_breaks = primer_pairs.copy()
     master_inter_primer_dist = {}
 
+    # TODO - make verbose controlled
+    print(f'{len(genomes)} input files has to be processed, starting now!')
+
     # TODO - add a command line argument that allows the user to set the number of workers.
     with concurrent.futures.ProcessPoolExecutor(max_workers=cmd_args.cpu) as executor:
         results = [executor.submit(screen_genome_for_primers, genomes[i], primer_pairs, cmd_args.primers,
                                    tmp_folder, cmd_args.include_primers, file_type, annotations[i],
-                                   cmd_args.out_path, cmd_args.max_primer_dist) for i, genome in enumerate(genomes)]
+                                   cmd_args.out_path, cmd_args.max_primer_dist, i) for i, genome in enumerate(genomes)]
 
         for f in concurrent.futures.as_completed(results):
             primer_hits, annots_per_interval, genome_name, primer_evidence, break_primers, inter_primer_dist = f.result()

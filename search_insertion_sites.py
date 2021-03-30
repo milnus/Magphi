@@ -57,8 +57,6 @@ def blast_out_to_sorted_bed(blast_xml_output, include_primers, genome_name, prim
 
     # Split up the bed lines into each primer and write a bed file for each primer
     for primer_pair in primer_pairs.keys():
-        print(primer_pairs[primer_pair][0])
-        print(primer_pairs[primer_pair][1])
         # Find bed lines for primer pair
         primer_bed_lines = [line for line in bed_list
                             if primer_pairs[primer_pair][0] == line[3] or primer_pairs[primer_pair][1] == line[3]]
@@ -587,7 +585,10 @@ def extract_seqs_n_annots(merged_bed_files, file_type, genome_file, annotation_f
 
 
 def screen_genome_for_primers(genome_file, primer_pairs, primer_path, tmp_folder,
-                              include_primers, file_type, annotation_file, out_path, max_primer_dist):
+                              include_primers, file_type, annotation_file, out_path, max_primer_dist, i):
+    if i+1 % 25 == 0 or i == 0:
+        print(f'   File number {i+1} is being processed')
+
     # Clean the genome name for path, .gff and possible _tmp if gff is given
     genome_name = genome_file.rsplit('/', 1)[1]
     genome_name = genome_name.rsplit('.', 1)[0]

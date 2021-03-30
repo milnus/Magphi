@@ -28,7 +28,7 @@ def partition_outputs(primer_pairs, out_path):
                     file_primer = file_primer.rsplit('_', 2)[0]
 
                 # Check if a file in the output folder contain the primer name and is a fasta or gff file.
-                if primer in file_primer:
+                if primer in file_primer and (f'{primer}_' in file or f'{primer}.' in file):
                     # Replace the double hyphen with a single.
                     file_new = out_folder_content[i].replace('--', '-')
                     # Move the file into the primer folder

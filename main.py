@@ -116,7 +116,9 @@ def main():
 
     os.rmdir(tmp_folder)
 
-    print(f"Done in: {time.time() - start_time} Seconds")
+    time_to_finish = time.time() - start_time
+    time_to_finish = int(round(time_to_finish, 0))
+    print(f"Done in: {time_to_finish} Seconds")
 
 if __name__ == '__main__':
     main()

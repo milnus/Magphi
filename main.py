@@ -38,6 +38,8 @@ def main():
 
     # Check if input is GFF3 files and split genome from annotations and assign to be handed over to blast,
     # If files are not gff then assign the fastas from the input an no annotations.
+    # TODO - make verbose controlled
+    print("Splitting GFF files into annotations and genomes")
     if file_type == 'gff':
         # TODO - Possibly parallellise this process
         genomes, annotations = split_gff_files(cmd_args.genomes, tmp_folder)
@@ -104,7 +106,6 @@ def main():
     # TODO - Output the Master dicts as matrices.
     #   * Input the primer names to be used with replace to remove them from the genome name and give columns the primers as name.
     #   * Possibly output the length of sequences found between primers along with the other information.
-    # write_output_matrixes(master_primer_hits, master_annotation_hits, primer_pairs, cmd_args.out_path)
     write_primer_hit_matrix(master_primer_hits, primer_pairs, cmd_args.out_path)
     if file_type == 'gff':
         write_annotation_num_matrix(master_annotation_hits, primers_w_breaks, cmd_args.out_path)

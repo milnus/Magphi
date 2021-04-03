@@ -94,7 +94,7 @@ def check_for_samtools():
 
 if __name__ == '__main__':
     #TODO - add name of tool!
-    print('\n------ Checking dependencies for NAME_OF_TOOL ------')
+    print('\n------ Checking dependencies for Magphi ------')
     biopython_presence = check_for_biopython()
 
     pybedtools_presence = check_for_pybedtools()

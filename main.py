@@ -29,7 +29,7 @@ def main():
         print("Output folder exists")
 
     # construct a temporary folder to hold files
-    tmp_folder = os.path.join(cmd_args.out_path, "phupa_tmp_folder")
+    tmp_folder = os.path.join(cmd_args.out_path, "Magphi_tmp_folder")
     try:
         os.mkdir(tmp_folder)
     except FileExistsError:

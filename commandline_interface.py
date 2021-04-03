@@ -3,7 +3,7 @@ import argparse
 
 def get_commandline_arguments(args):
     # Set up parser
-    parser = argparse.ArgumentParser(description='Welcome to Phupha!\n '
+    parser = argparse.ArgumentParser(description='Welcome to Magphi!\n '
                                                  'This program will extract sequences and possible annotations within '
                                                  'a set of insertion sequences or primers given as input.')
 

@@ -71,12 +71,18 @@ def main():
     print(f'{len(genomes)} input files has to be processed, starting now!')
 
     # TODO - add a command line argument that allows the user to set the number of workers.
+    genomes_processed = 0
     with concurrent.futures.ProcessPoolExecutor(max_workers=cmd_args.cpu) as executor:
         results = [executor.submit(screen_genome_for_primers, genomes[i], primer_pairs, cmd_args.primers,
                                    tmp_folder, cmd_args.include_primers, file_type, annotations[i],
-                                   cmd_args.out_path, cmd_args.max_primer_dist, i) for i, genome in enumerate(genomes)]
+                                   cmd_args.out_path, cmd_args.max_primer_dist) for i, genome in enumerate(genomes)]
 
         for f in concurrent.futures.as_completed(results):
+            genomes_processed += 1
+
+            if genomes_processed % 25 == 0 or genomes_processed == 0:
+                print(f'   File number {genomes_processed} has been processed')
+
             primer_hits, annots_per_interval, genome_name, primer_evidence, break_primers, inter_primer_dist = f.result()
 
             # Polish the genome name for the output dict:
@@ -100,12 +106,14 @@ def main():
             if len(break_primers.keys()) > 0:
                 primers_w_breaks.update(break_primers)
 
+    print('Partitioning output files into primer folders')
     # Partition output files into their primer set of origin.
     partition_outputs(primer_pairs, cmd_args.out_path)
 
     # TODO - Output the Master dicts as matrices.
     #   * Input the primer names to be used with replace to remove them from the genome name and give columns the primers as name.
     #   * Possibly output the length of sequences found between primers along with the other information.
+    print('Writing output matrices')
     write_primer_hit_matrix(master_primer_hits, primer_pairs, cmd_args.out_path)
     if file_type == 'gff':
         write_annotation_num_matrix(master_annotation_hits, primers_w_breaks, cmd_args.out_path)

@@ -1,4 +1,5 @@
 import os
+import warnings
 
 
 def partition_outputs(primer_pairs, out_path):
@@ -24,12 +25,26 @@ def partition_outputs(primer_pairs, out_path):
                 primer_end = file.rsplit('--', 1)[-1]
                 file_primer = primer_end.rsplit('.', 1)[0]
 
-                # Check if break is present
+                # Check if break is present, if then remove the break and then narrow down the primer the file belongs to.
                 if 'break' in file_primer:
-                    file_primer = file_primer.rsplit('_', 2)[0]
+                    file_primer = file_primer.rsplit('_', 1)[0]
+                    primer_match = [file_primer != primer_name for primer_name in primer_pairs]
+
+                    round_count = 1
+                    while all(primer_match):
+                        file_primer = file_primer[:-1]
+                        primer_match = [file_primer != primer_name for primer_name in primer_pairs]
+
+                        round_count += 1
+
+                        if round_count == 100:
+                            warnings.warn(f'Problem in placing outfile: {file} in an appropriate output folder for a primer.\n'
+                                          f'Please report this!')
+                            continue
 
                 # Check if a file in the output folder contain the primer name and is a fasta or gff file.
-                if primer == file_primer and (f'{primer}_' in primer_end or f'{primer}.' in primer_end):
+                # if primer == file_primer and (f'{primer}_' in primer_end or f'{primer}.' in primer_end):
+                if primer == file_primer:
                     # Replace the double hyphen with a single.
                     file_new = out_folder_content[i].replace('--', '-')
                     # Move the file into the primer folder

@@ -585,10 +585,7 @@ def extract_seqs_n_annots(merged_bed_files, file_type, genome_file, annotation_f
 
 
 def screen_genome_for_primers(genome_file, primer_pairs, primer_path, tmp_folder,
-                              include_primers, file_type, annotation_file, out_path, max_primer_dist, i):
-    if i+1 % 25 == 0 or i == 0:
-        print(f'   File number {i+1} is being processed')
-
+                              include_primers, file_type, annotation_file, out_path, max_primer_dist):
     # Clean the genome name for path, .gff and possible _tmp if gff is given
     genome_name = genome_file.rsplit('/', 1)[1]
     genome_name = genome_name.rsplit('.', 1)[0]

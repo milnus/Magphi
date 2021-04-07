@@ -551,11 +551,13 @@ def extract_seqs_n_annots(merged_bed_files, file_type, genome_file, annotation_f
                     gff_output_file = open(output_gff, 'w')
                     gff_writer = csv.writer(gff_output_file, delimiter='\t')
 
+                    # TODO - insert the required ##gff-version line
+
                     # Go through each line adjust the coordinates, the contig name and write the gff
                     for i, line in enumerate(annot):
                         line[0] = fasta_header
                         line[3] = int(line[3]) - start_coordinate
-                        line[4] = int(line[4]) - start_coordinate
+                        line[4] = int(line[4]) - start_coordinate + 1
                         gff_writer.writerow(line)
 
                     # Add in the tag for the Fasta

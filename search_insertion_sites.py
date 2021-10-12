@@ -551,7 +551,10 @@ def extract_seqs_n_annots(merged_bed_files, file_type, genome_file, annotation_f
                     gff_output_file = open(output_gff, 'w')
                     gff_writer = csv.writer(gff_output_file, delimiter='\t')
 
-                    # TODO - insert the required ##gff-version line
+                    # Insert the required '##gff-version 3' line
+                    gff_writer.writerow('##gff-version 3')
+                    # Write line recording the length of the extracted region
+                    gff_writer.writerow(f'##sequence-region {fasta_header} 1 {len(interval[0])}')
 
                     # Go through each line adjust the coordinates, the contig name and write the gff
                     for i, line in enumerate(annot):

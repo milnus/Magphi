@@ -10,6 +10,11 @@ The program reads one or more input FASTA files. For each file it computes a
 variety of statistics, and then prints a summary of the statistics as output.
 '''
 
+import warnings
+from check_depencies import check_dependencies_for_main
+from exit_with_error import exit_with_error
+
+# Initial
 from argparse import ArgumentParser
 from math import floor
 import sys
@@ -21,6 +26,7 @@ from Bio import SeqIO
 EXIT_FILE_IO_ERROR = 1
 EXIT_COMMAND_LINE_ERROR = 2
 EXIT_FASTA_FILE_ERROR = 3
+EXIT_DEPENDENCY_ERROR = 4
 DEFAULT_MIN_LEN = 0
 DEFAULT_VERBOSE = False
 HEADER = 'FILENAME\tNUMSEQ\tTOTAL\tMIN\tAVG\tMAX'
@@ -31,21 +37,6 @@ try:
     PROGRAM_VERSION = pkg_resources.require(PROGRAM_NAME)[0].version
 except pkg_resources.DistributionNotFound:
     PROGRAM_VERSION = "undefined_version"
-
-
-def exit_with_error(message, exit_status):
-    '''Print an error message to stderr, prefixed by the program name and 'ERROR'.
-    Then exit program with supplied exit status.
-
-    Arguments:
-        message: an error message as a string.
-        exit_status: a positive integer representing the exit status of the
-            program.
-    '''
-    logging.error(message)
-    print("{} ERROR: {}, exiting".format(PROGRAM_NAME, message), file=sys.stderr)
-    sys.exit(exit_status)
-
 
 def parse_args():
     '''Parse command line arguments.
@@ -63,7 +54,7 @@ def parse_args():
             DEFAULT_MIN_LEN))
     parser.add_argument('--version',
                         action='version',
-                        version='%(prog)s ' + PROGRAM_VERSION)
+                        version=f'{PROGRAM_VERSION}s ')
     parser.add_argument('--log',
                         metavar='LOG_FILE',
                         type=str,
@@ -227,6 +218,14 @@ def main():
     "Orchestrate the execution of the program"
     options = parse_args()
     init_logging(options.log)
+
+    # Check dependencies for Magphi
+    dependencies_return = check_dependencies_for_main(verbose=False) # TODO make commandline verbose controlled.
+    if dependencies_return:
+        print("All dependencies are go!")
+    else:
+        warnings.warn("Some dependencies are untested versions")
+
     print(HEADER)
     process_files(options)
 

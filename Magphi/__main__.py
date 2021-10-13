@@ -11,8 +11,8 @@ variety of statistics, and then prints a summary of the statistics as output.
 '''
 
 import warnings
-from check_depencies import check_dependencies_for_main
-from exit_with_error import exit_with_error
+from Magphi.check_depencies import check_dependencies_for_main
+from Magphi.exit_with_error import exit_with_error
 
 # Initial
 from argparse import ArgumentParser

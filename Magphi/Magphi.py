@@ -22,7 +22,7 @@ import logging
 import pkg_resources
 from Bio import SeqIO
 
-
+# TODO - Go through this list and redefine/remove error messeages, and header of program. Remove the default verbose, as it is set in the argparser.
 EXIT_FILE_IO_ERROR = 1
 EXIT_COMMAND_LINE_ERROR = 2
 EXIT_FASTA_FILE_ERROR = 3
@@ -38,23 +38,23 @@ try:
 except pkg_resources.DistributionNotFound:
     PROGRAM_VERSION = "undefined_version"
 
+
 def parse_args():
     '''Parse command line arguments.
     Returns Options object with command line argument values as attributes.
     Will exit the program on a command line error.
     '''
-    description = 'Read one or more FASTA files, compute simple stats for each file'
+    description = 'Read one or more FASTA files, compute simple stats for each file' # TODO - Change description of program
     parser = ArgumentParser(description=description)
     parser.add_argument(
         '--minlen',
         metavar='N',
         type=int,
         default=DEFAULT_MIN_LEN,
-        help='Minimum length sequence to include in stats (default {})'.format(
-            DEFAULT_MIN_LEN))
+        help=f'Minimum length sequence to include in stats (default {DEFAULT_MIN_LEN})')
     parser.add_argument('--version',
                         action='version',
-                        version=f'{PROGRAM_VERSION}s ')
+                        version=f'{PROGRAM_VERSION}s')
     parser.add_argument('--log',
                         metavar='LOG_FILE',
                         type=str,
@@ -211,7 +211,7 @@ def init_logging(log_filename):
                             format='%(asctime)s %(levelname)s - %(message)s',
                             datefmt="%Y-%m-%dT%H:%M:%S%z")
         logging.info('program started')
-        logging.info('command line: %s', ' '.join(sys.argv))
+        logging.info(f"command line: {' '.join(sys.argv)}")
 
 
 def main():

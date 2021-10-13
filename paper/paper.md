@@ -17,7 +17,7 @@ authors:
   orcid: 0000-0001-6141-5179
   affiliation: 1
 affiliations:
-- Department of Microbiology and Immunology, University of Melbourne at the Peter Doherty Institute for Infection and Immunity, Melbourne, VIC, Australia
+- name: Department of Microbiology and Immunology, University of Melbourne at the Peter Doherty Institute for Infection and Immunity, Melbourne, VIC, Australia
   index: 1
 date: 13 October 2021  
 bibliography: paper.bib

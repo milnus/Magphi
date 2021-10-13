@@ -1,7 +1,6 @@
 # Dependencies, with versions explicitly declared for development and testing
 biopython==1.79
 pybedtools==0.8.2
-bedtools==2.29.2
-samtools==1.9
+conda
 # Packages that are not dependencies but used for building or testing
 pylint

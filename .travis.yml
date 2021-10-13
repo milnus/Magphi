@@ -1,0 +1,21 @@
+sudo: true
+dist: xenial 
+services:
+  - docker
+language: python 
+python:
+  - "3.9"
+
+before_install:
+  - pip3 install cwltool
+  - docker build -t magphi .
+
+script:
+  # Both of these same tests, in Docker
+  # Functional tests
+  - docker run --entrypoint /Magphi/.travis/unit-test.sh magphi
+  # Unit tests
+  - docker run --entrypoint /Magphi/functional_tests/Magphi-test.sh magphi -p Magphi -d /Magphi/functional_tests/test_data -v
+
+  # CWL definition test
+  - cwltool Magphi.cwl --fasta_file functional_tests/test_data/two_sequence.fasta

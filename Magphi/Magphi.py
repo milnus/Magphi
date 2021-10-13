@@ -175,6 +175,8 @@ def process_files(options):
     Result:
        None
     '''
+    if len(options.fasta_files) == 0:
+        exit(EXIT_COMMAND_LINE_ERROR)
     if options.fasta_files:
         for fasta_filename in options.fasta_files:
             logging.info("Processing FASTA file from %s", fasta_filename)

@@ -19,7 +19,7 @@ setup(
     packages=['Magphi'],
     package_dir={'Magphi': 'Magphi'},
     entry_points={
-        'console_scripts': ['Magphi = Magphi.Magphi:main']
+        'console_scripts': ['Magphi = Magphi.__main__:main']
     },
     url='https://github.com/GITHUB_USERNAME/Magphi',
     license='LICENSE',

@@ -7,7 +7,7 @@ Usage: python -m unittest -v Magphi_test
 import unittest
 from io import StringIO
 #pylint: disable=no-name-in-module
-from __main__ import FastaStats
+from Magphi.__main__ import FastaStats
 
 class TestFastaStats(unittest.TestCase):
     '''Unit tests for FastaStats'''

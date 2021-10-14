@@ -13,7 +13,10 @@ variety of statistics, and then prints a summary of the statistics as output.
 import warnings
 import os
 import time
+import logging
 from sys import argv
+import pkg_resources # ??
+
 # from Magphi.commandline_interface import get_commandline_arguments
 # from Magphi.check_depencies import check_dependencies_for_main
 # from Magphi.exit_with_error import exit_with_error
@@ -24,9 +27,7 @@ from exit_with_error import exit_with_error
 # Initial
 from argparse import ArgumentParser
 from math import floor
-
-import logging
-import pkg_resources
+import sys
 from Bio import SeqIO
 
 # TODO - Go through this list and redefine/remove error messeages, and header of program. Remove the default verbose, as it is set in the argparser.

@@ -9,8 +9,8 @@ RUN pip3 install .
 RUN pip3 install -r requirements-dev.txt
 
 RUN apt-get update && apt-get install -y \
-  bedtools=2.29.9 \
-  samtools=1.9 \
+  bedtools \
+  samtools \
   && rm -rf /var/lib/apt/lists/*
 #bedtools==2.29.2
  # TODO - add docker container with bedtools - biocontainers?

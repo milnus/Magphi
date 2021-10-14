@@ -175,8 +175,6 @@ def process_files(options):
     Result:
        None
     '''
-    if len(options.fasta_files) == 0:
-        exit(EXIT_COMMAND_LINE_ERROR)
     if options.fasta_files:
         for fasta_filename in options.fasta_files:
             logging.info("Processing FASTA file from %s", fasta_filename)
@@ -225,6 +223,7 @@ def main():
     dependencies_return = check_dependencies_for_main(verbose=False) # TODO make commandline verbose controlled.
     if dependencies_return:
         logging.info("All dependencies are go!")
+        # TODO - log the version of dependencies.
     else:
         warnings.warn("Some dependencies are untested versions")
 

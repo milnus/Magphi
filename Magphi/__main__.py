@@ -224,7 +224,7 @@ def main():
     # Check dependencies for Magphi
     dependencies_return = check_dependencies_for_main(verbose=False) # TODO make commandline verbose controlled.
     if dependencies_return:
-        print("All dependencies are go!")
+        logging.info("All dependencies are go!")
     else:
         warnings.warn("Some dependencies are untested versions")
 

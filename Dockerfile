@@ -7,8 +7,11 @@ RUN pip3 install .
 
 # Override some of the dependencies with the hard-coded versions
 RUN pip3 install -r requirements-dev.txt
-RUN conda install -c bioconda bedtools=2.29.9
-RUN conda install -c bioconda samtools=1.9
+
+RUN apt-get update && apt-get install -y \
+  bedtools=2.29.9 \
+  samtools=1.9 \
+  && rm -rf /var/lib/apt/lists/*
 #bedtools==2.29.2
  # TODO - add docker container with bedtools - biocontainers?
 #samtools==1.9

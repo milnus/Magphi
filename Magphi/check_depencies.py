@@ -1,7 +1,8 @@
 import subprocess
 import warnings
 import sys
-from Magphi.exit_with_error import exit_with_error
+# from Magphi.exit_with_error import exit_with_error
+from exit_with_error import exit_with_error
 EXIT_DEPENDENCY_ERROR = 4
 
 

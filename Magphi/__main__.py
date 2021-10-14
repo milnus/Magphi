@@ -11,13 +11,20 @@ variety of statistics, and then prints a summary of the statistics as output.
 '''
 
 import warnings
-from Magphi.check_depencies import check_dependencies_for_main
-from Magphi.exit_with_error import exit_with_error
+import os
+import time
+from sys import argv
+# from Magphi.commandline_interface import get_commandline_arguments
+# from Magphi.check_depencies import check_dependencies_for_main
+# from Magphi.exit_with_error import exit_with_error
+from commandline_interface import get_commandline_arguments
+from check_depencies import check_dependencies_for_main
+from exit_with_error import exit_with_error
 
 # Initial
 from argparse import ArgumentParser
 from math import floor
-import sys
+
 import logging
 import pkg_resources
 from Bio import SeqIO
@@ -211,10 +218,16 @@ def init_logging(log_filename):
                             format='%(asctime)s %(levelname)s - %(message)s',
                             datefmt="%Y-%m-%dT%H:%M:%S%z")
         logging.info('program started')
-        logging.info(f"command line: {' '.join(sys.argv)}")
+        logging.info(f"command line: {' '.join(argv)}")
 
 
 def main():
+    start_time = time.time()
+
+    # Retrieve the flags given by the user in the commandline
+    cmd_args = get_commandline_arguments(argv[1:], PROGRAM_VERSION)
+
+
     "Orchestrate the execution of the program"
     options = parse_args()
     init_logging(options.log)

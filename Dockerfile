@@ -1,4 +1,4 @@
-FROM python:3.9.7-stretch
+FROM python:3.8-slim-stretch
 WORKDIR /Magphi
 COPY . .
 # TODO - Change the python up top

@@ -1,4 +1,4 @@
-FROM python:3.8-slim-stretch
+FROM python:3.7.3-stretch
 WORKDIR /Magphi
 COPY . .
 # TODO - Change the python up top
@@ -11,6 +11,7 @@ RUN pip3 install -r requirements-dev.txt
 RUN apt-get update && apt-get install -y \
   bedtools \
   samtools \
+  python3.9 \
   && rm -rf /var/lib/apt/lists/*
 #bedtools==2.29.2
  # TODO - add docker container with bedtools - biocontainers?

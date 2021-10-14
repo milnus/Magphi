@@ -223,7 +223,10 @@ def main():
     dependencies_return = check_dependencies_for_main(verbose=False) # TODO make commandline verbose controlled.
     if dependencies_return:
         logging.info("All dependencies are go!")
-        # TODO - log the version of dependencies.
+        logging.info("Dependency versions:")
+        dependencies = ['Biopython', 'Pybedtools', 'Bedtools', 'Samtools']
+        for i in range(0, len(dependencies_return)):
+            logging.info(f"{dependencies[i]} v.{dependencies_return[i]}")
     else:
         warnings.warn("Some dependencies are untested versions")
 

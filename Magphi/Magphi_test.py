@@ -4,7 +4,7 @@ Unit tests for Magphi.
 Usage: python -m unittest -v Magphi_test
 '''
 
-import Magphi.commandline_interface
+from Magphi import commandline_interface
 
 import unittest
 from io import StringIO
@@ -16,12 +16,15 @@ class TestCommandLineHelpCalls(unittest.TestCase):
     '''Unit test for the commandline interface'''
     def test_no_input(self):
         with self.assertRaises(SystemExit):
-            Magphi.commandline_interface.get_commandline_arguments([], 1)
+            commandline_interface.get_commandline_arguments([], 1)
 
     def test_single_dash_help(self):
         with self.assertRaises(SystemExit):
-            Magphi.commandline_interface.get_commandline_arguments('-help', 1)
+            commandline_interface.get_commandline_arguments('-help', 1)
 
+    def test_unrecognised_argument_exit(self):
+        with self.assertRaises(SystemExit):
+            commandline_interface.get_commandline_arguments(['-p', 'test.file', '-g', 'test.file', '--none'], 1)
 
 # Bioinitio tests
 class TestFastaStats(unittest.TestCase):

@@ -5,7 +5,7 @@ EXIT_COMMAND_LINE_ERROR = 2
 
 
 # def get_commandline_arguments(args, version):
-def get_commandline_arguments(version):
+def get_commandline_arguments(args, version):
     # Set up parser
     parser = argparse.ArgumentParser(description='Welcome to Magphi!\n '
                                                  'This program will extract sequences and possible annotations within '
@@ -79,16 +79,13 @@ def get_commandline_arguments(version):
                         version=f'Magphi {version}')
 
     # Check if there are no arguments given or the user ask for the help message
-    if len(sys.argv[1:]) < 1:
+    if len(args) < 1:
         parser.print_help()
         exit(code=EXIT_COMMAND_LINE_ERROR)
-    elif '-help' in sys.argv[1:]:
+    elif '-help' in args:
         parser.print_help()
         exit(code=0)
 
-    # args = parser.parse_args(args)
-    args = parser.parse_args()
-    print(args)
-    print(sys.argv[1:])
+    args = parser.parse_args(args)
 
     return args

@@ -226,7 +226,8 @@ def main():
     start_time = time.time()
 
     # Retrieve the flags given by the user in the commandline
-    cmd_args = get_commandline_arguments(argv[1:], PROGRAM_VERSION)
+    # cmd_args = get_commandline_arguments(argv[1:], PROGRAM_VERSION)
+    cmd_args = get_commandline_arguments(PROGRAM_VERSION)
 
 
     "Orchestrate the execution of the program"

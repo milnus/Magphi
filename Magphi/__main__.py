@@ -21,8 +21,8 @@ import pkg_resources # ??
 # from Magphi.check_depencies import check_dependencies_for_main
 # from Magphi.exit_with_error import exit_with_error
 from commandline_interface import get_commandline_arguments
-from check_depencies import check_dependencies_for_main
-from exit_with_error import exit_with_error
+from Magphi.check_depencies import check_dependencies_for_main
+from Magphi.exit_with_error import exit_with_error
 
 # Initial
 from argparse import ArgumentParser

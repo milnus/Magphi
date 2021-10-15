@@ -10,17 +10,42 @@ The program reads one or more input FASTA files. For each file it computes a
 variety of statistics, and then prints a summary of the statistics as output.
 '''
 
+import warnings
+import os
+import time
+import logging
+from sys import argv
+import pkg_resources # ??
+
+# from Magphi.commandline_interface import get_commandline_arguments
+# from Magphi.check_depencies import check_dependencies_for_main
+# from Magphi.exit_with_error import exit_with_error
+try:
+    from Magphi.commandline_interface import get_commandline_arguments
+except ModuleNotFoundError:
+    from commandline_interface import get_commandline_arguments
+
+try:
+    from Magphi.check_depencies import check_dependencies_for_main
+except ModuleNotFoundError:
+    from check_depencies import check_dependencies_for_main
+
+try:
+    from Magphi.exit_with_error import exit_with_error
+except ModuleNotFoundError:
+    from exit_with_error import exit_with_error
+
+# Initial
 from argparse import ArgumentParser
 from math import floor
 import sys
-import logging
-import pkg_resources
 from Bio import SeqIO
 
 # TODO - Go through this list and redefine/remove error messeages, and header of program. Remove the default verbose, as it is set in the argparser.
 EXIT_FILE_IO_ERROR = 1
 EXIT_COMMAND_LINE_ERROR = 2
 EXIT_FASTA_FILE_ERROR = 3
+EXIT_DEPENDENCY_ERROR = 4
 DEFAULT_MIN_LEN = 0
 DEFAULT_VERBOSE = False
 HEADER = 'FILENAME\tNUMSEQ\tTOTAL\tMIN\tAVG\tMAX'
@@ -31,20 +56,6 @@ try:
     PROGRAM_VERSION = pkg_resources.require(PROGRAM_NAME)[0].version
 except pkg_resources.DistributionNotFound:
     PROGRAM_VERSION = "undefined_version"
-
-
-def exit_with_error(message, exit_status):
-    '''Print an error message to stderr, prefixed by the program name and 'ERROR'.
-    Then exit program with supplied exit status.
-
-    Arguments:
-        message: an error message as a string.
-        exit_status: a positive integer representing the exit status of the
-            program.
-    '''
-    logging.error(message)
-    print(f"{PROGRAM_NAME} ERROR: {message}, exiting", file=sys.stderr)
-    sys.exit(exit_status)
 
 
 def parse_args():
@@ -219,13 +230,31 @@ def init_logging(log_filename):
                             format='%(asctime)s %(levelname)s - %(message)s',
                             datefmt="%Y-%m-%dT%H:%M:%S%z")
         logging.info('program started')
-        logging.info(f"command line: {' '.join(sys.argv)}")
+        logging.info(f"command line: {' '.join(argv)}")
 
 
 def main():
+    start_time = time.time()
+
+    # Retrieve the flags given by the user in the commandline
+    cmd_args = get_commandline_arguments(argv[1:], PROGRAM_VERSION)
+
+
     "Orchestrate the execution of the program"
     options = parse_args()
     init_logging(options.log)
+
+    # Check dependencies for Magphi
+    dependencies_return = check_dependencies_for_main(verbose=False) # TODO make commandline verbose controlled.
+    if dependencies_return:
+        logging.info("All dependencies are go!")
+        logging.info("Dependency versions:")
+        dependencies = ['Biopython', 'Pybedtools', 'Bedtools', 'Samtools']
+        for i in range(0, len(dependencies_return)):
+            logging.info(f"{dependencies[i]} v.{dependencies_return[i]}")
+    else:
+        warnings.warn("Some dependencies are untested versions")
+
     print(HEADER)
     process_files(options)
 

@@ -4,11 +4,29 @@ Unit tests for Magphi.
 Usage: python -m unittest -v Magphi_test
 '''
 
+from Magphi import commandline_interface
+
 import unittest
 from io import StringIO
 #pylint: disable=no-name-in-module
-from Magphi import FastaStats
+from Magphi.__main__ import FastaStats
 
+
+class TestCommandLineHelpCalls(unittest.TestCase):
+    '''Unit test for the commandline interface'''
+    def test_no_input(self):
+        with self.assertRaises(SystemExit):
+            commandline_interface.get_commandline_arguments([], 1)
+
+    def test_single_dash_help(self):
+        with self.assertRaises(SystemExit):
+            commandline_interface.get_commandline_arguments('-help', 1)
+
+    def test_unrecognised_argument_exit(self):
+        with self.assertRaises(SystemExit):
+            commandline_interface.get_commandline_arguments(['-p', 'test.file', '-g', 'test.file', '--none'], 1)
+
+# Bioinitio tests
 class TestFastaStats(unittest.TestCase):
     '''Unit tests for FastaStats'''
     def do_test(self, input_str, minlen, expected):

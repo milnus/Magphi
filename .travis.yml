@@ -17,5 +17,5 @@ script:
   # Unit tests
   - docker run --entrypoint /Magphi/functional_tests/Magphi-test.sh magphi -p Magphi -d /Magphi/functional_tests/test_data -v
 
-  # CWL definition test
-  - cwltool Magphi.cwl --fasta_file functional_tests/test_data/two_sequence.fasta
+  # CWL definition test- TODO Construct and reinstate the CWL.
+  # - cwltool Magphi.cwl --fasta_file functional_tests/test_data/two_sequence.fasta

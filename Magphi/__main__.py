@@ -35,6 +35,11 @@ try:
 except ModuleNotFoundError:
     from exit_with_error import exit_with_error
 
+try:
+    from Magphi.check_inputs import check_inputs
+except ModuleNotFoundError:
+    from check_inputs import check_inputs
+
 # Initial
 from argparse import ArgumentParser
 from math import floor
@@ -241,8 +246,8 @@ def main():
 
 
     "Orchestrate the execution of the program"
-    options = parse_args()
-    init_logging(options.log)
+    # options = parse_args()
+    init_logging(cmd_args.log)
 
     # Check dependencies for Magphi
     dependencies_return = check_dependencies_for_main(verbose=False) # TODO make commandline verbose controlled.
@@ -255,8 +260,12 @@ def main():
     else:
         warnings.warn("Some dependencies are untested versions")
 
-    print(HEADER)
-    process_files(options)
+    # Check the input files
+
+
+    # From Bioinitio frame
+    # print(HEADER)
+    # process_files(options)
 
 
 # If this script is run from the command line then call the main function.

@@ -6,6 +6,9 @@ EXIT_COMMAND_LINE_ERROR = 2
 
 # def get_commandline_arguments(args, version):
 def get_commandline_arguments(args, version):
+    ''' Parse command line arguments.
+    return instructions given on command line in the args argument.
+    Will recognise the unusual '-help' can and print help if nothing is given as input on the command line.'''
     # Set up parser
     parser = argparse.ArgumentParser(description='Welcome to Magphi!\n '
                                                  'This program will extract sequences and possible annotations within '

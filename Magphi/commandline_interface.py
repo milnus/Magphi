@@ -10,7 +10,8 @@ def get_commandline_arguments(args, version):
     return instructions given on command line in the args argument.
     Will recognise the unusual '-help' can and print help if nothing is given as input on the command line.'''
     # Set up parser
-    parser = argparse.ArgumentParser(description='Welcome to Magphi!\n '
+    parser = argparse.ArgumentParser(prog='Magphi',
+                                     description='Welcome to Magphi!\n '
                                                  'This program will extract sequences and possible annotations within '
                                                  'a set of insertion sequences or primers given as input.')
 

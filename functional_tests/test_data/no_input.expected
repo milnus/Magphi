@@ -1,0 +1,29 @@
+usage: Magphi [-h] -g .fa/.gff [.fa/.gff ...] -p multi_fasta_file.fa [-ip]
+              [-md int] [-o path/to/output] [-c] [-l Log_file] [-v]
+
+Welcome to Magphi! This program will extract sequences and possible
+annotations within a set of insertion sequences or primers given as input.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -g .fa/.gff [.fa/.gff ...], --input_genomes .fa/.gff [.fa/.gff ...]
+                        Give the fasta or gff3 files. (gff3 files should
+                        contain the genome fasta sequence)
+  -p multi_fasta_file.fa, --input_primers multi_fasta_file.fa
+                        Give the multi fasta containing the primers to be used
+                        for extracting sequnces
+  -ip, --include_primers
+                        Argument to include the primers in the
+                        sequence/annotations extracted [default: primers are
+                        removed]
+  -md int, --max_primer_distance int
+                        The maximum distance with which primers will be
+                        merged. This can often be set a bit higher than an
+                        expected size of a region If no maximum distance is
+                        wanted then set to 0 [default: 50,000bp]
+  -o path/to/output, --output_folder path/to/output
+                        Give path to output folder [default: current folder]
+  -c , --cpu            Give max number of CPUs [default: 1]
+  -l Log_file, --log Log_file
+                        record program progress in LOG_FILE
+  -v, --version         show program's version number and exit

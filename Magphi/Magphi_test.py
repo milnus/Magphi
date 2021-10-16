@@ -31,8 +31,14 @@ class TestCommandLineHelpCalls(unittest.TestCase):
 
 
 class TestFileRecognition(unittest.TestCase):
-    # Move to folder with mock input files
-    os.chdir('../unit_test_data/TestFileRecognition')
+    # Move to folder with mock input files. First try Github structure, then try pulled repository structure
+    try:
+        print(f'Current directory: {os.getcwd()}')
+        print(f'Current directory content: {os.listdir()}')
+        os.chdir('/Magphi/unit_test_data/TestFileRecognition')
+    except FileNotFoundError:
+        print('Here!!!')
+        os.chdir('../unit_test_data/TestFileRecognition')
 
     def test_fasta_recognition(self):
         ''' Function to test the recognition of differently formatted fasta files '''

@@ -47,15 +47,6 @@ class TestFileRecognition(unittest.TestCase):
 
         self.assertEqual('fasta', file_type)
 
-    def test_mixed_recognition(self):
-        ''' test that a mix of fasta and gff files results in exiting Magphi with an error '''
-        path = 'Mixed_gff_and_fasta'
-        files = os.listdir(path)
-        files = [os.path.join(path, file) for file in files]
-
-        with self.assertRaises(SystemExit):
-            check_inputs.check_if_fasta(files)
-
     def test_none_fasta_recognition(self):
         ''' test that gff files are not recognised as fasta files '''
         path = 'Gff3_files'
@@ -65,6 +56,24 @@ class TestFileRecognition(unittest.TestCase):
         file_type = check_inputs.check_if_fasta(files)
 
         self.assertEqual(None, file_type)
+
+    def test_mixed_gff_and_fasta_recognition(self):
+        ''' test that a mix of fasta and gff files results in exiting Magphi with an error '''
+        path = 'Mixed_gff_and_fasta'
+        files = os.listdir(path)
+        files = [os.path.join(path, file) for file in files]
+
+        with self.assertRaises(SystemExit):
+            check_inputs.check_if_fasta(files)
+
+    def test_fasta_and_random_text_recognition(self):
+        ''' test that a mix of fasta and random text files results in exiting Magphi with an error '''
+        path = 'Mixed_fasta_and_text'
+        files = os.listdir(path)
+        files = [os.path.join(path, file) for file in files]
+
+        with self.assertRaises(SystemExit):
+            check_inputs.check_if_fasta(files)
 
     def test_complete_gff_recognition(self):
         ''' test that gff files with an attached genome are recognised correctly '''
@@ -92,6 +101,15 @@ class TestFileRecognition(unittest.TestCase):
         files = os.listdir(path)
         files = [os.path.join(path, file) for file in files]
         print(files)
+        with self.assertRaises(SystemExit):
+            check_inputs.check_if_gff(files)
+
+    def test_gff_and_random_text_recognition(self):
+        ''' test that a mix of GFF3 and random text files results in exiting Magphi with an error '''
+        path = 'Mixed_gff_and_text'
+        files = os.listdir(path)
+        files = [os.path.join(path, file) for file in files]
+
         with self.assertRaises(SystemExit):
             check_inputs.check_if_gff(files)
 

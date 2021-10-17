@@ -49,7 +49,7 @@ from Bio import SeqIO
 # TODO - Go through this list and redefine/remove error messeages, and header of program. Remove the default verbose, as it is set in the argparser.
 EXIT_FILE_IO_ERROR = 1
 EXIT_COMMAND_LINE_ERROR = 2
-EXIT_FASTA_FILE_ERROR = 3
+EXIT_INPUT_FILE_ERROR = 3
 EXIT_DEPENDENCY_ERROR = 4
 DEFAULT_MIN_LEN = 0
 DEFAULT_VERBOSE = False

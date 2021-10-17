@@ -10,6 +10,7 @@ import os
 from Magphi import commandline_interface
 from Magphi import check_inputs
 from Magphi import split_gff_file
+from Magphi import primer_handling
 
 from io import StringIO
 #pylint: disable=no-name-in-module
@@ -162,6 +163,37 @@ class TestSplittingGff(unittest.TestCase):
         os.remove(genome)
         os.remove(annotation)
 
+
+class TestPrimerFunctions(unittest.TestCase):
+    try:
+        os.chdir('/Magphi/unit_test_data/TestPrimerFunctions')
+    except FileNotFoundError:
+        os.chdir('../TestPrimerFunctions')
+
+    def test_uneven_primer_number(self):
+        with self.assertRaises(SystemExit):
+            primer_handling.check_number_of_primers('Uneven_number_primers.txt')
+
+    def test_correct_primer_pairing(self):
+        primer_names = ['D_1', 'D_2', 'mutsD_1', 'mutsD_2']
+        primer_pairs = primer_handling.construct_pair_primers(primer_names)
+
+        expected_names = {'D': ['D_1', 'D_2'], 'mutsD': ['mutsD_1', 'mutsD_2']}
+
+        # Sort dicts to make them same order
+        primer_pairs = [primer_pairs[key].sort() for key in primer_pairs]
+        expected_names = [expected_names[key].sort() for key in expected_names]
+
+        self.assertEqual(expected_names , primer_pairs)
+
+    def test_non_matching_primer_names(self):
+        primer_names = ['D_2', 'B_1', 'Z_1', 'A_1']
+        with self.assertRaises(SystemExit):
+            primer_handling.construct_pair_primers(primer_names)
+
+    def test_identical_primer_names(self):
+        with self.assertRaises(SystemExit):
+            primer_handling.extract_primer_info('Same_name_primers.txt')
 
 # Bioinitio tests
 # class TestFastaStats(unittest.TestCase):

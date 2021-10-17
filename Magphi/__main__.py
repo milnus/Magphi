@@ -40,6 +40,16 @@ try:
 except ModuleNotFoundError:
     from check_inputs import check_inputs
 
+try:
+    from Magphi.split_gff_file import split_gff_files
+except ModuleNotFoundError:
+    from split_gff_file import split_gff_files
+
+try:
+    from Magphi.primer_handling import handle_primers
+except ModuleNotFoundError:
+    from primer_handling import handle_primers
+
 # Initial
 from argparse import ArgumentParser
 from math import floor
@@ -262,6 +272,37 @@ def main():
 
     # Check the input files
     file_type = check_inputs(cmd_args.genomes)
+
+    # Try to construct the output folder and except if it does exist
+    # TODO - make verbose controlled and log
+    try:
+        print("Trying to construct output folder...")
+        os.mkdir(cmd_args.out_path)
+        print("Succeeded!")
+    except FileExistsError:
+        print("Output folder exists")
+
+    # construct a temporary folder to hold files
+    # TODO - log construction of tmp folder
+    tmp_folder = os.path.join(cmd_args.out_path, "Magphi_tmp_folder")
+    try:
+        os.mkdir(tmp_folder)
+    except FileExistsError:
+        raise Warning("A temporary folder already exists at the given output location. "
+                      "Most likely from an incomplete analysis")
+
+    # Check if input is GFF3 files and split genome from annotations and assign to be handed over to blast,
+    # If files are not gff then assign the fastas from the input an no annotations.
+    # TODO - make verbose controlled - add logging
+    print("Splitting GFF files into annotations and genomes")
+    if file_type == 'gff':
+        genomes, annotations = split_gff_files(cmd_args.genomes, tmp_folder)
+    else:
+        genomes = cmd_args.genomes
+        annotations = [None] * len(cmd_args.genomes)
+
+    # Read in and combine primers into pairs
+    primer_pairs, primer_dict = handle_primers(cmd_args.primers)
 
     # From Bioinitio frame
     # print(HEADER)

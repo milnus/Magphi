@@ -159,7 +159,7 @@ test_stdout_exit "$test_program -help" no_input.expected 0
 # Test exit status for a bad command line invocation
 test_exit_status "$test_program --this_is_not_a_valid_argument > /dev/null 2>&1" 2
 
-## Check exit status for bad input GFF or FASTA files # TODO
+## Check exit status for bad input GFF or FASTA files
 # Test exit status when input is mixed fasta and gff
 test_exit_status "$test_program -g test_fasta.fna test_GFF.gff -p empty_file > /dev/null 2>&1" 3
 # Test exit status when fasta is mixed with random text file

@@ -150,12 +150,27 @@ cd $test_data_dir
 #test_stdout_exit "$test_program empty_file" empty_file.expected 0
 # Test when --minlen filters out ALL sequences (empty result)
 #test_stdout_exit "$test_program --minlen 1000 two_sequence.fasta" two_sequence.fasta.minlen_1000.expected 0
+
+## Test commandline exit status
 # Test output for no no arguments
 test_stdout_exit "$test_program" no_input.expected 2
 # Test output for -help argument given
 test_stdout_exit "$test_program -help" no_input.expected 0
 # Test exit status for a bad command line invocation
 test_exit_status "$test_program --this_is_not_a_valid_argument > /dev/null 2>&1" 2
+
+## Check exit status for bad input GFF or FASTA files # TODO
+# Test exit status when input is mixed fasta and gff
+test_exit_status "$test_program -g test_fasta.fna test_GFF.gff -p empty_file > /dev/null 2>&1" 3
+# Test exit status when fasta is mixed with random text file
+test_exit_status "$test_program -g test_fasta.fna random_text -p empty_file > /dev/null 2>&1" 3
+# Test exit status when gff is mixed with random text file
+test_exit_status "$test_program -g test_GFF.gff random_text -p empty_file > /dev/null 2>&1" 3
+# Test when just random text file is given
+test_exit_status "$test_program -g random_text -p empty_file > /dev/null 2>&1" 3
+# Test when empty file is given as input
+test_exit_status "$test_program -g empty_file -p empty_file > /dev/null 2>&1" 3
+
 # Test exit status for a non existent input FASTA file
 #test_exit_status "$test_program this_file_does_not_exist.fasta > /dev/null 2>&1" 1
 

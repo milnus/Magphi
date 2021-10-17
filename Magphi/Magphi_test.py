@@ -100,7 +100,6 @@ class TestFileRecognition(unittest.TestCase):
         path = 'Gff3_without_genome_attached'
         files = os.listdir(path)
         files = [os.path.join(path, file) for file in files]
-        print(files)
         with self.assertRaises(SystemExit):
             check_inputs.check_if_gff(files)
 
@@ -114,12 +113,14 @@ class TestFileRecognition(unittest.TestCase):
             check_inputs.check_if_gff(files)
 
     def test_not_incompatible_recognition(self):
+        ''' test that a text file not being a Fasta or GFF3 files results in an error '''
         files = ['Mixed_miscellaneous_files/Random_text.txt']
 
         with self.assertRaises(SystemExit):
             check_inputs.check_inputs(files)
 
     def test_empty_file(self):
+        ''' Test that an empty file results in an error '''
         files = ['Mixed_miscellaneous_files/empty_file.txt']
 
         with self.assertRaises(SystemExit):

@@ -85,10 +85,10 @@ def get_commandline_arguments(args, version):
     # Check if there are no arguments given or the user ask for the help message
     if len(args) < 1:
         parser.print_help()
-        exit(code=EXIT_COMMAND_LINE_ERROR)
+        sys.exit(EXIT_COMMAND_LINE_ERROR)
     elif '-help' in args:
         parser.print_help()
-        exit(code=0)
+        sys.exit(code=0)
 
     args = parser.parse_args(args)
 

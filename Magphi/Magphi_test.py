@@ -9,6 +9,7 @@ import os
 
 from Magphi import commandline_interface
 from Magphi import check_inputs
+from Magphi import split_gff_file
 
 from io import StringIO
 #pylint: disable=no-name-in-module
@@ -125,6 +126,42 @@ class TestFileRecognition(unittest.TestCase):
 
         with self.assertRaises(SystemExit):
             check_inputs.check_inputs(files)
+
+
+class TestSplittingGff(unittest.TestCase):
+    def test_gff_split_single_file(self):
+        ''' test the function that splits a gff file into annotations and genome. Assess the number of lines in output '''
+        # Grab the test file
+        try:
+            os.chdir('/Magphi/unit_test_data/TestSplittingGff')
+        except FileNotFoundError:
+            os.chdir('../TestSplittingGff')
+            #unit_test_data/TestSplittingGff
+
+        path = os.getcwd()
+        file = os.path.join(path, 'minimized.gff')
+
+        # Split the test file
+        genome, annotation = split_gff_file.split_single_gff(file, path)
+
+        # read the now divided genome and annotations and get the number of lines
+        open_genome = open(genome, 'r')
+        open_annotation = open(annotation, 'r')
+        genome_file_length = len(open_genome.readlines())
+        annotation_file_length = len(open_annotation.readlines())
+
+        # Close files again
+        open_genome.close()
+        open_annotation.close()
+
+        # Test if the files contain the number of expected lines.
+        self.assertEqual(10, genome_file_length)
+        self.assertEqual(5, annotation_file_length)
+
+        # remove the genome and annotations.
+        os.remove(genome)
+        os.remove(annotation)
+
 
 # Bioinitio tests
 # class TestFastaStats(unittest.TestCase):

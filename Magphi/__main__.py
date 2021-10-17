@@ -261,7 +261,7 @@ def main():
         warnings.warn("Some dependencies are untested versions")
 
     # Check the input files
-
+    file_type = check_inputs(cmd_args.genomes)
 
     # From Bioinitio frame
     # print(HEADER)

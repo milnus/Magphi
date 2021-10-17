@@ -15,7 +15,11 @@ from Magphi import primer_handling
 from io import StringIO
 #pylint: disable=no-name-in-module
 from Magphi.__main__ import FastaStats
-
+# Move to folder with mock input files. First try Github structure, then try pulled repository structure
+try:
+    os.chdir('/Magphi/unit_test_data/')
+except FileNotFoundError:
+    os.chdir('../unit_test_data/')
 
 class TestCommandLineHelpCalls(unittest.TestCase):
     '''Unit test for the commandline interface'''
@@ -33,16 +37,13 @@ class TestCommandLineHelpCalls(unittest.TestCase):
 
 
 class TestFileRecognition(unittest.TestCase):
-    # Move to folder with mock input files. First try Github structure, then try pulled repository structure
-    try:
-        os.chdir('/Magphi/unit_test_data/TestFileRecognition')
-    except FileNotFoundError:
-        os.chdir('../unit_test_data/TestFileRecognition')
-
+    #TestFileRecognition
     def test_fasta_recognition(self):
         ''' test the recognition of fasta files '''
-        path = 'Fasta_files'
+        path = 'TestFileRecognition/Fasta_files'
+        print(os.getcwd())
         files = os.listdir(path)
+        print(files)
         files = [os.path.join(path, file) for file in files]
 
         file_type = check_inputs.check_if_fasta(files)
@@ -51,7 +52,7 @@ class TestFileRecognition(unittest.TestCase):
 
     def test_none_fasta_recognition(self):
         ''' test that gff files are not recognised as fasta files '''
-        path = 'Gff3_files'
+        path = 'TestFileRecognition/Gff3_files'
         files = os.listdir(path)
         files = [os.path.join(path, file) for file in files]
 
@@ -61,7 +62,7 @@ class TestFileRecognition(unittest.TestCase):
 
     def test_mixed_gff_and_fasta_recognition(self):
         ''' test that a mix of fasta and gff files results in exiting Magphi with an error '''
-        path = 'Mixed_gff_and_fasta'
+        path = 'TestFileRecognition/Mixed_gff_and_fasta'
         files = os.listdir(path)
         files = [os.path.join(path, file) for file in files]
 
@@ -70,7 +71,7 @@ class TestFileRecognition(unittest.TestCase):
 
     def test_fasta_and_random_text_recognition(self):
         ''' test that a mix of fasta and random text files results in exiting Magphi with an error '''
-        path = 'Mixed_fasta_and_text'
+        path = 'TestFileRecognition/Mixed_fasta_and_text'
         files = os.listdir(path)
         files = [os.path.join(path, file) for file in files]
 
@@ -79,7 +80,7 @@ class TestFileRecognition(unittest.TestCase):
 
     def test_complete_gff_recognition(self):
         ''' test that gff files with an attached genome are recognised correctly '''
-        path = 'Gff3_files'
+        path = 'TestFileRecognition/Gff3_files'
         files = os.listdir(path)
         files = [os.path.join(path, file) for file in files]
 
@@ -89,7 +90,7 @@ class TestFileRecognition(unittest.TestCase):
 
     def test_none_gff_recognition(self):
         ''' test that fasta files are not recognised as gff '''
-        path = 'Fasta_files'
+        path = 'TestFileRecognition/Fasta_files'
         files = os.listdir(path)
         files = [os.path.join(path, file) for file in files]
 
@@ -99,7 +100,7 @@ class TestFileRecognition(unittest.TestCase):
 
     def test_gff_missing_genome_recognition(self):
         ''' test that gff files without a genomes attached exits with an error '''
-        path = 'Gff3_without_genome_attached'
+        path = 'TestFileRecognition/Gff3_without_genome_attached'
         files = os.listdir(path)
         files = [os.path.join(path, file) for file in files]
         with self.assertRaises(SystemExit):
@@ -107,7 +108,7 @@ class TestFileRecognition(unittest.TestCase):
 
     def test_gff_and_random_text_recognition(self):
         ''' test that a mix of GFF3 and random text files results in exiting Magphi with an error '''
-        path = 'Mixed_gff_and_text'
+        path = 'TestFileRecognition/Mixed_gff_and_text'
         files = os.listdir(path)
         files = [os.path.join(path, file) for file in files]
 
@@ -116,14 +117,14 @@ class TestFileRecognition(unittest.TestCase):
 
     def test_not_incompatible_recognition(self):
         ''' test that a text file not being a Fasta or GFF3 files results in an error '''
-        files = ['Mixed_miscellaneous_files/Random_text.txt']
+        files = ['TestFileRecognition/Mixed_miscellaneous_files/Random_text.txt']
 
         with self.assertRaises(SystemExit):
             check_inputs.check_inputs(files)
 
     def test_empty_file(self):
         ''' Test that an empty file results in an error '''
-        files = ['Mixed_miscellaneous_files/empty_file.txt']
+        files = ['TestFileRecognition/Mixed_miscellaneous_files/empty_file.txt']
 
         with self.assertRaises(SystemExit):
             check_inputs.check_inputs(files)
@@ -132,15 +133,8 @@ class TestFileRecognition(unittest.TestCase):
 class TestSplittingGff(unittest.TestCase):
     def test_gff_split_single_file(self):
         ''' test the function that splits a gff file into annotations and genome. Assess the number of lines in output '''
-        # Grab the test file
-        try:
-            os.chdir('/Magphi/unit_test_data/TestSplittingGff')
-        except FileNotFoundError:
-            os.chdir('../TestSplittingGff')
-            #unit_test_data/TestSplittingGff
-
         path = os.getcwd()
-        file = os.path.join(path, 'minimized.gff')
+        file = os.path.join(path, 'TestSplittingGff/minimized.gff')
 
         # Split the test file
         genome, annotation = split_gff_file.split_single_gff(file, path)
@@ -165,14 +159,9 @@ class TestSplittingGff(unittest.TestCase):
 
 
 class TestPrimerFunctions(unittest.TestCase):
-    try:
-        os.chdir('/Magphi/unit_test_data/TestPrimerFunctions')
-    except FileNotFoundError:
-        os.chdir('../TestPrimerFunctions')
-
     def test_uneven_primer_number(self):
         with self.assertRaises(SystemExit):
-            primer_handling.check_number_of_primers('Uneven_number_primers.txt')
+            primer_handling.check_number_of_primers('TestPrimerFunctions/Uneven_number_primers.txt')
 
     def test_correct_primer_pairing(self):
         primer_names = ['D_1', 'D_2', 'mutsD_1', 'mutsD_2']
@@ -193,7 +182,7 @@ class TestPrimerFunctions(unittest.TestCase):
 
     def test_identical_primer_names(self):
         with self.assertRaises(SystemExit):
-            primer_handling.extract_primer_info('Same_name_primers.txt')
+            primer_handling.extract_primer_info('TestPrimerFunctions/Same_name_primers.txt')
 
 # Bioinitio tests
 # class TestFastaStats(unittest.TestCase):

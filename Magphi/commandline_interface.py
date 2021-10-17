@@ -88,7 +88,7 @@ def get_commandline_arguments(args, version):
         sys.exit(EXIT_COMMAND_LINE_ERROR)
     elif '-help' in args:
         parser.print_help()
-        sys.exit(code=0)
+        sys.exit(0)
 
     args = parser.parse_args(args)
 

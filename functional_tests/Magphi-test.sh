@@ -163,11 +163,11 @@ test_exit_status "$test_program --this_is_not_a_valid_argument > /dev/null 2>&1"
 # Test exit status when input is mixed fasta and gff
 test_exit_status "$test_program -g test_fasta.fna test_GFF.gff -p empty_file > /dev/null 2>&1" 3
 # Test exit status when fasta is mixed with random text file
-test_exit_status "$test_program -g test_fasta.fna random_text -p empty_file > /dev/null 2>&1" 3
+test_exit_status "$test_program -g test_fasta.fna random_text.txt -p empty_file > /dev/null 2>&1" 3
 # Test exit status when gff is mixed with random text file
-test_exit_status "$test_program -g test_GFF.gff random_text -p empty_file > /dev/null 2>&1" 3
+test_exit_status "$test_program -g test_GFF.gff random_text.txt -p empty_file > /dev/null 2>&1" 3
 # Test when just random text file is given
-test_exit_status "$test_program -g random_text -p empty_file > /dev/null 2>&1" 3
+test_exit_status "$test_program -g random_text.txt -p empty_file > /dev/null 2>&1" 3
 # Test when empty file is given as input
 test_exit_status "$test_program -g empty_file -p empty_file > /dev/null 2>&1" 3
 

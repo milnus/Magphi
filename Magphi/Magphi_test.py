@@ -38,59 +38,74 @@ class TestFileRecognition(unittest.TestCase):
         os.chdir('../unit_test_data/TestFileRecognition')
 
     def test_fasta_recognition(self):
-        ''' Function to test the recognition of differently formatted fasta files '''
-        path = 'test_fasta_recognition'
-        files = os.listdir('test_fasta_recognition')
+        ''' test the recognition of fasta files '''
+        path = 'Fasta_files'
+        files = os.listdir(path)
         files = [os.path.join(path, file) for file in files]
 
         file_type = check_inputs.check_if_fasta(files)
 
         self.assertEqual('fasta', file_type)
 
-    # def test_mixed_recognition(self):
-    #     path = '/Users/mjespersen/Documents/Phupa_test_data/Unittest_recognise_mixed'
-    #     files = os.listdir(path)
-    #     files = [os.path.join(path, file) for file in files]
-    #
-    #     with self.assertRaises(SystemExit):
-    #         check_inputs.check_if_fasta(files)
-    #
-    # def test_none_fasta_recognition(self):
-    #     path = '/Users/mjespersen/Documents/Phupa_test_data/Unittest_recognise_GFF3'
-    #     files = os.listdir(path)
-    #     files = [os.path.join(path, file) for file in files]
-    #
-    #     file_type = check_inputs.check_if_fasta(files)
-    #
-    #     self.assertEqual(None, file_type)
-    #
-    # def test_complete_gff_recognition(self):
-    #     path = '/Users/mjespersen/Documents/Phupa_test_data/Unittest_recognise_GFF3'
-    #     files = os.listdir(path)
-    #     files = [os.path.join(path, file) for file in files]
-    #
-    #     file_type = check_inputs.check_if_gff(files)
-    #
-    #     self.assertEqual('gff', file_type)
-    #
-    # def test_gff_missing_genome_recognition(self):
-    #     path = '/Users/mjespersen/Documents/Phupa_test_data/Unittest_recognise_GFF3_wo_genome'
-    #     files = os.listdir(path)
-    #     files = [os.path.join(path, file) for file in files]
-    #
-    #     with self.assertRaises(SystemExit):
-    #         check_inputs.check_if_gff(files)
-    #
-    # def test_not_incompatible_recognition(self):
-    #     path = '/Users/mjespersen/Documents/Phupa_test_data/Unittest_not_recognised_files'
-    #     files = os.listdir(path)
-    #     files = [os.path.join(path, file) for file in files]
-    #
-    #     with self.assertRaises(SystemExit):
-    #         check_inputs.check_inputs(files)
-    #
-    # def test_empty_file(self):
-    #     pass
+    def test_mixed_recognition(self):
+        ''' test that a mix of fasta and gff files results in exiting Magphi with an error '''
+        path = 'Mixed_gff_and_fasta'
+        files = os.listdir(path)
+        files = [os.path.join(path, file) for file in files]
+
+        with self.assertRaises(SystemExit):
+            check_inputs.check_if_fasta(files)
+
+    def test_none_fasta_recognition(self):
+        ''' test that gff files are not recognised as fasta files '''
+        path = 'Gff3_files'
+        files = os.listdir(path)
+        files = [os.path.join(path, file) for file in files]
+
+        file_type = check_inputs.check_if_fasta(files)
+
+        self.assertEqual(None, file_type)
+
+    def test_complete_gff_recognition(self):
+        ''' test that gff files with an attached genome are recognised correctly '''
+        path = 'Gff3_files'
+        files = os.listdir(path)
+        files = [os.path.join(path, file) for file in files]
+
+        file_type = check_inputs.check_if_gff(files)
+
+        self.assertEqual('gff', file_type)
+
+    def test_none_gff_recognition(self):
+        ''' test that fasta files are not recognised as gff '''
+        path = 'Fasta_files'
+        files = os.listdir(path)
+        files = [os.path.join(path, file) for file in files]
+
+        file_type = check_inputs.check_if_gff(files)
+
+        self.assertEqual(None, file_type)
+
+    def test_gff_missing_genome_recognition(self):
+        ''' test that gff files without a genomes attached exits with an error '''
+        path = 'Gff3_without_genome_attached'
+        files = os.listdir(path)
+        files = [os.path.join(path, file) for file in files]
+        print(files)
+        with self.assertRaises(SystemExit):
+            check_inputs.check_if_gff(files)
+
+    def test_not_incompatible_recognition(self):
+        files = ['Mixed_miscellaneous_files/Random_text.txt']
+
+        with self.assertRaises(SystemExit):
+            check_inputs.check_inputs(files)
+
+    def test_empty_file(self):
+        files = ['Mixed_miscellaneous_files/empty_file.txt']
+
+        with self.assertRaises(SystemExit):
+            check_inputs.check_inputs(files)
 
 # Bioinitio tests
 # class TestFastaStats(unittest.TestCase):

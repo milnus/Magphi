@@ -205,7 +205,7 @@ class TestPrimerFunctions(unittest.TestCase):
 #   8. Run
 
 
-class TestPrimersPlacement(unittest.TestCase):
+class TestPrimersPlacement(unittest.TestCase): # TODO - check if this is exhaustive
 
     def test_single_primer_single_hit(self):
         ''' Test that a single seed sequence hit returns the correct evidence level '''
@@ -518,8 +518,86 @@ class TestPrimersPlacement(unittest.TestCase):
         self.assertEqual(3, evidence_level_return)
 
 
+class TestPrimerReachContigEndCalculation(unittest.TestCase):
+    def test_no_ends_reached(self):
+        genome_file_fai = 'TestPrimerReachContigEndCalculation/single_contig_1200N.fasta.fai'
+        max_distance = 1
+        primer_contig_hits = {'Contig_1': [['Contig_1', 500, 600, 'Primer_1'], ['Contig_1', 600, 700, 'Primer_2']]}
 
-class TestFlankingRegion(unittest.TestCase): # TODO - to finish
+        end_reaches, end_sums, end_reached_matrix, intervals = \
+            search_insertion_sites.primer_reach_contig_end_calc(genome_file_fai, max_distance, primer_contig_hits)
+
+        self.assertEqual([0, 0], end_reaches)
+        self.assertEqual([0, 0], end_sums)
+        self.assertEqual([[0, 0], [0, 0]], end_reached_matrix)
+        self.assertEqual([['Contig_1', 500, 600, 'Primer_1', '0'], ['Contig_1', 600, 700, 'Primer_2', '1']], intervals)
+
+    def test_single_3_prime_end_reached(self):
+        genome_file_fai = 'TestPrimerReachContigEndCalculation/single_contig_1200N.fasta.fai'
+        max_distance = 500
+        primer_contig_hits = {'Contig_1': [['Contig_1', 500, 600, 'Primer_1'], ['Contig_1', 600, 700, 'Primer_2']]}
+
+        end_reaches, end_sums, end_reached_matrix, intervals = \
+            search_insertion_sites.primer_reach_contig_end_calc(genome_file_fai, max_distance, primer_contig_hits)
+
+        self.assertEqual([0, 1], end_reaches)
+        self.assertEqual([0, 1], end_sums)
+        self.assertEqual([[0, 0], [0, 1]], end_reached_matrix)
+        self.assertEqual([['Contig_1', 500, 600, 'Primer_1', '0'], ['Contig_1', 600, 700, 'Primer_2', '1']], intervals)
+
+    def test_single_5_prime_end_reached(self):
+        genome_file_fai = 'TestPrimerReachContigEndCalculation/single_contig_1200N.fasta.fai'
+        max_distance = 451
+        primer_contig_hits = {'Contig_1': [['Contig_1', 450, 600, 'Primer_1'], ['Contig_1', 600, 650, 'Primer_2']]}
+
+        end_reaches, end_sums, end_reached_matrix, intervals = \
+            search_insertion_sites.primer_reach_contig_end_calc(genome_file_fai, max_distance, primer_contig_hits)
+
+        self.assertEqual([0, 1], end_reaches)
+        self.assertEqual([1, 0], end_sums)
+        self.assertEqual([[1, 0], [0, 0]], end_reached_matrix)
+        self.assertEqual([['Contig_1', 450, 600, 'Primer_1', '0'], ['Contig_1', 600, 650, 'Primer_2', '1']], intervals)
+
+    def test_single_seed_sequence_reach_both_ends(self):
+        genome_file_fai = 'TestPrimerReachContigEndCalculation/single_contig_1200N.fasta.fai'
+        max_distance = 451
+        primer_contig_hits = {'Contig_1': [['Contig_1', 450, 750, 'Primer_1'], ['Contig_1', 600, 650, 'Primer_2']]}
+
+        end_reaches, end_sums, end_reached_matrix, intervals = \
+            search_insertion_sites.primer_reach_contig_end_calc(genome_file_fai, max_distance, primer_contig_hits)
+
+        self.assertEqual([1, 0], end_reaches)
+        self.assertEqual([2, 0], end_sums)
+        self.assertEqual([[1, 1], [0, 0]], end_reached_matrix)
+        self.assertEqual([['Contig_1', 450, 750, 'Primer_1', '0'], ['Contig_1', 600, 650, 'Primer_2', '1']], intervals)
+
+    def test_single_seed_sequence_reach_both_ends_n_seed_seqeunce_with_one_reach(self):
+        genome_file_fai = 'TestPrimerReachContigEndCalculation/single_contig_1200N.fasta.fai'
+        max_distance = 451
+        primer_contig_hits = {'Contig_1': [['Contig_1', 450, 750, 'Primer_1'], ['Contig_1', 600, 750, 'Primer_2']]}
+
+        end_reaches, end_sums, end_reached_matrix, intervals = \
+            search_insertion_sites.primer_reach_contig_end_calc(genome_file_fai, max_distance, primer_contig_hits)
+
+        self.assertEqual([1, 1], end_reaches)
+        self.assertEqual([2, 1], end_sums)
+        self.assertEqual([[1, 1], [0, 1]], end_reached_matrix)
+        self.assertEqual([['Contig_1', 450, 750, 'Primer_1', '0'], ['Contig_1', 600, 750, 'Primer_2', '1']], intervals)
+
+    def test_two_seed_sequence_reach_both_ends(self):
+        genome_file_fai = 'TestPrimerReachContigEndCalculation/single_contig_1200N.fasta.fai'
+        max_distance = 1000
+        primer_contig_hits = {'Contig_1': [['Contig_1', 450, 750, 'Primer_1'], ['Contig_1', 600, 750, 'Primer_2']]}
+
+        end_reaches, end_sums, end_reached_matrix, intervals = \
+            search_insertion_sites.primer_reach_contig_end_calc(genome_file_fai, max_distance, primer_contig_hits)
+
+        self.assertEqual([2, 0], end_reaches)
+        self.assertEqual([2, 2], end_sums)
+        self.assertEqual([[1, 1], [1, 1]], end_reached_matrix)
+        self.assertEqual([['Contig_1', 450, 750, 'Primer_1', '0'], ['Contig_1', 600, 750, 'Primer_2', '1']], intervals)
+
+class TestFlankingRegion(unittest.TestCase): # TODO - check if this is exhaustive
 
     def test_no_max_distance_limit(self):
         ''' Test that the correct evidence level is returned when no max limit is given. '''
@@ -625,9 +703,16 @@ class TestFlankingRegion(unittest.TestCase): # TODO - to finish
     # TODO - test warning return - if you can figure out how to do it ;-)
 
 
+class TestWriteBedFromPrimers(unittest.TestCase): # TODO
+    pass
 
-# TODO - test extract_seqs_n_annots
 
+class TestBedMergeHandling(unittest.TestCase): # TODO
+    pass
+
+
+class TestExtractSeqsNAnnots(unittest.TestCase): # TODO
+    pass
 
 
 # Bioinitio tests

@@ -127,7 +127,6 @@ def primer_reach_contig_end_calc(genome_file, max_primer_dist, primer_contig_hit
     # Go through each primer hit to see if it reached the end of the contig under the max distance
     for i, interval in enumerate(intervals):
         # Check if the 5' and 3' can be reached using the max distance
-        # TODO - less-or-equal or just less than?
         if int(interval[1]) - max_primer_dist < 0:
             end_reached_matrix[i][0] = 1
 

@@ -9,7 +9,7 @@ RUN pip3 install .
 RUN pip3 install -r requirements-dev.txt
 
 RUN apt-get update && apt-get install -y \
-  bedtools=2.29.2 \
+  bedtools=2.30.0 \
   samtools \
   && rm -rf /var/lib/apt/lists/*
   # TODO - install BLAST+!

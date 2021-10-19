@@ -559,7 +559,7 @@ class TestFlankingRegion(unittest.TestCase): # TODO - to finish
 
     def test_multiple_hit_single_contig_w_same_primer_single_overlap_and_mix_pair(self):# TODO Change path
         ''' Test that when two seed seqeunces overlap they can still be recognised as connected. '''
-        with open('/Users/mjespersen/Documents/Phupa_test_data/Unitest_flanking_regions/single_contig_multi_hit_sampe_overlap_n_mix_pair.json', 'r') as primer_hit_json:
+        with open('TestFlankingRegion/single_contig/single_contig_multi_hit_same_overlap_n_mix_pair.json', 'r') as primer_hit_json:
             primer_hit_dict = json.load(primer_hit_json)
         genome_fai_file = 'TestFlankingRegion/single_contig/single_contig_1200N.fasta.fai'
         flanking_return = search_insertion_sites.examine_flanking_regions(primer_hit_dict, 1, genome_fai_file)
@@ -568,7 +568,7 @@ class TestFlankingRegion(unittest.TestCase): # TODO - to finish
 
     def test_multiple_hit_single_contig_w_same_primer_multiple_overlap_and_mix_pair(self): # TODO Change path
         ''' Test that multiple seed seqeunces on the same contig can be connected even when two primers from a pair overlap '''
-        with open('/Users/mjespersen/Documents/Phupa_test_data/Unitest_flanking_regions/single_contig_multi_hit_sampe_overlap_n_mix_pair.json', 'r') as primer_hit_json:
+        with open('TestFlankingRegion/single_contig/single_contig_multi_hit_same_overlap_n_mix_pair.json', 'r') as primer_hit_json:
             primer_hit_dict = json.load(primer_hit_json)
         genome_fai_file = 'TestFlankingRegion/single_contig/single_contig_1200N.fasta.fai'
         flanking_return = search_insertion_sites.examine_flanking_regions(primer_hit_dict, 21, genome_fai_file)

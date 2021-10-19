@@ -1,15 +1,16 @@
+import os
+import glob
+import csv
+import warnings
+import sys
+from itertools import combinations
+from shutil import copyfile, copyfileobj
 from Bio.Blast.Applications import NcbimakeblastdbCommandline
 from Bio.Blast.Applications import NcbiblastnCommandline
 from Bio.Sequencing.Applications import SamtoolsFaidxCommandline
 from Bio import SearchIO
 import pybedtools as bedtools
-import os
-import glob
-from shutil import copyfile, copyfileobj
-import csv
-from itertools import combinations
-import warnings
-import sys
+# pylint: disable=E1123
 
 
 def blast_insertion_site(primers, genome_db, tmp_name):
@@ -226,9 +227,7 @@ def examine_flanking_regions(primer_contig_hits, max_primer_dist, genome_file, b
 
         elif num_interactions == 1:
             #TODO - Check that primers do not reach the end of the contig. - combined with below calucaltion?
-            end_reaches, *_ = primer_reach_contig_end_calc(genome_file,
-                                                                                                max_primer_dist,
-                                                                                                primer_contig_hits)
+            end_reaches, *_ = primer_reach_contig_end_calc(genome_file,max_primer_dist, primer_contig_hits)
             if sum(end_reaches) > 0:
                 return 3
 
@@ -397,9 +396,9 @@ def check_primers_placement(bed_files, primer_pairs, primer_hits, max_primer_dis
                         elif return_value == 5:
                             primer_hit_support_dict[primer_name] = return_value
                             alternative_return_value = examine_flanking_regions(primer_to_contig,
-                                                                                            max_primer_dist,
-                                                                                            f'{genome_file}.fai',
-                                                                                            file+'_6')
+                                                                                max_primer_dist,
+                                                                                f'{genome_file}.fai',
+                                                                                file+'_6')
 
                             if alternative_return_value == 6: # ADD alternative value 3?
                                 primer_hit_support_dict[primer_name] = 3
@@ -701,4 +700,3 @@ def screen_genome_for_primers(genome_file, primer_pairs, primer_path, tmp_folder
     return primer_hits, annots_per_interval, genome_name, primer_evidence, break_primers, inter_primer_dist
 
     # TODO - look into pybedtools.parallel.parallel_apply(…[, …]) and possible speed ups from this.
-

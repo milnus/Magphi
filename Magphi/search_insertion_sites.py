@@ -454,6 +454,7 @@ def check_primers_placement(bed_files, primer_pairs, primer_hits, max_primer_dis
 
 
 def bed_merge_handling(blast_hit_beds, include_primers, exclude_primer_list, max_primer_dist, primer_evidence):
+    # TODO - Implement so that primers that overlap are handled well, especially when primers are to be not included!
     # initialise list to hold merged bed file names:
     merged_bed_files = []
 
@@ -499,9 +500,17 @@ def bed_merge_handling(blast_hit_beds, include_primers, exclude_primer_list, max
         merged_bed_file = bed_file.rsplit('.', 1)[0]
         merged_bed_file = f'{merged_bed_file}_merged.bed'
         # Save
-        primer_hits.saveas(merged_bed_file)
-        # Add to list
-        merged_bed_files.append(merged_bed_file)
+        # Check if there is any interval to report,
+        # else notify by setting the return evidence level
+        if len(primer_hits):
+            primer_hits.saveas(merged_bed_file)
+            # Add to list
+            merged_bed_files.append(merged_bed_file)
+        else:
+            split_bed_name = bed_file.rsplit('/', 1)[-1]
+            split_bed_name = split_bed_name.replace('.bed', '')
+            primer_name = split_bed_name.rsplit('~~', 1)[-1]
+            primer_evidence[primer_name] = 9000 # TODO - Change and describe the evidence level of then primers overlap and are excluded resulting in no interval to extract.
 
     return merged_bed_files, primer_evidence
 

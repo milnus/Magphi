@@ -705,7 +705,7 @@ class TestFlankingRegion(unittest.TestCase): # TODO - check if this is exhaustiv
     # TODO - test warning return - if you can figure out how to do it ;-)
 
 
-class TestWriteBedFromPrimers(unittest.TestCase): # TODO
+class TestWriteBedFromPrimers(unittest.TestCase):
 
     def test_writing_two_primers(self):
         list_of_primers = [['Contig_1', '500', '600', 'Primer_1'], ['Contig_1', '600', '700', 'Primer_2']]
@@ -722,10 +722,83 @@ class TestWriteBedFromPrimers(unittest.TestCase): # TODO
         os.remove(bed_file_name)
 
 
-class TestBedMergeHandling(unittest.TestCase): # TODO
-    pass
+class TestBedMergeHandling(unittest.TestCase):
+    def test_single_connection_of_seed_sequences_exclude_primers(self):
+        blast_hit_beds = ['TestBedMergeHandling/Contig_1~~simple_connect.bed']
+        exclude_primers = True
+        exclude_primer_list = ['TestBedMergeHandling/Contig_1~~simple_connect_exclude_primers_file.bed']
+        max_primer_dist = 101
+        primer_evidence = {'simple_connect': 7}
 
+        merged_bed_files, primer_evidence = search_insertion_sites.bed_merge_handling(blast_hit_beds,
+                                                  exclude_primers,
+                                                  exclude_primer_list,
+                                                  max_primer_dist,
+                                                  primer_evidence)
 
+        self.assertEqual(8, primer_evidence['simple_connect'])
+
+        with open(merged_bed_files[0], 'r') as result:
+            self.assertEqual(['Contig_1\t600\t700\tsimple_connect_1,simple_connect_2\t2\n'], result.readlines())
+
+        os.remove('TestBedMergeHandling/Contig_1~~simple_connect_merged.bed')
+
+    def test_single_connection_of_seed_sequences_include_primers(self):
+        blast_hit_beds = ['TestBedMergeHandling/Contig_1~~simple_connect.bed']
+        exclude_primers = False
+        exclude_primer_list = ['TestBedMergeHandling/Contig_1~~simple_connect_exclude_primers_file.bed']
+        max_primer_dist = 101
+        primer_evidence = {'simple_connect': 7}
+
+        merged_bed_files, primer_evidence = search_insertion_sites.bed_merge_handling(blast_hit_beds,
+                                                  exclude_primers,
+                                                  exclude_primer_list,
+                                                  max_primer_dist,
+                                                  primer_evidence)
+
+        self.assertEqual(8, primer_evidence['simple_connect'])
+
+        with open(merged_bed_files[0], 'r') as result:
+            self.assertEqual(['Contig_1\t500\t800\tsimple_connect_1,simple_connect_2\t2\n'], result.readlines())
+
+        os.remove('TestBedMergeHandling/Contig_1~~simple_connect_merged.bed')
+
+    def test_overlap_connection_of_seed_sequences_exclude_primers(self): # TODO
+        blast_hit_beds = ['TestBedMergeHandling/Contig_1~~overlap_connect.bed']
+        exclude_primers = True
+        exclude_primer_list = ['TestBedMergeHandling/Contig_1~~overlap_connect_exclude_primers_file.bed']
+        max_primer_dist = 101
+        primer_evidence = {'overlap_connect': 7}
+
+        merged_bed_files, primer_evidence = search_insertion_sites.bed_merge_handling(blast_hit_beds,
+                                                  exclude_primers,
+                                                  exclude_primer_list,
+                                                  max_primer_dist,
+                                                  primer_evidence)
+
+        self.assertEqual(9000, primer_evidence['overlap_connect'])
+
+    def test_overlap_connection_of_seed_sequences_include_primers(self):
+        blast_hit_beds = ['TestBedMergeHandling/Contig_1~~overlap_connect.bed']
+        exclude_primers = False
+        exclude_primer_list = ['TestBedMergeHandling/Contig_1~~overlap_connect_exclude_primers_file.bed']
+        max_primer_dist = 101
+        primer_evidence = {'overlap_connect': 7}
+
+        merged_bed_files, primer_evidence = search_insertion_sites.bed_merge_handling(blast_hit_beds,
+                                                  exclude_primers,
+                                                  exclude_primer_list,
+                                                  max_primer_dist,
+                                                  primer_evidence)
+
+        self.assertEqual(8, primer_evidence['overlap_connect'])
+
+        with open(merged_bed_files[0], 'r') as result:
+            self.assertEqual(['Contig_1\t500\t800\toverlap_connect_1,overlap_connect_2\t2\n'], result.readlines())
+
+        os.remove('TestBedMergeHandling/Contig_1~~overlap_connect_merged.bed')
+
+# Contig_1~~simple_connect_exclude_primers_file.bed
 class TestExtractSeqsNAnnots(unittest.TestCase): # TODO
     pass
 

@@ -8,6 +8,7 @@ import unittest
 import os
 import json
 from shutil import copyfile
+import io
 
 from Magphi import commandline_interface
 from Magphi import check_inputs
@@ -597,6 +598,7 @@ class TestPrimerReachContigEndCalculation(unittest.TestCase):
         self.assertEqual([[1, 1], [1, 1]], end_reached_matrix)
         self.assertEqual([['Contig_1', 450, 750, 'Primer_1', '0'], ['Contig_1', 600, 750, 'Primer_2', '1']], intervals)
 
+
 class TestFlankingRegion(unittest.TestCase): # TODO - check if this is exhaustive
 
     def test_no_max_distance_limit(self):
@@ -704,7 +706,20 @@ class TestFlankingRegion(unittest.TestCase): # TODO - check if this is exhaustiv
 
 
 class TestWriteBedFromPrimers(unittest.TestCase): # TODO
-    pass
+
+    def test_writing_two_primers(self):
+        list_of_primers = [['Contig_1', '500', '600', 'Primer_1'], ['Contig_1', '600', '700', 'Primer_2']]
+        bed_file_name = 'TestWriteBedFromPrimers/unit_test_file.bed'
+
+        search_insertion_sites.write_bed_from_list_of_primers(list_of_primers, bed_file_name)
+
+        expected_bed_file = 'TestWriteBedFromPrimers/expected_bed_file.bed'
+
+        with open(expected_bed_file, 'r') as expected:
+            with open(bed_file_name, 'r') as result:
+                self.assertEqual(expected.readlines(), result.readlines())
+
+        os.remove(bed_file_name)
 
 
 class TestBedMergeHandling(unittest.TestCase): # TODO

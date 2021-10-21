@@ -553,7 +553,7 @@ def extract_seqs_n_annots(merged_bed_files, file_type, genome_file, annotation_f
                 # TODO - make sure the addition of the contig break primer pairs do not interfere with any other processes!
                 break_primers[primer_pair_name] = [primers[0], 'break']
 
-            # Construct output name for exstracted seuqnce
+            # Construct output name for extracted sequence
             genome_name = genome_file.rsplit('/', 1)[-1]
             genome_name = genome_name.rsplit('.', 1)[0]
             genome_name = genome_name.rsplit('_tmp', 1)[0]
@@ -578,6 +578,7 @@ def extract_seqs_n_annots(merged_bed_files, file_type, genome_file, annotation_f
 
             # extract annotations if gff is provided as input
             if file_type == 'gff':
+                # TODO - Should there be a way to only extract genes, CDS, other or default all?
                 # Load in the gff as a BedTool object
                 gff_file = bedtools.BedTool(annotation_file)
 
@@ -611,9 +612,9 @@ def extract_seqs_n_annots(merged_bed_files, file_type, genome_file, annotation_f
                     gff_writer = csv.writer(gff_output_file, delimiter='\t')
 
                     # Insert the required '##gff-version 3' line
-                    gff_writer.writerow('##gff-version 3')
+                    gff_output_file.write('##gff-version 3\n')
                     # Write line recording the length of the extracted region
-                    gff_writer.writerow(f'##sequence-region {fasta_header} 1 {len(interval[0])}')
+                    gff_output_file.write(f'##sequence-region {fasta_header} 1 {len(interval[0])}\n')
 
                     # Go through each line adjust the coordinates, the contig name and write the gff
                     for i, line in enumerate(annot):

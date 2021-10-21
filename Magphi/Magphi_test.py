@@ -798,9 +798,258 @@ class TestBedMergeHandling(unittest.TestCase):
 
         os.remove('TestBedMergeHandling/Contig_1~~overlap_connect_merged.bed')
 
-# Contig_1~~simple_connect_exclude_primers_file.bed
-class TestExtractSeqsNAnnots(unittest.TestCase): # TODO
-    pass
+
+class TestExtractSeqsNAnnots(unittest.TestCase):
+    def test_same_contig_fasta_extraction(self):
+        ''' Test extraction of fasta sequence given a fasta file with region of interest on single same contig. '''
+        merged_bed_files = ['TestExtractSeqsNAnnots/No_extraction/Single_contig/Single_contig~~Single_contig_primer.bed']
+        file_type = 'fasta'
+        genome_file = 'TestExtractSeqsNAnnots/No_extraction/Single_contig/Single_contig.fna'
+        annotation_file = ''
+        tmp_folder = 'TestExtractSeqsNAnnots/No_extraction/Single_contig'
+        out_path = 'TestExtractSeqsNAnnots/No_extraction/Single_contig'
+        primer_pairs = {'Single_contig_primer': ['Single_contig_primer_1', 'Single_contig_primer_2']}
+        primer_evidence = {'Single_contig_primer': 8}
+
+        copyfile(genome_file, genome_file+'_original')
+
+        annots_pr_interval, break_seed_sequence_primers, seed_sequence_evidence, inter_seed_sequence_dist = \
+            search_insertion_sites.extract_seqs_n_annots(merged_bed_files, file_type, genome_file,
+                                                         annotation_file, tmp_folder, out_path,
+                                                         primer_pairs, primer_evidence)
+
+        os.rename(genome_file+'_original', genome_file)
+
+        self.assertEqual(1, len(annots_pr_interval))
+        self.assertEqual(None, annots_pr_interval['Single_contig_primer'])
+
+        self.assertEqual(0, len(break_seed_sequence_primers))
+
+        self.assertEqual(8, seed_sequence_evidence['Single_contig_primer'])
+
+        self.assertEqual(10, inter_seed_sequence_dist['Single_contig_primer'])
+
+        with open(os.path.join(out_path, 'Single_contig--Single_contig_primer.fasta')) as extracted_fasta:
+            self.assertEqual('TTTTTTTTTT\n', extracted_fasta.readlines()[1])
+
+        os.remove(os.path.join(out_path, 'Single_contig--Single_contig_primer.fasta'))
+
+    def test_extraction_from_gff_no_annotation_extracted(self):
+        ''' Test extraction of fasta seqeunce given a gff file, with no annotations in region of interest and on the same contig '''
+        merged_bed_files = ['TestExtractSeqsNAnnots/No_extraction/Single_contig/Single_contig~~Single_contig_primer.bed']
+        file_type = 'gff'
+        genome_file = 'TestExtractSeqsNAnnots/No_extraction/Single_contig/Single_contig.fna'
+        annotation_file = 'TestExtractSeqsNAnnots/No_extraction/Single_contig/Single_contig_annotations.gff'
+        tmp_folder = 'TestExtractSeqsNAnnots/No_extraction/Single_contig'
+        out_path = 'TestExtractSeqsNAnnots/No_extraction/Single_contig'
+        primer_pairs = {'Single_contig_primer': ['Single_contig_primer_1', 'Single_contig_primer_2']}
+        primer_evidence = {'Single_contig_primer': 8}
+
+        copyfile(genome_file, genome_file + '_original')
+        copyfile(annotation_file, annotation_file + '_original')
+
+        annots_pr_interval, break_seed_sequence_primers, seed_sequence_evidence, inter_seed_sequence_dist = \
+            search_insertion_sites.extract_seqs_n_annots(merged_bed_files, file_type, genome_file,
+                                                         annotation_file, tmp_folder, out_path,
+                                                         primer_pairs, primer_evidence)
+
+        os.rename(genome_file + '_original', genome_file)
+        os.rename(annotation_file + '_original', annotation_file)
+
+        self.assertEqual(1, len(annots_pr_interval))
+        self.assertEqual(0, annots_pr_interval['Single_contig_primer'])
+
+        self.assertEqual(0, len(break_seed_sequence_primers))
+
+        self.assertEqual(8, seed_sequence_evidence['Single_contig_primer'])
+
+        self.assertEqual(10, inter_seed_sequence_dist['Single_contig_primer'])
+
+        with open(os.path.join(out_path, 'Single_contig--Single_contig_primer.fasta')) as extracted_fasta:
+            self.assertEqual('TTTTTTTTTT\n', extracted_fasta.readlines()[1])
+
+        os.remove(os.path.join(out_path, 'Single_contig--Single_contig_primer.fasta'))
+
+    def test_extraction_from_gff_with_annotation_extracted(self):
+        ''' Test extraction of fasta and annotations on a single contig given a gff file '''
+        merged_bed_files = ['TestExtractSeqsNAnnots/With_extraction/Single_contig/Single_contig_extract_annots~~Single_contig_primer.bed']
+        file_type = 'gff'
+        genome_file = 'TestExtractSeqsNAnnots/With_extraction/Single_contig/Single_contig_extract_annots.fna'
+        annotation_file = 'TestExtractSeqsNAnnots/With_extraction/Single_contig/Single_contigs_extract_annots.gff'
+        tmp_folder = 'TestExtractSeqsNAnnots/With_extraction/Single_contig'
+        out_path = 'TestExtractSeqsNAnnots/With_extraction/Single_contig'
+        primer_pairs = {'Single_contig_primer': ['Single_contig_primer_1', 'Single_contig_primer_2']}
+        primer_evidence = {'Single_contig_primer': 8}
+
+        copyfile(genome_file, genome_file + '_original')
+        copyfile(annotation_file, annotation_file + '_original')
+
+        annots_pr_interval, break_seed_sequence_primers, seed_sequence_evidence, inter_seed_sequence_dist = \
+            search_insertion_sites.extract_seqs_n_annots(merged_bed_files, file_type, genome_file,
+                                                         annotation_file, tmp_folder, out_path,
+                                                         primer_pairs, primer_evidence)
+
+        os.rename(genome_file + '_original', genome_file)
+        os.rename(annotation_file + '_original', annotation_file)
+
+        self.assertEqual(1, len(annots_pr_interval))
+        self.assertEqual(2, annots_pr_interval['Single_contig_primer'])
+
+        self.assertEqual(0, len(break_seed_sequence_primers))
+
+        self.assertEqual(9, seed_sequence_evidence['Single_contig_primer'])
+
+        self.assertEqual(20, inter_seed_sequence_dist['Single_contig_primer'])
+
+        with open(os.path.join(out_path, 'Single_contig_extract_annots--Single_contig_primer.fasta')) as extracted_fasta:
+            self.assertEqual('NNNNNNTTTTTTTTTTNNNN\n', extracted_fasta.readlines()[1])
+
+        # Test placement of genes gff when coordinates are adjusted.
+        with open(os.path.join(out_path, 'Single_contig_extract_annots--Single_contig_primer.gff')) as extracted_annotations:
+            gff_lines = extracted_annotations.readlines()
+            fist_line = gff_lines[2].split('\t')
+            second_line = gff_lines[3].split('\t')
+            self.assertListEqual(['1', '3'], fist_line[3:5])
+            self.assertListEqual(['17', '19'], second_line[3:5])
+
+            self.assertEqual('NNNNNNTTTTTTTTTTNNNN\n', gff_lines[6])
+
+        os.remove(os.path.join(out_path, 'Single_contig_extract_annots--Single_contig_primer.fasta'))
+        os.remove(os.path.join(out_path, 'Single_contig_extract_annots--Single_contig_primer.gff'))
+
+    def test_cross_contig_fasta_extraction(self):
+        ''' Test extraction of fasta sequence across contigs given a fasta file '''
+        merged_bed_files = ['TestExtractSeqsNAnnots/No_extraction/Cross_contig/Multi_contig~~Multi_contig_primer.bed']
+        file_type = 'fasta'
+        genome_file = 'TestExtractSeqsNAnnots/No_extraction/Cross_contig/Multi_contig.fna'
+        annotation_file = ''
+        tmp_folder = 'TestExtractSeqsNAnnots/No_extraction/Cross_contig'
+        out_path = 'TestExtractSeqsNAnnots/No_extraction/Cross_contig'
+        primer_pairs = {'Multi_contig_primer': ['Multi_contig_primer_1', 'Multi_contig_primer_2']}
+        primer_evidence = {'Multi_contig_primer': 6}
+
+        copyfile(genome_file, genome_file+'_original')
+
+        annots_pr_interval, break_seed_sequence_primers, seed_sequence_evidence, inter_seed_sequence_dist = \
+            search_insertion_sites.extract_seqs_n_annots(merged_bed_files, file_type, genome_file,
+                                                         annotation_file, tmp_folder, out_path,
+                                                         primer_pairs, primer_evidence)
+
+        os.rename(genome_file+'_original', genome_file)
+
+        self.assertEqual(1, len(annots_pr_interval))
+        self.assertEqual(None, annots_pr_interval['Multi_contig_primer'])
+
+        self.assertEqual(2, len(break_seed_sequence_primers))
+        expected_primers_returned = {'Multi_contig_primer_1_break': ['Multi_contig_primer_1', 'break'], 'Multi_contig_primer_2_break': ['Multi_contig_primer_2', 'break']}
+        self.assertEqual(expected_primers_returned, break_seed_sequence_primers)
+
+        self.assertEqual(6, seed_sequence_evidence['Multi_contig_primer'])
+
+        self.assertEqual(10, inter_seed_sequence_dist['Multi_contig_primer_1_break'])
+        self.assertEqual(10, inter_seed_sequence_dist['Multi_contig_primer_2_break'])
+
+        with open(os.path.join(out_path, 'Multi_contig--Multi_contig_primer_1_break.fasta')) as extracted_fasta:
+            self.assertEqual('AAAAAAAAAA\n', extracted_fasta.readlines()[1])
+
+        with open(os.path.join(out_path, 'Multi_contig--Multi_contig_primer_2_break.fasta')) as extracted_fasta:
+            self.assertEqual('AAAAAAAAAA\n', extracted_fasta.readlines()[1])
+
+        os.remove(os.path.join(out_path, 'Multi_contig--Multi_contig_primer_1_break.fasta'))
+        os.remove(os.path.join(out_path, 'Multi_contig--Multi_contig_primer_2_break.fasta'))
+
+    def test_extraction_from_gff_across_contigs_no_annotation_extracted(self):
+        ''' Test extraction of fasta sequence across contigs given a gff file with no annotations in the region to be extracted '''
+        merged_bed_files = ['TestExtractSeqsNAnnots/No_extraction/Cross_contig/Multi_contig~~Multi_contig_primer.bed']
+        file_type = 'gff'
+        genome_file = 'TestExtractSeqsNAnnots/No_extraction/Cross_contig/Multi_contig.fna'
+        annotation_file = 'TestExtractSeqsNAnnots/No_extraction/Cross_contig/Multi_contig_annotations.gff'
+        tmp_folder = 'TestExtractSeqsNAnnots/No_extraction/Cross_contig'
+        out_path = 'TestExtractSeqsNAnnots/No_extraction/Cross_contig'
+        primer_pairs = {'Multi_contig_primer': ['Multi_contig_primer_1', 'Multi_contig_primer_2']}
+        primer_evidence = {'Multi_contig_primer': 6}
+
+        copyfile(genome_file, genome_file + '_original')
+        copyfile(annotation_file, annotation_file + '_original')
+
+        annots_pr_interval, break_seed_sequence_primers, seed_sequence_evidence, inter_seed_sequence_dist = \
+            search_insertion_sites.extract_seqs_n_annots(merged_bed_files, file_type, genome_file,
+                                                         annotation_file, tmp_folder, out_path,
+                                                         primer_pairs, primer_evidence)
+
+        os.rename(genome_file + '_original', genome_file)
+        os.rename(annotation_file + '_original', annotation_file)
+
+        self.assertEqual(3, len(annots_pr_interval))
+        expected_annots = {'Multi_contig_primer': None, 'Multi_contig_primer_1_break': 0, 'Multi_contig_primer_2_break': 0}
+        self.assertEqual(expected_annots, annots_pr_interval)
+
+        self.assertEqual(2, len(break_seed_sequence_primers))
+
+        self.assertEqual(6, seed_sequence_evidence['Multi_contig_primer'])
+
+        self.assertEqual(10, inter_seed_sequence_dist['Multi_contig_primer_1_break'])
+        self.assertEqual(10, inter_seed_sequence_dist['Multi_contig_primer_2_break'])
+
+        with open(os.path.join(out_path, 'Multi_contig--Multi_contig_primer_1_break.fasta')) as extracted_fasta:
+            self.assertEqual('AAAAAAAAAA\n', extracted_fasta.readlines()[1])
+
+        with open(os.path.join(out_path, 'Multi_contig--Multi_contig_primer_2_break.fasta')) as extracted_fasta:
+            self.assertEqual('AAAAAAAAAA\n', extracted_fasta.readlines()[1])
+
+        os.remove(os.path.join(out_path, 'Multi_contig--Multi_contig_primer_1_break.fasta'))
+        os.remove(os.path.join(out_path, 'Multi_contig--Multi_contig_primer_2_break.fasta'))
+
+    def test_extraction_from_gff_across_contigs_with_annotation_extracted(self):
+        # TODO - Discuss if there should be an evidence level for connection across contigs with annotations between them?
+        # TODO - Discuss if annotations inside primer coordinates should count towards a higher evidence level.
+        ''' Test extraction of annotations and fasta sequences given a gff file, with annotations in the region to be extracted. '''
+        merged_bed_files = ['TestExtractSeqsNAnnots/With_extraction/Cross_contig/Multi_contig_extraction~~Multi_contig_extraction_primer.bed']
+        file_type = 'gff'
+        genome_file = 'TestExtractSeqsNAnnots/With_extraction/Cross_contig/Multi_contig_extraction.fna'
+        annotation_file = 'TestExtractSeqsNAnnots/With_extraction/Cross_contig/Multi_contig_extraction_annotations.gff'
+        tmp_folder = 'TestExtractSeqsNAnnots/With_extraction/Cross_contig'
+        out_path = 'TestExtractSeqsNAnnots/With_extraction/Cross_contig'
+        primer_pairs = {'Multi_contig_extraction_primer': ['Multi_contig_extraction_primer_1', 'Multi_contig_extraction_primer_2']}
+        primer_evidence = {'Multi_contig_extraction_primer': 6}
+
+        copyfile(genome_file, genome_file + '_original')
+        copyfile(annotation_file, annotation_file + '_original')
+
+        annots_pr_interval, break_seed_sequence_primers, seed_sequence_evidence, inter_seed_sequence_dist = \
+            search_insertion_sites.extract_seqs_n_annots(merged_bed_files, file_type, genome_file,
+                                                         annotation_file, tmp_folder, out_path,
+                                                         primer_pairs, primer_evidence)
+
+        os.rename(genome_file + '_original', genome_file)
+        os.rename(annotation_file + '_original', annotation_file)
+
+        print(annots_pr_interval)
+        print(break_seed_sequence_primers)
+        print(seed_sequence_evidence)
+        print(inter_seed_sequence_dist)
+
+        self.assertEqual(3, len(annots_pr_interval))
+        expected_annots = {'Multi_contig_extraction_primer': None, 'Multi_contig_extraction_primer_1_break': 1, 'Multi_contig_extraction_primer_2_break': 1}
+        self.assertEqual(expected_annots, annots_pr_interval)
+
+        self.assertEqual(2, len(break_seed_sequence_primers))
+
+        self.assertEqual(6, seed_sequence_evidence['Multi_contig_extraction_primer'])
+
+        self.assertEqual(14, inter_seed_sequence_dist['Multi_contig_extraction_primer_1_break'])
+        self.assertEqual(14, inter_seed_sequence_dist['Multi_contig_extraction_primer_2_break'])
+
+        with open(os.path.join(out_path, 'Multi_contig_extraction--Multi_contig_extraction_primer_1_break.fasta')) as extracted_fasta:
+            self.assertEqual('AAAAAAAAAANNNN\n', extracted_fasta.readlines()[1])
+
+        with open(os.path.join(out_path, 'Multi_contig_extraction--Multi_contig_extraction_primer_2_break.fasta')) as extracted_fasta:
+            self.assertEqual('NNNNAAAAAAAAAA\n', extracted_fasta.readlines()[1])
+
+        os.remove(os.path.join(out_path, 'Multi_contig_extraction--Multi_contig_extraction_primer_1_break.fasta'))
+        os.remove(os.path.join(out_path, 'Multi_contig_extraction--Multi_contig_extraction_primer_2_break.fasta'))
+        os.remove(os.path.join(out_path, 'Multi_contig_extraction--Multi_contig_extraction_primer_1_break.gff'))
+        os.remove(os.path.join(out_path, 'Multi_contig_extraction--Multi_contig_extraction_primer_2_break.gff'))
 
 
 # Bioinitio tests

@@ -15,6 +15,7 @@ from Magphi import check_inputs
 from Magphi import split_gff_file
 from Magphi import primer_handling
 from Magphi import search_insertion_sites
+from Magphi import wrangle_outputs
 
 from io import StringIO
 #pylint: disable=no-name-in-module
@@ -1024,11 +1025,6 @@ class TestExtractSeqsNAnnots(unittest.TestCase):
         os.rename(genome_file + '_original', genome_file)
         os.rename(annotation_file + '_original', annotation_file)
 
-        print(annots_pr_interval)
-        print(break_seed_sequence_primers)
-        print(seed_sequence_evidence)
-        print(inter_seed_sequence_dist)
-
         self.assertEqual(3, len(annots_pr_interval))
         expected_annots = {'Multi_contig_extraction_primer': None, 'Multi_contig_extraction_primer_1_break': 1, 'Multi_contig_extraction_primer_2_break': 1}
         self.assertEqual(expected_annots, annots_pr_interval)
@@ -1050,6 +1046,115 @@ class TestExtractSeqsNAnnots(unittest.TestCase):
         os.remove(os.path.join(out_path, 'Multi_contig_extraction--Multi_contig_extraction_primer_2_break.fasta'))
         os.remove(os.path.join(out_path, 'Multi_contig_extraction--Multi_contig_extraction_primer_1_break.gff'))
         os.remove(os.path.join(out_path, 'Multi_contig_extraction--Multi_contig_extraction_primer_2_break.gff'))
+
+class TestPartitionOutputs(unittest.TestCase):
+    def setUp(self):
+        genomes = ['W4rpi', 'lxO0f', 'UM1Dz', '4gDNy', '3PSQZ', 'JltLP']
+        self.primers = ['ycFQk', '8VNvY', 'Tl04Z', '4EBZ0', 'qngws', 'J08Tv', 'A', 'AA', 'AAA']
+
+        self.random_fastas = dict.fromkeys(self.primers)
+        self.random_gffs = dict.fromkeys(self.primers)
+        self.random_breaks = dict.fromkeys(self.primers)
+
+        for primer in self.primers:
+            self.random_fastas[primer] = []
+            self.random_gffs[primer] = []
+            self.random_breaks[primer] = []
+            for genome in genomes:
+                self.random_fastas[primer].append(f'{genome}--{primer}.fasta')
+                self.random_gffs[primer].append(f'{genome}--{primer}.gff')
+                self.random_breaks[primer].append(f'{genome}--{primer}_1_break.fasta')
+                self.random_breaks[primer].append(f'{genome}--{primer}_2_break.fasta')
+
+    def tearDown(self):
+        for primer in self.primers:
+            work_dir = os.path.join('TestPartitionOutputs', primer)
+            for file in os.listdir(work_dir):
+                os.remove(os.path.join(work_dir, file))
+
+            os.rmdir(work_dir)
+
+    def test_partitioning_of_output_fasta_files(self):
+        unittest_data_dir = 'TestPartitionOutputs'
+        # Construct files to be sorted
+        for primer in self.random_fastas:
+            for file_name in self.random_fastas[primer]:
+                with open(os.path.join(unittest_data_dir, file_name), 'w'):
+                    pass
+
+        # remove .DS_Store if on Mac....
+        try:
+            os.remove(os.path.join(unittest_data_dir, '.DS_Store'))
+        except FileNotFoundError:
+            pass
+
+        # Run test to wrangle outputs
+        wrangle_outputs.partition_outputs(self.primers, unittest_data_dir)
+
+        # Check that all files are in their expected place
+        file_presence = []
+        for primer in self.primers:
+            for file in self.random_fastas[primer]:
+
+                file = os.path.join(os.path.join(unittest_data_dir, primer), file.replace('--', '-'))
+                file_presence.append(os.path.isfile(file))
+
+        # Test itself
+        self.assertTrue(all(file_presence))
+
+    def test_partitioning_of_output_gff_files(self):
+        unittest_data_dir = 'TestPartitionOutputs'
+        # Construct files to be sorted
+        for primer in self.random_gffs:
+            for file_name in self.random_gffs[primer]:
+                with open(os.path.join(unittest_data_dir, file_name), 'w'):
+                    pass
+
+        # remove .DS_Store if on Mac....
+        try:
+            os.remove(os.path.join(unittest_data_dir, '.DS_Store'))
+        except FileNotFoundError:
+            pass
+
+        # Run test to wrangle outputs
+        wrangle_outputs.partition_outputs(self.primers, unittest_data_dir)
+
+        # Check that all files are in their expected place
+        file_presence = []
+        for primer in self.primers:
+            for file in self.random_gffs[primer]:
+                file = os.path.join(os.path.join(unittest_data_dir, primer), file.replace('--', '-'))
+                file_presence.append(os.path.isfile(file))
+
+        # Test itself
+        self.assertTrue(all(file_presence))
+
+    def test_partitioning_of_output_break_files(self):
+        unittest_data_dir = 'TestPartitionOutputs'
+        # Construct files to be sorted
+        for primer in self.random_breaks:
+            for file_name in self.random_breaks[primer]:
+                with open(os.path.join(unittest_data_dir, file_name), 'w'):
+                    pass
+
+        # remove .DS_Store if on Mac....
+        try:
+            os.remove(os.path.join(unittest_data_dir, '.DS_Store'))
+        except FileNotFoundError:
+            pass
+
+        # Run test to wrangle outputs
+        wrangle_outputs.partition_outputs(self.primers, unittest_data_dir)
+
+        # Check that all files are in their expected place
+        file_presence = []
+        for primer in self.primers:
+            for file in self.random_breaks[primer]:
+                file = os.path.join(os.path.join(unittest_data_dir, primer), file.replace('--', '-'))
+                file_presence.append(os.path.isfile(file))
+
+        # Test itself
+        self.assertTrue(all(file_presence))
 
 
 # Bioinitio tests

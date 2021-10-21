@@ -1047,24 +1047,30 @@ class TestExtractSeqsNAnnots(unittest.TestCase):
         os.remove(os.path.join(out_path, 'Multi_contig_extraction--Multi_contig_extraction_primer_1_break.gff'))
         os.remove(os.path.join(out_path, 'Multi_contig_extraction--Multi_contig_extraction_primer_2_break.gff'))
 
+
 class TestPartitionOutputs(unittest.TestCase):
-    def setUp(self):
+    # def setUp(self):
+    @classmethod
+    def setUpClass(cls):
+        ''' Construct the names for different mock output files in fasta and gff format '''
         genomes = ['W4rpi', 'lxO0f', 'UM1Dz', '4gDNy', '3PSQZ', 'JltLP']
-        self.primers = ['ycFQk', '8VNvY', 'Tl04Z', '4EBZ0', 'qngws', 'J08Tv', 'A', 'AA', 'AAA']
+        cls.primers = ['ycFQk', '8VNvY', 'Tl04Z', '4EBZ0', 'qngws', 'J08Tv', 'A', 'AA', 'AAA']
 
-        self.random_fastas = dict.fromkeys(self.primers)
-        self.random_gffs = dict.fromkeys(self.primers)
-        self.random_breaks = dict.fromkeys(self.primers)
+        cls.random_fastas = dict.fromkeys(cls.primers)
+        cls.random_gffs = dict.fromkeys(cls.primers)
+        cls.random_breaks = dict.fromkeys(cls.primers)
 
-        for primer in self.primers:
-            self.random_fastas[primer] = []
-            self.random_gffs[primer] = []
-            self.random_breaks[primer] = []
+        for primer in cls.primers:
+            cls.random_fastas[primer] = []
+            cls.random_gffs[primer] = []
+            cls.random_breaks[primer] = []
             for genome in genomes:
-                self.random_fastas[primer].append(f'{genome}--{primer}.fasta')
-                self.random_gffs[primer].append(f'{genome}--{primer}.gff')
-                self.random_breaks[primer].append(f'{genome}--{primer}_1_break.fasta')
-                self.random_breaks[primer].append(f'{genome}--{primer}_2_break.fasta')
+                cls.random_fastas[primer].append(f'{genome}--{primer}.fasta')
+                cls.random_gffs[primer].append(f'{genome}--{primer}.gff')
+                cls.random_breaks[primer].append(f'{genome}--{primer}_1_break.fasta')
+                cls.random_breaks[primer].append(f'{genome}--{primer}_2_break.fasta')
+
+        os.remove('TestPartitionOutputs/file.txt')
 
     def tearDown(self):
         for primer in self.primers:
@@ -1156,96 +1162,11 @@ class TestPartitionOutputs(unittest.TestCase):
         # Test itself
         self.assertTrue(all(file_presence))
 
-
-# Bioinitio tests
-# class TestFastaStats(unittest.TestCase):
-#     '''Unit tests for FastaStats'''
-#     def do_test(self, input_str, minlen, expected):
-#         "Wrapper function for testing FastaStats"
-#         result = FastaStats().from_file(StringIO(input_str), minlen)
-#         self.assertEqual(expected, result)
-#
-#     def test_zero_byte_input(self):
-#         "Test input containing zero bytes"
-#         expected = FastaStats(num_seqs=0,
-#                               num_bases=0,
-#                               min_len=None,
-#                               max_len=None,
-#                               average=None)
-#         self.do_test('', 0, expected)
-#
-#     def test_single_newline_input(self):
-#         "Test input containing a newline (\n) character"
-#         expected = FastaStats(num_seqs=0,
-#                               num_bases=0,
-#                               min_len=None,
-#                               max_len=None,
-#                               average=None)
-#         self.do_test('\n', 0, expected)
-#
-#     def test_single_greater_than_input(self):
-#         "Test input containing a single greater-than (>) character"
-#         expected = FastaStats(num_seqs=1,
-#                               num_bases=0,
-#                               min_len=0,
-#                               max_len=0,
-#                               average=0)
-#         self.do_test('>', 0, expected)
-#
-#     def test_one_sequence(self):
-#         "Test input containing one sequence"
-#         expected = FastaStats(num_seqs=1,
-#                               num_bases=5,
-#                               min_len=5,
-#                               max_len=5,
-#                               average=5)
-#         self.do_test(">header\nATGC\nA", 0, expected)
-#
-#     def test_two_sequences(self):
-#         "Test input containing two sequences"
-#         expected = FastaStats(num_seqs=2,
-#                               num_bases=9,
-#                               min_len=2,
-#                               max_len=7,
-#                               average=4)
-#         self.do_test(">header1\nATGC\nAGG\n>header2\nTT\n", 0, expected)
-#
-#     def test_no_header(self):
-#         "Test input containing sequence without preceding header"
-#         expected = FastaStats(num_seqs=0,
-#                               num_bases=0,
-#                               min_len=None,
-#                               max_len=None,
-#                               average=None)
-#         self.do_test("no header\n", 0, expected)
-#
-#     def test_minlen_less_than_all(self):
-#         "Test input when --minlen is less than 2 out of 2 sequences"
-#         expected = FastaStats(num_seqs=2,
-#                               num_bases=9,
-#                               min_len=2,
-#                               max_len=7,
-#                               average=4)
-#         self.do_test(">header1\nATGC\nAGG\n>header2\nTT\n", 2, expected)
-#
-#     def test_minlen_greater_than_one(self):
-#         "Test input when --minlen is less than 1 out of 2 sequences"
-#         expected = FastaStats(num_seqs=1,
-#                               num_bases=7,
-#                               min_len=7,
-#                               max_len=7,
-#                               average=7)
-#         self.do_test(">header1\nATGC\nAGG\n>header2\nTT\n", 3, expected)
-#
-#     def test_minlen_greater_than_all(self):
-#         "Test input when --minlen is greater than 2 out of 2 sequences"
-#         expected = FastaStats(num_seqs=0,
-#                               num_bases=0,
-#                               min_len=None,
-#                               max_len=None,
-#                               average=None)
-#         self.do_test(">header1\nATGC\nAGG\n>header2\nTT\n", 8, expected)
-
+    @classmethod
+    def tearDownClass(cls):
+        print('teardownclass')
+        with open('TestPartitionOutputs/file.txt', 'w'):
+            pass
 
 if __name__ == '__main__':
     unittest.main()

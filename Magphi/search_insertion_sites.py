@@ -574,7 +574,10 @@ def extract_seqs_n_annots(merged_bed_files, file_type, genome_file, annotation_f
             inter_primer_dist[primer_pair_name] = len(interval[0])
 
             # Extract the fasta sequence and save it in output folder
-            interval.sequence(fi=genome_file, fo=output_genome, nameOnly=True)
+            try:
+                interval.sequence(fi=genome_file, fo=output_genome, nameOnly=True)
+            except bedtools.helpers.BEDToolsError:
+                interval.sequence(fi=genome_file, fo=output_genome, name=True)
 
             # extract annotations if gff is provided as input
             if file_type == 'gff':

@@ -16,9 +16,11 @@ from Magphi import split_gff_file
 from Magphi import primer_handling
 from Magphi import search_insertion_sites
 from Magphi import wrangle_outputs
+# pylint: disable=E1133
 
 from io import StringIO
-#pylint: disable=no-name-in-module
+# pylint: disable=no-name-in-module
+
 from Magphi.__main__ import FastaStats
 # Move to folder with mock input files. First try Github structure, then try pulled repository structure
 try:
@@ -1164,7 +1166,6 @@ class TestPartitionOutputs(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        print('teardownclass')
         with open('TestPartitionOutputs/file.txt', 'w'):
             pass
 

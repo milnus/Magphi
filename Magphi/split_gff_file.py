@@ -1,8 +1,9 @@
 import os
 import concurrent.futures
+import gzip
 
 
-def split_single_gff(gff, tmp_folder):
+def split_single_gff(gff, tmp_folder, is_input_gzipped):
     # Trim the name/path of the input file
     base_name = gff.split('/')[-1]
     base_name = base_name.rsplit('.', 1)[0]
@@ -19,31 +20,37 @@ def split_single_gff(gff, tmp_folder):
     tmp_fasta = open(tmp_fasta_name, 'w')
 
     # Open the input gff file
-    with open(gff, 'r') as gff_file:
-        # Indicate whether fasta file is found
-        fasta_found = False
+    if is_input_gzipped:
+        gff_file = gzip.open(gff, 'rt')
+    else:
+        gff_file = open(gff, 'r')
+    # Indicate whether fasta file is found
+    fasta_found = False
 
-        # Go through all line of gff file
-        for line in gff_file.readlines():
-            # Check if genome has been reach if, then skip line
-            if '##FASTA' in line:
-                fasta_found = True
-                continue
+    # Go through all line of gff file
+    for line in gff_file.readlines():
+        print(line)
+        # Check if genome has been reach if, then skip line
+        if '##FASTA' in line:
+            fasta_found = True
+            continue
 
-            # Check if genome has been reach if, then record line in genome,
-            # else then record the as annotation line
-            if fasta_found:
-                tmp_fasta.write(line)
-            else:
-                tmp_gff.write(line)
+        # Check if genome has been reach if, then record line in genome,
+        # else then record the as annotation line
+        if fasta_found:
+            tmp_fasta.write(line)
+        else:
+            tmp_gff.write(line)
+
     # Close files before opening the next
+    gff_file.close()
     tmp_gff.close()
     tmp_fasta.close()
 
     return tmp_fasta_name, tmp_gff_name
 
 
-def split_gff_files(input_files, tmp_folder):
+def split_gff_files(input_files, tmp_folder, is_input_gzipped):
     """ Function to go through each input GFF3 file and split it into temporary files containing the gff annotations
     and the genome, to make them compatible with BLAST and bedtools"""
 
@@ -52,7 +59,7 @@ def split_gff_files(input_files, tmp_folder):
     annotation_files = []
 
     with concurrent.futures.ThreadPoolExecutor() as executor:
-        results = [executor.submit(split_single_gff, gff, tmp_folder) for gff in input_files]
+        results = [executor.submit(split_single_gff, gff, tmp_folder, is_input_gzipped) for gff in input_files]
 
         for f in concurrent.futures.as_completed(results):
             tmp_fasta, tmp_gff = f.result()

@@ -28,6 +28,7 @@ try:
 except FileNotFoundError:
     os.chdir('../unit_test_data/')
 
+
 class TestCommandLineHelpCalls(unittest.TestCase):
     '''Unit test for the commandline interface'''
     def test_no_input(self):
@@ -44,7 +45,6 @@ class TestCommandLineHelpCalls(unittest.TestCase):
 
 
 class TestFileRecognition(unittest.TestCase):
-    #TestFileRecognition
     def test_fasta_recognition(self):
         ''' test the recognition of fasta files '''
         path = 'TestFileRecognition/Fasta_files'
@@ -134,6 +134,19 @@ class TestFileRecognition(unittest.TestCase):
         with self.assertRaises(SystemExit):
             check_inputs.check_inputs(files)
 
+    def test_gzipped_files(self):
+        ''' Test that input of gzipped files are recognised as such '''
+        files = ['TestFileRecognition/All_gzipped/GCA_005163865.fna.gz', 'TestFileRecognition/All_gzipped/GCA_900475985.fna.gz']
+
+        self.assertEqual(True, check_inputs.check_if_gzip(files))
+
+    def test_mixed_gzipped_and_none_compressed_files(self):
+        ''' Test that input of gzipped files are recognised as such '''
+        files = ['TestFileRecognition/Mixed_gzipped/GCA_005163865.fna.gz', 'TestFileRecognition/Mixed_gzipped/GCA_900475985.fna']
+
+        with self.assertRaises(SystemExit):
+            check_inputs.check_if_gzip(files)
+
 
 class TestSplittingGff(unittest.TestCase):
     def test_gff_split_single_file(self):
@@ -142,7 +155,33 @@ class TestSplittingGff(unittest.TestCase):
         file = os.path.join(path, 'TestSplittingGff/minimized.gff')
 
         # Split the test file
-        genome, annotation = split_gff_file.split_single_gff(file, path)
+        genome, annotation = split_gff_file.split_single_gff(file, path, is_input_gzipped=False)
+
+        # read the now divided genome and annotations and get the number of lines
+        open_genome = open(genome, 'r')
+        open_annotation = open(annotation, 'r')
+        genome_file_length = len(open_genome.readlines())
+        annotation_file_length = len(open_annotation.readlines())
+
+        # Close files again
+        open_genome.close()
+        open_annotation.close()
+
+        # Test if the files contain the number of expected lines.
+        self.assertEqual(10, genome_file_length)
+        self.assertEqual(5, annotation_file_length)
+
+        # remove the genome and annotations.
+        os.remove(genome)
+        os.remove(annotation)
+
+    def test_gff_split_single_gzipped_file(self):
+        ''' test the function that splits a gff file into annotations and genome. Assess the number of lines in output '''
+        path = os.getcwd()
+        file = os.path.join(path, 'TestSplittingGff/minimized_gzipped.gff.gz')
+
+        # Split the test file
+        genome, annotation = split_gff_file.split_single_gff(file, path, is_input_gzipped=True)
 
         # read the now divided genome and annotations and get the number of lines
         open_genome = open(genome, 'r')

@@ -16,10 +16,8 @@ import time
 import logging
 from sys import argv
 import pkg_resources # ??
+import concurrent.futures
 
-# from Magphi.commandline_interface import get_commandline_arguments
-# from Magphi.check_depencies import check_dependencies_for_main
-# from Magphi.exit_with_error import exit_with_error
 try:
     from Magphi.commandline_interface import get_commandline_arguments
 except ModuleNotFoundError:
@@ -49,6 +47,24 @@ try:
     from Magphi.primer_handling import handle_primers
 except ModuleNotFoundError:
     from primer_handling import handle_primers
+
+try:
+    from Magphi.search_insertion_sites import screen_genome_for_primers
+except ModuleNotFoundError:
+    from search_insertion_sites import screen_genome_for_primers
+
+try:
+    from Magphi.wrangle_outputs import partition_outputs, write_paired_primers
+except ModuleNotFoundError:
+    from wrangle_outputs import partition_outputs, write_paired_primers
+
+try:
+    from Magphi.write_output_csv import write_primer_hit_matrix, write_annotation_num_matrix, write_primer_hit_evidence, write_inter_primer_dist
+except ModuleNotFoundError:
+    from write_output_csv import write_primer_hit_matrix, write_annotation_num_matrix, write_primer_hit_evidence, write_inter_primer_dist
+
+from write_output_csv import write_primer_hit_matrix, write_annotation_num_matrix, write_primer_hit_evidence, \
+        write_inter_primer_dist
 
 # Initial
 from argparse import ArgumentParser
@@ -140,7 +156,7 @@ class FastaStats(object):
                 self.average)
 
     def from_file(self, fasta_file, minlen_threshold=DEFAULT_MIN_LEN):
-        '''Compute a FastaStats object from an input FASTA file.
+        ''' Compute a FastaStats object from an input FASTA file.
 
         Arguments:
            fasta_file: an open file object for the FASTA file
@@ -247,7 +263,12 @@ def init_logging(log_filename):
         logging.info('program started')
         logging.info(f"command line: {' '.join(argv)}")
 
+        # TODO - should default logging be command-line arguements, time of run, dependency versions, Errors and progress?
+        #   -log flag can be given for more info?
 
+#TODO - Handle gzipped files? - https://docs.python.org/3.9/library/gzip.html
+#   Check input and set GZIP = TRUE to control the copying into the tmp dir.
+#   Assume .gz is in file name
 def main():
     start_time = time.time()
 
@@ -271,7 +292,7 @@ def main():
         warnings.warn("Some dependencies are untested versions")
 
     # Check the input files
-    file_type = check_inputs(cmd_args.genomes)
+    file_type, is_input_gzipped = check_inputs(cmd_args.genomes)
 
     # Try to construct the output folder and except if it does exist
     # TODO - make verbose controlled and log
@@ -294,9 +315,10 @@ def main():
     # Check if input is GFF3 files and split genome from annotations and assign to be handed over to blast,
     # If files are not gff then assign the fastas from the input an no annotations.
     # TODO - make verbose controlled - add logging
-    print("Splitting GFF files into annotations and genomes")
+    # TODO - should this splitting be done when each genome is being searched for primers? This will decrease the load of memory used
     if file_type == 'gff':
-        genomes, annotations = split_gff_files(cmd_args.genomes, tmp_folder)
+        print("Splitting GFF files into annotations and genomes")
+        genomes, annotations = split_gff_files(cmd_args.genomes, tmp_folder, is_input_gzipped)
     else:
         genomes = cmd_args.genomes
         annotations = [None] * len(cmd_args.genomes)
@@ -304,9 +326,74 @@ def main():
     # Read in and combine primers into pairs
     primer_pairs, primer_dict = handle_primers(cmd_args.primers)
 
-    # From Bioinitio frame
-    # print(HEADER)
-    # process_files(options)
+    # Construct master dict to hold the returned information from primers
+    master_primer_hits = {}
+    master_annotation_hits = {}
+    master_primer_evidence = {}
+    primers_w_breaks = primer_pairs.copy()
+    master_inter_primer_dist = {}
+
+    # TODO - make verbose controlled - logging
+    print(f'{len(genomes)} input files to be processed, starting now!')
+
+    genomes_processed = 0
+    with concurrent.futures.ThreadPoolExecutor(max_workers=cmd_args.cpu) as executor:
+        results = [executor.submit(screen_genome_for_primers, genomes[i], primer_pairs, cmd_args.primers,
+                                   tmp_folder, cmd_args.include_primers, file_type, annotations[i],
+                                   cmd_args.out_path, cmd_args.max_primer_dist) for i, genome in enumerate(genomes)]
+
+        for f in concurrent.futures.as_completed(results):
+            genomes_processed += 1
+
+            if genomes_processed % 25 == 0 or genomes_processed == 0:
+                print(f'   File number {genomes_processed} has been processed')
+
+            primer_hits, annots_per_interval, genome_name, primer_evidence, break_primers, inter_primer_dist = f.result()
+
+            # Polish the genome name for the output dict:
+            genome_name = genome_name.rsplit('/', 1)[-1]
+
+            # Update the master dicts with information from current run.
+            master_annotation_hits[genome_name] = annots_per_interval
+            # master_annotation_hits[genome_name] = annots_per_interval
+            master_primer_hits[genome_name] = primer_hits
+            # master_primer_hits[genome_name] = primer_hits
+            master_primer_evidence[genome_name] = primer_evidence
+            master_inter_primer_dist[genome_name] = inter_primer_dist
+
+            # Add the genome to the dict to be writen out
+            master_primer_hits[genome_name]['genome'] = genome_name
+            master_annotation_hits[genome_name]['genome'] = genome_name
+            master_primer_evidence[genome_name]['genome'] = genome_name
+            master_inter_primer_dist[genome_name]['genome'] = genome_name
+
+            # Check if there are any primers returned as being neighbours to contig breaks.
+            if len(break_primers.keys()) > 0:
+                primers_w_breaks.update(break_primers)
+
+    print('Partitioning output files into primer folders')
+    # Partition output files into their primer set of origin.
+    partition_outputs(primer_pairs, cmd_args.out_path)
+
+    # TODO - look at this!
+    print('Writing output matrices')
+    write_primer_hit_matrix(master_primer_hits, primer_pairs, cmd_args.out_path)
+    if file_type == 'gff':
+        write_annotation_num_matrix(master_annotation_hits, primers_w_breaks, cmd_args.out_path)
+    write_primer_hit_evidence(master_primer_evidence, primer_pairs, cmd_args.out_path)
+    write_inter_primer_dist(master_inter_primer_dist, primers_w_breaks, cmd_args.out_path)
+
+    # Write a file specifying which primers were paired and their common name
+    write_paired_primers(primer_pairs, cmd_args.out_path)
+
+    os.rmdir(tmp_folder)
+
+    time_to_finish = time.time() - start_time
+    time_to_finish = int(round(time_to_finish, 0))
+    print(f"Done in: {time_to_finish} Seconds")
+
+    # TODO - How does Log work? Do we print something to terminal?
+    # TODO - Functional tests
 
 
 # If this script is run from the command line then call the main function.

@@ -1,7 +1,7 @@
 import sys
 import logging
 
-
+# TODO - Add in that tmp folder should try to be deleted??
 def exit_with_error(message, exit_status):
     '''Print an error message to stderr, prefixed by the program name and 'ERROR'.
     Then exit program with supplied exit status.

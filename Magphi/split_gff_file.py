@@ -29,7 +29,6 @@ def split_single_gff(gff, tmp_folder, is_input_gzipped):
 
     # Go through all line of gff file
     for line in gff_file.readlines():
-        print(line)
         # Check if genome has been reach if, then skip line
         if '##FASTA' in line:
             fasta_found = True

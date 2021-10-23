@@ -63,9 +63,6 @@ try:
 except ModuleNotFoundError:
     from write_output_csv import write_primer_hit_matrix, write_annotation_num_matrix, write_primer_hit_evidence, write_inter_primer_dist
 
-from write_output_csv import write_primer_hit_matrix, write_annotation_num_matrix, write_primer_hit_evidence, \
-        write_inter_primer_dist
-
 # Initial
 from argparse import ArgumentParser
 from math import floor

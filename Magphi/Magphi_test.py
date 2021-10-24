@@ -16,6 +16,7 @@ from Magphi import split_gff_file
 from Magphi import primer_handling
 from Magphi import search_insertion_sites
 from Magphi import wrangle_outputs
+from Magphi import write_output_csv
 # pylint: disable=E1133
 
 from io import StringIO
@@ -1207,6 +1208,98 @@ class TestPartitionOutputs(unittest.TestCase):
     def tearDownClass(cls):
         with open('TestPartitionOutputs/file.txt', 'w'):
             pass
+
+
+class TestWritingOutputFiles(unittest.TestCase):
+
+    def test_writing_primer_pairs(self):
+        ''' Test the function for writing the file on how seed sequences were paired '''
+        primer_pairs = {'primer_1': ['primer_1_1', 'primer_1_2'],
+                        'primer_2': ['primer_2_1', 'primer_2_2']}
+        wrangle_outputs.write_paired_primers(primer_pairs, 'TestWritingOutputFiles')
+
+        with open('TestWritingOutputFiles/primer_pairing.expected', 'r') as expected:
+            with open('TestWritingOutputFiles/primer_pairing.tsv') as result:
+                self.assertEqual(expected.readlines(), result.readlines())
+
+        os.remove('TestWritingOutputFiles/primer_pairing.tsv')
+
+    def test_writing_write_primer_hit_matrix(self):
+        master_primer_hits = {'genome_1': {'genome': 'genome_1',
+                                           'primer_1': 2,
+                                           'primer_2': 4},
+                              'genome_2': {'genome': 'genome_2',
+                                           'primer_1': 2,
+                                           'primer_2': 2}}
+        primer_pairs = {'primer_1': ['primer_1_1', 'primer_1_2'],
+                        'primer_2': ['primer_2_1', 'primer_2_2']}
+        out_path = 'TestWritingOutputFiles'
+
+        write_output_csv.write_primer_hit_matrix(master_primer_hits, primer_pairs, out_path)
+
+        with open('TestWritingOutputFiles/contig_hit_matrix.expected', 'r') as expected:
+            with open('TestWritingOutputFiles/contig_hit_matrix.csv') as result:
+                self.assertEqual(expected.readlines(), result.readlines())
+
+        os.remove('TestWritingOutputFiles/contig_hit_matrix.csv')
+
+    def test_writing_annotation_matrix(self):
+        master_annotation_hits = {'genome_1': {'genome': 'genome_1',
+                                           'primer_1': 2,
+                                           'primer_2': 4},
+                                  'genome_2': {'genome': 'genome_2',
+                                               'primer_1': 2,
+                                               'primer_2': 2}}
+        primer_pairs = {'primer_1': ['primer_1_1', 'primer_1_2'],
+                        'primer_2': ['primer_2_1', 'primer_2_2']}
+        out_path = 'TestWritingOutputFiles'
+
+        write_output_csv.write_annotation_num_matrix(master_annotation_hits, primer_pairs, out_path)
+
+        with open('TestWritingOutputFiles/contig_hit_matrix.expected', 'r') as expected:
+            with open('TestWritingOutputFiles/annotation_num_matrix.csv') as result:
+                self.assertEqual(expected.readlines(), result.readlines())
+
+        os.remove('TestWritingOutputFiles/annotation_num_matrix.csv')
+
+    def test_writing_primer_evidence(self):
+        master_primer_evidence = {'genome_1': {'genome': 'genome_1',
+                                           'primer_1': 2,
+                                           'primer_2': 4},
+                                  'genome_2': {'genome': 'genome_2',
+                                               'primer_1': 2,
+                                               'primer_2': 2}}
+        primer_pairs = {'primer_1': ['primer_1_1', 'primer_1_2'],
+                        'primer_2': ['primer_2_1', 'primer_2_2']}
+        out_path = 'TestWritingOutputFiles'
+
+        write_output_csv.write_primer_hit_evidence(master_primer_evidence, primer_pairs, out_path)
+
+        with open('TestWritingOutputFiles/contig_hit_matrix.expected', 'r') as expected:
+            with open('TestWritingOutputFiles/master_primer_evidence.csv') as result:
+                self.assertEqual(expected.readlines(), result.readlines())
+
+        os.remove('TestWritingOutputFiles/master_primer_evidence.csv')
+
+    def test_writing_inter_primer_distance(self):
+        master_inter_primer_dist = {'genome_1': {'genome': 'genome_1',
+                                               'primer_1': 2,
+                                               'primer_2': 4},
+                                  'genome_2': {'genome': 'genome_2',
+                                               'primer_1': 2,
+                                               'primer_2': 2}}
+        primer_pairs = {'primer_1': ['primer_1_1', 'primer_1_2'],
+                        'primer_2': ['primer_2_1', 'primer_2_2']}
+        out_path = 'TestWritingOutputFiles'
+
+        write_output_csv.write_inter_primer_dist(master_inter_primer_dist, primer_pairs, out_path)
+
+        with open('TestWritingOutputFiles/contig_hit_matrix.expected', 'r') as expected:
+            with open('TestWritingOutputFiles/inter_primer_distance.csv') as result:
+                self.assertEqual(expected.readlines(), result.readlines())
+
+        os.remove('TestWritingOutputFiles/inter_primer_distance.csv')
+
 
 if __name__ == '__main__':
     unittest.main()

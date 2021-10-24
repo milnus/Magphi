@@ -263,9 +263,7 @@ def init_logging(log_filename):
         # TODO - should default logging be command-line arguements, time of run, dependency versions, Errors and progress?
         #   -log flag can be given for more info?
 
-#TODO - Handle gzipped files? - https://docs.python.org/3.9/library/gzip.html
-#   Check input and set GZIP = TRUE to control the copying into the tmp dir.
-#   Assume .gz is in file name
+
 def main():
     start_time = time.time()
 
@@ -372,7 +370,6 @@ def main():
     # Partition output files into their primer set of origin.
     partition_outputs(primer_pairs, cmd_args.out_path)
 
-    # TODO - look at this!
     print('Writing output matrices')
     write_primer_hit_matrix(master_primer_hits, primer_pairs, cmd_args.out_path)
     if file_type == 'gff':

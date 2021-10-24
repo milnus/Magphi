@@ -1,7 +1,7 @@
 import csv
 import os
 
-# TODO - test?
+
 def write_primer_hit_matrix(master_primer_hits, primer_pairs, out_path):
     with open(os.path.join(out_path, 'contig_hit_matrix.csv'), 'w') as out_file:
         header = ['genome'] + list(primer_pairs.keys())

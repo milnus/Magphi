@@ -8,9 +8,7 @@ import unittest
 import os
 import json
 from shutil import copyfile
-import io
 
-from Magphi import commandline_interface
 from Magphi import check_inputs
 from Magphi import split_gff_file
 from Magphi import primer_handling
@@ -23,7 +21,6 @@ from Magphi import exit_with_error
 from io import StringIO
 # pylint: disable=no-name-in-module
 
-from Magphi.__main__ import FastaStats
 # Move to folder with mock input files. First try Github structure, then try pulled repository structure
 try:
     os.chdir('/Magphi/unit_test_data/')
@@ -239,6 +236,9 @@ class TestPrimerFunctions(unittest.TestCase):
             primer_handling.extract_primer_info('TestPrimerFunctions/Same_name_primers.txt')
 
 
+# TODO - test blast function?
+
+
 # TODO - test blast_out_to_sorted_bed function - use an input file of blast xml output - use two sets of primers
 #  Test both inclusion and exclution of primers. - Andrew's responsitibily.
 #   - We want to test that a blast output is converted correctly to Bed format.
@@ -258,7 +258,7 @@ class TestPrimersPlacement(unittest.TestCase): # TODO - check if this is exhaust
         ''' Test that a single seed sequence hit returns the correct evidence level '''
         bed_files = ['TestPrimersPlacement/single_contig_1200N~~single_primer.bed']
         primer_pairs = {'single_primer': ['single_primer_1', 'single_primer_2']}
-        primer_hits = {'single_primer': 2}
+        primer_hits = {'single_primer': 1}
         max_primer_dist = 1
         genome_file = 'TestFlankingRegion/single_contig/single_contig_1200N.fasta'
         file_type = 'fasta'
@@ -275,7 +275,7 @@ class TestPrimersPlacement(unittest.TestCase): # TODO - check if this is exhaust
         os.remove('TestPrimersPlacement/single_contig_1200N.fasta')
 
         evidence_level_return = flanking_return[1]['single_primer']
-        self.assertEqual(1, evidence_level_return)
+        self.assertEqual(0, evidence_level_return)
 
     def test_single_primer_multiple_hit_same_contig_no_overlap(self):
         ''' Test that a single primer of a pair, hitting a single contig multiple times results in a correct evidence level '''
@@ -298,7 +298,7 @@ class TestPrimersPlacement(unittest.TestCase): # TODO - check if this is exhaust
         os.remove('TestPrimersPlacement/single_contig_1200N.fasta')
 
         evidence_level_return = flanking_return[1]['primer']
-        self.assertEqual(1, evidence_level_return)
+        self.assertEqual(0, evidence_level_return)
 
     def test_single_primer_multiple_hit_same_contig_w_overlap(self):
         ''' Test that a single primer hitting a single contig multiple times with large max distance gives the correct evidence level '''
@@ -321,7 +321,7 @@ class TestPrimersPlacement(unittest.TestCase): # TODO - check if this is exhaust
         os.remove('TestPrimersPlacement/single_contig_1200N.fasta')
 
         evidence_level_return = flanking_return[1]['primer']
-        self.assertEqual(1, evidence_level_return)# TODO - Should this be a one or how to report that only one unique primer has been annealled? Should there be an evidence level for one hit by one primer and one for multiple hit by only one primer (to indicate that one or both primers may be faulty?)
+        self.assertEqual(0, evidence_level_return)
 
     def test_single_primer_multiple_hit_multiple_contigs_no_overlap(self):
         ''' Test that a single primer hitting multiple contigs with no overlap results in the right evidence level '''
@@ -344,7 +344,7 @@ class TestPrimersPlacement(unittest.TestCase): # TODO - check if this is exhaust
         os.remove('TestPrimersPlacement/double_contig.fasta')
 
         evidence_level_return = flanking_return[1]['primer_same']
-        self.assertEqual(1, evidence_level_return)
+        self.assertEqual(0, evidence_level_return)
 
     def test_single_primer_multiple_hit_multiple_contigs_with_overlap(self):
         ''' Test that a single primer hitting multiple contigs with overlap results in the right evidence level '''
@@ -367,10 +367,10 @@ class TestPrimersPlacement(unittest.TestCase): # TODO - check if this is exhaust
         os.remove('TestPrimersPlacement/double_contig.fasta')
 
         evidence_level_return = flanking_return[1]['primer_same']
-        self.assertEqual(1, evidence_level_return)
+        self.assertEqual(0, evidence_level_return)
 
     def test_single_primer_multiple_hit_multiple_contigs(self):
-        ''' Test that both primers hit once on one contig with overlap and that the evidence level is correct '''
+        ''' Test that both seed sequences hit once on one contig with no overlap and that the evidence level is correct '''
         bed_files = ['TestPrimersPlacement/single_contig_1200N~~primer_different.bed']
         primer_pairs = {'primer_different': ['primer_different_1', 'primer_different_2']}
         primer_hits = {'primer_different': 2}
@@ -390,7 +390,7 @@ class TestPrimersPlacement(unittest.TestCase): # TODO - check if this is exhaust
         os.remove('TestPrimersPlacement/single_contig_1200N.fasta')
 
         evidence_level_return = flanking_return[1]['primer_different']
-        self.assertEqual(7, evidence_level_return)
+        self.assertEqual('5A', evidence_level_return)
 
     def test_multiple_hits_multiple_contigs_inter_contig_connect(self):
         ''' Test the outcome with two seed sequences that can connect on same contig, but not across contigs
@@ -425,7 +425,7 @@ class TestPrimersPlacement(unittest.TestCase): # TODO - check if this is exhaust
         # Copy back input file
         os.rename(bed_files[0] + 'original', bed_files[0])
         evidence_level_return = flanking_return[1]['primer_close_placement']
-        self.assertEqual(5, evidence_level_return)
+        self.assertEqual('5B', evidence_level_return)
 
     def test_multiple_hits_multiple_contigs_cross_contig_connect(self):
         ''' Test the outcome with two unique seed sequences that can connect on same contig and across contigs'''
@@ -454,10 +454,10 @@ class TestPrimersPlacement(unittest.TestCase): # TODO - check if this is exhaust
         # Copy back input file
         os.rename(bed_files[0]+'original', bed_files[0])
         evidence_level_return = flanking_return[1]['primer_close_placement']
-        self.assertEqual(3, evidence_level_return)
+        self.assertEqual(2, evidence_level_return)
 
     def test_multiple_hits_multiple_contigs_cross_contig_reach(self):
-        ''' Test the outcome with two unique seed sequences can connect across contigs when inter contig connection is not allowed by max distance'''
+        ''' Test the outcome when two unique seed sequences can connect across contigs when inter contig connection is not allowed by max distance'''
         bed_files = ['TestPrimersPlacement/double_contig~~primer_long_placement.bed']
         primer_pairs = {'primer_long_placement': ['primer_long_placement_1', 'primer_long_placement_2']}
         primer_hits = {'primer_long_placement': 2}
@@ -490,10 +490,10 @@ class TestPrimersPlacement(unittest.TestCase): # TODO - check if this is exhaust
         # Copy back input file
         os.rename(bed_files[0] + 'original', bed_files[0])
         evidence_level_return = flanking_return[1]['primer_long_placement']
-        self.assertEqual(6, evidence_level_return)
+        self.assertEqual('4B', evidence_level_return)
 
-    def test_multiple_hits_multiple_contigs_multi_overlap_long(self): #TODO -still need to refine this what do we actually want from this?
-        ''' Test the outcome with two unique seed sequences can connect on same contig and across contigs'''
+    def test_multiple_hits_multiple_contigs_multi_overlap_long(self):
+        ''' Test the outcome when two unique seed sequences can connect on same contig and across contigs'''
         bed_files = ['TestPrimersPlacement/double_contig~~primer_long_placement.bed']
         primer_pairs = {'primer_long_placement': ['primer_long_placement_1', 'primer_long_placement_2']}
         primer_hits = {'primer_long_placement': 2}
@@ -514,10 +514,10 @@ class TestPrimersPlacement(unittest.TestCase): # TODO - check if this is exhaust
         os.remove('TestPrimersPlacement/double_contig.fasta')
 
         evidence_level_return = flanking_return[1]['primer_long_placement']
-        self.assertEqual(3, evidence_level_return)
+        self.assertEqual(2, evidence_level_return)
 
     def test_multiple_hits_multiple_contigs_end_overlap_short(self):
-        ''' Test the outcome with two unique seed sequences can connect on same contig and across contigs'''
+        ''' Test the outcome with two unique seed sequences can connect across the contig and across the ends of the same contig'''
         bed_files = ['TestPrimersPlacement/double_contig~~primer_short_placement.bed']
         primer_pairs = {'primer_short_placement': ['primer_short_placement_1', 'primer_short_placement_2']}
         primer_hits = {'primer_short_placement': 2}
@@ -538,10 +538,10 @@ class TestPrimersPlacement(unittest.TestCase): # TODO - check if this is exhaust
         os.remove('TestPrimersPlacement/double_contig.fasta')
 
         evidence_level_return = flanking_return[1]['primer_short_placement']
-        self.assertEqual(3, evidence_level_return)
+        self.assertEqual(2, evidence_level_return)
 
     def test_multiple_hits_multiple_contigs_multi_overlap_short(self):
-        ''' Test the outcome with two unique seed sequences can connect on same contig and across contigs'''
+        ''' Test the outcome with two unique seed sequences can connect on same contig and across different contigs'''
         bed_files = ['TestPrimersPlacement/double_contig~~primer_short_placement.bed']
         primer_pairs = {'primer_short_placement': ['primer_short_placement_1', 'primer_short_placement_2']}
         primer_hits = {'primer_short_placement': 2}
@@ -562,7 +562,31 @@ class TestPrimersPlacement(unittest.TestCase): # TODO - check if this is exhaust
         os.remove('TestPrimersPlacement/double_contig.fasta')
 
         evidence_level_return = flanking_return[1]['primer_short_placement']
-        self.assertEqual(3, evidence_level_return)
+        self.assertEqual(2, evidence_level_return)
+
+    def test_sinlge_hits_multiple_contigs_no_overlap(self):
+        ''' Test the outcome with only two unique seed sequences can connect across different contigs'''
+        bed_files = ['TestPrimersPlacement/double_contig~~single_primers_across_contigs.bed']
+        primer_pairs = {'single_primers_across_contigs': ['single_primers_across_contigs_1', 'single_primers_across_contigs_2']}
+        primer_hits = {'single_primers_across_contigs': 2}
+        max_primer_dist = 1
+        genome_file = 'TestFlankingRegion/double_contig/double_contig.fasta'
+        file_type = 'fasta'
+        tmp_folder = 'TestPrimersPlacement'
+
+        flanking_return = search_insertion_sites.check_primers_placement(bed_files=bed_files,
+                                                                         primer_pairs=primer_pairs,
+                                                                         primer_hits=primer_hits,
+                                                                         max_primer_dist=max_primer_dist,
+                                                                         genome_file=genome_file,
+                                                                         file_type=file_type,
+                                                                         tmp_folder=tmp_folder)
+
+        os.remove('TestPrimersPlacement/double_contig.fasta.fai')
+        os.remove('TestPrimersPlacement/double_contig.fasta')
+
+        evidence_level_return = flanking_return[1]['single_primers_across_contigs']
+        self.assertEqual('4A', evidence_level_return)
 
 
 class TestPrimerReachContigEndCalculation(unittest.TestCase):
@@ -660,7 +684,7 @@ class TestFlankingRegion(unittest.TestCase): # TODO - check if this is exhaustiv
 
         flanking_return = search_insertion_sites.examine_flanking_regions(primer_hit_dict, 0, 'test')
 
-        self.assertEqual(3, flanking_return)
+        self.assertEqual(2, flanking_return)
 
     def test_multiple_hit_single_contig_w_no_overlaps(self):
         ''' Test the handling of multiple hits from both seed sequneces in a pair but no connection between them '''
@@ -669,7 +693,7 @@ class TestFlankingRegion(unittest.TestCase): # TODO - check if this is exhaustiv
         genome_fai_file = 'TestFlankingRegion/single_contig/single_contig_1200N.fasta.fai'
         flanking_return = search_insertion_sites.examine_flanking_regions(primer_hit_dict, 1, genome_fai_file)
 
-        self.assertEqual(2, flanking_return)
+        self.assertEqual(1, flanking_return)
 
     def test_multiple_hit_single_contig_w_single_overlap(self):
         ''' Test that seed seqeunces from pair with multiple hit on single contig can be connected correctly with correct max distance'''
@@ -678,7 +702,7 @@ class TestFlankingRegion(unittest.TestCase): # TODO - check if this is exhaustiv
         genome_fai_file = 'TestFlankingRegion/single_contig/single_contig_1200N.fasta.fai'
         flanking_return = search_insertion_sites.examine_flanking_regions(primer_hit_dict, 51, genome_fai_file) # TODO Should primers overlap by minimum 1 bp or can they be 'kissing', meaning they hit adjcent basepairs?
 
-        self.assertEqual(5, flanking_return)
+        self.assertEqual('5B', flanking_return)
 
     def test_multiple_hit_single_contig_w_multiple_overlaps(self):
         ''' Test that multiple seed sequnces from pair on same contig, that can all be connected give the right evidence level '''
@@ -687,7 +711,7 @@ class TestFlankingRegion(unittest.TestCase): # TODO - check if this is exhaustiv
         genome_fai_file = 'TestFlankingRegion/single_contig/single_contig_1200N.fasta.fai'
         flanking_return = search_insertion_sites.examine_flanking_regions(primer_hit_dict, 101, genome_fai_file)
 
-        self.assertEqual(3, flanking_return)
+        self.assertEqual(2, flanking_return)
 
     def test_multiple_hit_single_contig_w_same_primer_single_overlap_and_mix_pair(self):# TODO Change path
         ''' Test that when two seed seqeunces overlap they can still be recognised as connected. '''
@@ -696,7 +720,7 @@ class TestFlankingRegion(unittest.TestCase): # TODO - check if this is exhaustiv
         genome_fai_file = 'TestFlankingRegion/single_contig/single_contig_1200N.fasta.fai'
         flanking_return = search_insertion_sites.examine_flanking_regions(primer_hit_dict, 1, genome_fai_file)
 
-        self.assertEqual(5, flanking_return)
+        self.assertEqual('5B', flanking_return)
 
     def test_multiple_hit_single_contig_w_same_primer_multiple_overlap_and_mix_pair(self): # TODO Change path
         ''' Test that multiple seed seqeunces on the same contig can be connected even when two primers from a pair overlap '''
@@ -705,7 +729,7 @@ class TestFlankingRegion(unittest.TestCase): # TODO - check if this is exhaustiv
         genome_fai_file = 'TestFlankingRegion/single_contig/single_contig_1200N.fasta.fai'
         flanking_return = search_insertion_sites.examine_flanking_regions(primer_hit_dict, 21, genome_fai_file)
 
-        self.assertEqual(3, flanking_return)
+        self.assertEqual(2, flanking_return)
 
     def test_single_hits_multiple_contigs_overlap_across_contig(self):
         ''' Test that seed sequences from a pair can be connected across the gap between contigs, if given appropriate max distance '''
@@ -714,7 +738,7 @@ class TestFlankingRegion(unittest.TestCase): # TODO - check if this is exhaustiv
         genome_fai_file = 'TestFlankingRegion/double_contig/double_contig.fasta.fai'
         flanking_return = search_insertion_sites.examine_flanking_regions(primer_hit_dict, 101, genome_fai_file)
 
-        self.assertEqual(6, flanking_return)
+        self.assertEqual('4B', flanking_return)
 
     def test_single_hits_multiple_contigs_no_end_reaced(self):
         ''' Test that given a too little max distance with two seed sequences on separate contigs the correct evidence level is returned  '''
@@ -723,7 +747,7 @@ class TestFlankingRegion(unittest.TestCase): # TODO - check if this is exhaustiv
         genome_fai_file = 'TestFlankingRegion/double_contig/double_contig.fasta.fai'
         flanking_return = search_insertion_sites.examine_flanking_regions(primer_hit_dict, 100, genome_fai_file)
 
-        self.assertEqual(2, flanking_return)
+        self.assertEqual(1, flanking_return)
 
     def test_single_hits_multiple_contigs_all_ends_reaced(self):
         ''' Test that given a too large max distance with two seed sequences on separate contigs returns the correct evidence level '''
@@ -732,7 +756,7 @@ class TestFlankingRegion(unittest.TestCase): # TODO - check if this is exhaustiv
         genome_fai_file = 'TestFlankingRegion/double_contig/double_contig.fasta.fai'
         flanking_return = search_insertion_sites.examine_flanking_regions(primer_hit_dict, 10000, genome_fai_file)
 
-        self.assertEqual(3, flanking_return)
+        self.assertEqual(2, flanking_return)
 
     def test_single_hits_multiple_contigs_two_and_one_ends_reaced(self):
         ''' Test the outcome with two seed sequences on seperate contigs, with max distance reaching one end or two ends of contig, depending on seed sequence'''
@@ -741,7 +765,7 @@ class TestFlankingRegion(unittest.TestCase): # TODO - check if this is exhaustiv
         genome_fai_file = 'TestFlankingRegion/double_contig/double_contig.fasta.fai'
         flanking_return = search_insertion_sites.examine_flanking_regions(primer_hit_dict, 300, genome_fai_file)
 
-        self.assertEqual(4, flanking_return)
+        self.assertEqual(2, flanking_return)
 
     def test_single_hits_single_contig_w_multiple_overlaps_w_ends(self):
         ''' Test that two SS that overlap with one reaching an end gives the correct evidence level '''
@@ -750,7 +774,7 @@ class TestFlankingRegion(unittest.TestCase): # TODO - check if this is exhaustiv
         genome_fai_file = 'TestFlankingRegion/single_contig/single_contig_1200N.fasta.fai'
         flanking_return = search_insertion_sites.examine_flanking_regions(primer_hit_dict, 351, genome_fai_file)
 
-        self.assertEqual(3, flanking_return)
+        self.assertEqual(2, flanking_return)
 
 # TODO - examine and write a test for Chaw's problem.
 # TODO - test warning return - if you can figure out how to do it ;-)
@@ -781,7 +805,7 @@ class TestBedMergeHandling(unittest.TestCase):
         include_primers = False
         exclude_primer_list = ['TestBedMergeHandling/Contig_1~~simple_connect_exclude_primers_file.bed']
         max_primer_dist = 101
-        primer_evidence = {'simple_connect': 7}
+        primer_evidence = {'simple_connect': '5A'}
 
         merged_bed_files, primer_evidence = search_insertion_sites.bed_merge_handling(blast_hit_beds,
                                                   include_primers,
@@ -789,7 +813,7 @@ class TestBedMergeHandling(unittest.TestCase):
                                                   max_primer_dist,
                                                   primer_evidence)
 
-        self.assertEqual(8, primer_evidence['simple_connect'])
+        self.assertEqual('5B', primer_evidence['simple_connect'])
 
         with open(merged_bed_files[0], 'r') as result:
             self.assertEqual(['Contig_1\t600\t700\tsimple_connect_1,simple_connect_2\t2\n'], result.readlines())
@@ -797,12 +821,12 @@ class TestBedMergeHandling(unittest.TestCase):
         os.remove('TestBedMergeHandling/Contig_1~~simple_connect_merged.bed')
 
     def test_single_connection_of_seed_sequences_include_primers(self):
-        ''' Test merge of two seed sequnces on single contig with inclution of seed seqeunces '''
+        ''' Test merge of two seed sequences on single contig with inclution of seed seqeunces '''
         blast_hit_beds = ['TestBedMergeHandling/Contig_1~~simple_connect.bed']
         include_primers = True
         exclude_primer_list = ['TestBedMergeHandling/Contig_1~~simple_connect_exclude_primers_file.bed']
         max_primer_dist = 101
-        primer_evidence = {'simple_connect': 7}
+        primer_evidence = {'simple_connect': '5B'}
 
         merged_bed_files, primer_evidence = search_insertion_sites.bed_merge_handling(blast_hit_beds,
                                                   include_primers,
@@ -810,7 +834,7 @@ class TestBedMergeHandling(unittest.TestCase):
                                                   max_primer_dist,
                                                   primer_evidence)
 
-        self.assertEqual(8, primer_evidence['simple_connect'])
+        self.assertEqual('5B', primer_evidence['simple_connect'])
 
         with open(merged_bed_files[0], 'r') as result:
             self.assertEqual(['Contig_1\t500\t800\tsimple_connect_1,simple_connect_2\t2\n'], result.readlines())
@@ -818,12 +842,12 @@ class TestBedMergeHandling(unittest.TestCase):
         os.remove('TestBedMergeHandling/Contig_1~~simple_connect_merged.bed')
 
     def test_overlap_connection_of_seed_sequences_exclude_primers(self):
-        ''' Test merge of seed seqeunces that are already overlapping and exclude the primers '''
+        ''' Test merge of seed sequences that are already overlapping and exclude the primers '''
         blast_hit_beds = ['TestBedMergeHandling/Contig_1~~overlap_connect.bed']
         include_primers = False
         exclude_primer_list = ['TestBedMergeHandling/Contig_1~~overlap_connect_exclude_primers_file.bed']
         max_primer_dist = 101
-        primer_evidence = {'overlap_connect': 7}
+        primer_evidence = {'overlap_connect': '5B'}
 
         merged_bed_files, primer_evidence = search_insertion_sites.bed_merge_handling(blast_hit_beds,
                                                   include_primers,
@@ -831,7 +855,7 @@ class TestBedMergeHandling(unittest.TestCase):
                                                   max_primer_dist,
                                                   primer_evidence)
 
-        self.assertEqual(9000, primer_evidence['overlap_connect'])
+        self.assertEqual(3, primer_evidence['overlap_connect'])
 
     def test_overlap_connection_of_seed_sequences_include_primers(self):
         ''' test the merge of already overlapping seed sequence and include the primers '''
@@ -847,14 +871,14 @@ class TestBedMergeHandling(unittest.TestCase):
                                                   max_primer_dist,
                                                   primer_evidence)
 
-        self.assertEqual(8, primer_evidence['overlap_connect'])
+        self.assertEqual('5B', primer_evidence['overlap_connect'])
 
         with open(merged_bed_files[0], 'r') as result:
             self.assertEqual(['Contig_1\t500\t800\toverlap_connect_1,overlap_connect_2\t2\n'], result.readlines())
 
         os.remove('TestBedMergeHandling/Contig_1~~overlap_connect_merged.bed')
 
-    def test_merge_with_primer_on_contig_edge_exclude_primer(self): # TODO!!! This test is depending on whether or not an additional evidence level is to be constructed.
+    def test_merge_with_primer_on_contig_edge_exclude_primer(self):
         # TODO - Use to test the implementation of the new evidence levels
         ''' Test the merge of primers where one primer falls on the edge of a contig '''
         blast_hit_beds = ['TestBedMergeHandling/double_contig~~primer_edge_placement.bed']
@@ -869,14 +893,12 @@ class TestBedMergeHandling(unittest.TestCase):
                                                                                       max_primer_dist,
                                                                                       primer_evidence)
 
-        # self.assertEqual(8, primer_evidence['overlap_connect'])
-        print(primer_evidence)
-        print(merged_bed_files)
+        self.assertEqual(4, primer_evidence['primer_edge_placement'])
 
-        # with open(merged_bed_files[0], 'r') as result:
-        #     self.assertEqual(['Contig_1\t500\t800\toverlap_connect_1,overlap_connect_2\t2\n'], result.readlines())
+        with open(merged_bed_files[0], 'r') as result:
+            self.assertEqual(['Contig_2\t0\t100\tprimer_edge_placement_2\t1\n'], result.readlines())
 
-        # os.remove('TestBedMergeHandling/Contig_1~~overlap_connect_merged.bed')
+        os.remove('TestBedMergeHandling/double_contig~~primer_edge_placement_merged.bed')
 
 
 class TestExtractSeqsNAnnots(unittest.TestCase):

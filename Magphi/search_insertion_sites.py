@@ -166,7 +166,7 @@ def examine_flanking_regions(primer_contig_hits, max_primer_dist, genome_file, b
     '''
     # If no limits are given and only one contig is hit then no pairs can be predicted
     if max_primer_dist == 0:
-        return 3
+        return 2
 
     # If limits are given then check overlap of primers, if they are only found on one contig
     elif len(primer_contig_hits) == 1 and max_primer_dist > 0:
@@ -235,13 +235,13 @@ def examine_flanking_regions(primer_contig_hits, max_primer_dist, genome_file, b
         num_interactions = sum(num_interactions)
 
         if num_interactions == 0:
-            return 2
+            return 1
 
         elif num_interactions == 1:
             # Check if primers reach end of contigs
             end_reaches, *_ = primer_reach_contig_end_calc(genome_file, max_primer_dist, primer_contig_hits)
             if sum(end_reaches) > 0:
-                return 3
+                return 2
 
             interaction_indexes = []
             # Get index of the interaction between primers
@@ -255,32 +255,32 @@ def examine_flanking_regions(primer_contig_hits, max_primer_dist, genome_file, b
             interaction_primers = [intervals[index][:4] for index in interaction_indexes]
             # Write the bed file from the list of primers
             write_bed_from_list_of_primers(interaction_primers, bed_file_name)
-            return 5
+            return '5B'
 
         elif num_interactions > 1:
-            return 3
+            return 2
 
     else:
         end_reaches, end_sums, end_reached_matrix, intervals = primer_reach_contig_end_calc(genome_file, max_primer_dist, primer_contig_hits)
 
         # See if no ends has been reached
         if end_reaches[0] == 0 and end_reaches[1] == 0:
-            return 2
+            return 1
 
         # Check if one primer has reached one or both ends, while the other has reached no ends. # TODO - should this be handled differently? is it in line with evidence levels? Should the evidence level be changed for this?
         elif (end_reaches[0] == 1 and end_reaches[1] == 0) or (end_reaches[0] == 0 and end_reaches[1] == 1):
-            return 6 # TODO Discuss the evidence level of this. - Maybe 2?
+            return 6 # TODO Discuss the evidence level of this. - Maybe 2? # - test
 
-            # Check if
+        # Check if
         # two or more primers hit both ends of their contig (end_reaches[0] > 1) or
         # three or more primers all hit one end of their contig (end_reaches[1] > 2) or
         # one primer reaches two ends and two primers reaches one end each (end_reaches[0] == 1 and end_reaches[1] == 2)
         elif end_reaches[0] > 1 or end_reaches[1] > 2 or (end_reaches[0] == 1 and end_reaches[1] == 2):
-            return 3
+            return 2
 
         # Check if one primer has reached both ends and one primer has reached one end
         elif end_reaches[1] == 1 and end_reaches[0] == 1:
-            return 4
+            return 2
 
         # Check if two primers have reached one end.
         elif end_reaches[1] == 2:
@@ -320,7 +320,7 @@ def examine_flanking_regions(primer_contig_hits, max_primer_dist, genome_file, b
 
             # Write out new .bed file with only the extended primers.
             write_bed_from_list_of_primers(extended_primers, bed_file_name)
-            return 6
+            return '4B'
 
         else:
             # TODO - add what the tmp folder ends up being named.
@@ -397,23 +397,23 @@ def check_primers_placement(bed_files, primer_pairs, primer_hits, max_primer_dis
 
                         # Record the return value as evidence (3 = multiple overlaps)
                         # 2 or 4 means more examination is required
-                        if return_value == 3:
+                        if return_value == 2:
                             primer_hit_support_dict[primer_name] = return_value
-                        elif return_value == 2 or return_value == 4:
+                        elif return_value == 1 or return_value == 4:
                             # Examine the remaining junctions to see if two primers can be found to connect across contigs
                             primer_hit_support_dict[primer_name] = examine_flanking_regions(primer_to_contig,
                                                                                             max_primer_dist,
                                                                                             f'{genome_file}.fai',
                                                                                             file)
-                        elif return_value == 5:
+                        elif return_value == '5B':
                             primer_hit_support_dict[primer_name] = return_value
                             alternative_return_value = examine_flanking_regions(primer_to_contig,
                                                                                 max_primer_dist,
                                                                                 f'{genome_file}.fai',
                                                                                 file+'_6')
 
-                            if alternative_return_value == 6: # ADD alternative value 3?
-                                primer_hit_support_dict[primer_name] = 3
+                            if alternative_return_value == '4B': # ADD alternative value 3?
+                                primer_hit_support_dict[primer_name] = 2
                                 os.remove(file+'_5')
                                 try:
                                     os.remove(file + '_6')
@@ -427,22 +427,22 @@ def check_primers_placement(bed_files, primer_pairs, primer_hits, max_primer_dis
                         else:
                             sys.exit(100)
                 else:
-                    # Examine the primer hits across different contigs
-                    primer_hit_support_dict[primer_name] = examine_flanking_regions(primer_to_contig,
-                                                                                    max_primer_dist,
-                                                                                    f'{genome_file}.fai',
-                                                                                    file)
+                    # Examine the primer hits across different contigs ***
+                    return_value = examine_flanking_regions(primer_to_contig,
+                                                            max_primer_dist,
+                                                            f'{genome_file}.fai',
+                                                            file)
+
+                    if return_value == 1 and primer_hits[primer_name] == 2 and uniq_primers == 2:
+                        primer_hit_support_dict[primer_name] = '4A'
+                    else:
+                        primer_hit_support_dict[primer_name] = return_value
 
             else:
-                # # Find number of different primers that hit the contig
-                # # Get the hits
-                # primer_bed_lines = primer_to_contig[list(primer_to_contig.keys())[0]]
-                # uniq_primers = len(set([hit[3] for hit in primer_bed_lines]))
-
                 # Check if precisely two primers hit the contig and that the mates from the pair hit one time each
                 if primer_hits[primer_name] == 2 and uniq_primers == 2:
                     # Score primer hit
-                    primer_hit_support_dict[primer_name] = 7
+                    primer_hit_support_dict[primer_name] = '5A' # TODO - POSSIBLY WRONG - WAS 7
 
                 # Check if two unique primers hit, but one/both may have hit multiple times
                 elif primer_hits[primer_name] > 2 and uniq_primers == 2:
@@ -454,14 +454,14 @@ def check_primers_placement(bed_files, primer_pairs, primer_hits, max_primer_dis
                 # Check that only one primer has hit, but it has hit multiple times
                 elif uniq_primers == 1:
                     # Score primer hit
-                    primer_hit_support_dict[primer_name] = 1
+                    primer_hit_support_dict[primer_name] = 0
                 else:
                     raise NotImplementedError(f'Some unaccounted for constalation of primers hits '
                                               f'was found to hit a single contig.\n'
                                               f'The primer pair in question is {primer_name} in genome {genome_file}.\n'
                                               f'Please report this along with the following: {primer_bed_lines}')
         else:
-            primer_hit_support_dict[primer_name] = 1
+            primer_hit_support_dict[primer_name] = 0
 
     return genome_file, primer_hit_support_dict
 
@@ -474,6 +474,11 @@ def bed_merge_handling(blast_hit_beds, include_primers, exclude_primer_list, max
     for i, bed_file in enumerate(blast_hit_beds):
         primer_hits = bedtools.BedTool(bed_file)
 
+        # Get name of primer
+        split_bed_name = bed_file.rsplit('/', 1)[-1]
+        split_bed_name = split_bed_name.replace('.bed', '')
+        primer_name = split_bed_name.rsplit('~~', 1)[-1]
+
         # Check if max distance between primers is set to unlimited (0)
         if max_primer_dist == 0:
             max_primer_dist = 9999999999
@@ -482,19 +487,13 @@ def bed_merge_handling(blast_hit_beds, include_primers, exclude_primer_list, max
         if len(primer_hits) > 0:
             primer_hits = primer_hits.merge(c=[4, 4], o='collapse,count', d=max_primer_dist)
         else:
-            split_bed_name = bed_file.rsplit('/', 1)[-1]
-            split_bed_name = split_bed_name.replace('.bed', '')
-            primer_name = split_bed_name.rsplit('~~', 1)[-1]
             primer_evidence[primer_name] = 0
             continue
 
         # Check if the evidence level for the primers should increase due to primers being merged.
         # Check that there is one line and that two primers have been merged and not just one primer hit
         if len(primer_hits) == 1 and int(primer_hits[0][4]) == 2:
-            split_bed_name = bed_file.rsplit('/', 1)[-1]
-            split_bed_name = split_bed_name.replace('.bed', '')
-            primer_name = split_bed_name.rsplit('~~', 1)[-1]
-            primer_evidence[primer_name] = 8
+            primer_evidence[primer_name] = '5B'
 
         # Evaluate if primers are to be excluded from the intervals
         # TODO - Can be problematic if the primer hits the end of a contig, then the primer will be removed. Either make the user aware that a primer is found on the edge of a contig and only extract sequences that have somthing between it and the contig break or other soluton.
@@ -502,10 +501,13 @@ def bed_merge_handling(blast_hit_beds, include_primers, exclude_primer_list, max
             # Load bed containing primers to be excluded
             exclusion_bed = bedtools.BedTool(exclude_primer_list[i])
 
+            pre_deletion_intervals = len(primer_hits)
+
             # Remove the primer intervals
             primer_hits = primer_hits.subtract(exclusion_bed)
 
-            # TODO - should there be an evidene level for a primer that is found on the edge of a contig and thus being removed when primers are not included.
+            if pre_deletion_intervals > len(primer_hits):
+                primer_evidence[primer_name] = 4
 
         # Save the merged intervals
         # Construct name
@@ -519,10 +521,7 @@ def bed_merge_handling(blast_hit_beds, include_primers, exclude_primer_list, max
             # Add to list
             merged_bed_files.append(merged_bed_file)
         else:
-            split_bed_name = bed_file.rsplit('/', 1)[-1]
-            split_bed_name = split_bed_name.replace('.bed', '')
-            primer_name = split_bed_name.rsplit('~~', 1)[-1]
-            primer_evidence[primer_name] = 9000 # TODO - Change and describe the evidence level of then primers overlap and are excluded resulting in no interval to extract.
+            primer_evidence[primer_name] = 3
 
     return merged_bed_files, primer_evidence
 

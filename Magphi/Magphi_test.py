@@ -17,6 +17,7 @@ from Magphi import primer_handling
 from Magphi import search_insertion_sites
 from Magphi import wrangle_outputs
 from Magphi import write_output_csv
+from Magphi import exit_with_error
 # pylint: disable=E1133
 
 from io import StringIO
@@ -30,19 +31,21 @@ except FileNotFoundError:
     os.chdir('../unit_test_data/')
 
 
-class TestCommandLineHelpCalls(unittest.TestCase):
-    '''Unit test for the commandline interface'''
-    def test_no_input(self):
-        with self.assertRaises(SystemExit):
-            commandline_interface.get_commandline_arguments([], 1)
+class TestExitWithError(unittest.TestCase):
+    def test_exit_w_tmp_folder_deletion(self):
+        ''' Test the exit function is able to remove the temporary folder '''
+        tmp_folder = 'TestExitWithError/tmp_folder'
+        tmp_folder_copy = 'TestExitWithError/tmp_folder_copy'
+        os.mkdir(tmp_folder_copy)
 
-    def test_single_dash_help(self):
-        with self.assertRaises(SystemExit):
-            commandline_interface.get_commandline_arguments('-help', 1)
+        tmp_files = os.listdir(tmp_folder)
+        for file in tmp_files:
+            copyfile(os.path.join(tmp_folder, file), os.path.join(tmp_folder_copy, file))
 
-    def test_unrecognised_argument_exit(self):
         with self.assertRaises(SystemExit):
-            commandline_interface.get_commandline_arguments(['-p', 'test.file', '-g', 'test.file', '--none'], 1)
+            exit_with_error.exit_with_error(exit_status=2, message='test msg', tmp_folder=tmp_folder)
+
+        os.rename(tmp_folder_copy, tmp_folder)
 
 
 class TestFileRecognition(unittest.TestCase):
@@ -564,6 +567,7 @@ class TestPrimersPlacement(unittest.TestCase): # TODO - check if this is exhaust
 
 class TestPrimerReachContigEndCalculation(unittest.TestCase):
     def test_no_ends_reached(self):
+        ''' Test for a situation where no ends of contigs are reached by primers '''
         genome_file_fai = 'TestPrimerReachContigEndCalculation/single_contig_1200N.fasta.fai'
         max_distance = 1
         primer_contig_hits = {'Contig_1': [['Contig_1', 500, 600, 'Primer_1'], ['Contig_1', 600, 700, 'Primer_2']]}
@@ -577,6 +581,7 @@ class TestPrimerReachContigEndCalculation(unittest.TestCase):
         self.assertEqual([['Contig_1', 500, 600, 'Primer_1', '0'], ['Contig_1', 600, 700, 'Primer_2', '1']], intervals)
 
     def test_single_3_prime_end_reached(self):
+        ''' test for a single contig that reach only the 3' of a contig. '''
         genome_file_fai = 'TestPrimerReachContigEndCalculation/single_contig_1200N.fasta.fai'
         max_distance = 500
         primer_contig_hits = {'Contig_1': [['Contig_1', 500, 600, 'Primer_1'], ['Contig_1', 600, 700, 'Primer_2']]}
@@ -590,6 +595,7 @@ class TestPrimerReachContigEndCalculation(unittest.TestCase):
         self.assertEqual([['Contig_1', 500, 600, 'Primer_1', '0'], ['Contig_1', 600, 700, 'Primer_2', '1']], intervals)
 
     def test_single_5_prime_end_reached(self):
+        ''' Test for a single seed sequence that each the 5' of a contig. '''
         genome_file_fai = 'TestPrimerReachContigEndCalculation/single_contig_1200N.fasta.fai'
         max_distance = 451
         primer_contig_hits = {'Contig_1': [['Contig_1', 450, 600, 'Primer_1'], ['Contig_1', 600, 650, 'Primer_2']]}
@@ -603,6 +609,7 @@ class TestPrimerReachContigEndCalculation(unittest.TestCase):
         self.assertEqual([['Contig_1', 450, 600, 'Primer_1', '0'], ['Contig_1', 600, 650, 'Primer_2', '1']], intervals)
 
     def test_single_seed_sequence_reach_both_ends(self):
+        ''' Test for a seed sequence that reach both ends of a contig '''
         genome_file_fai = 'TestPrimerReachContigEndCalculation/single_contig_1200N.fasta.fai'
         max_distance = 451
         primer_contig_hits = {'Contig_1': [['Contig_1', 450, 750, 'Primer_1'], ['Contig_1', 600, 650, 'Primer_2']]}
@@ -616,6 +623,7 @@ class TestPrimerReachContigEndCalculation(unittest.TestCase):
         self.assertEqual([['Contig_1', 450, 750, 'Primer_1', '0'], ['Contig_1', 600, 650, 'Primer_2', '1']], intervals)
 
     def test_single_seed_sequence_reach_both_ends_n_seed_seqeunce_with_one_reach(self):
+        ''' Test case of seed sequences that reach differing number of ends of contigs. '''
         genome_file_fai = 'TestPrimerReachContigEndCalculation/single_contig_1200N.fasta.fai'
         max_distance = 451
         primer_contig_hits = {'Contig_1': [['Contig_1', 450, 750, 'Primer_1'], ['Contig_1', 600, 750, 'Primer_2']]}
@@ -629,6 +637,7 @@ class TestPrimerReachContigEndCalculation(unittest.TestCase):
         self.assertEqual([['Contig_1', 450, 750, 'Primer_1', '0'], ['Contig_1', 600, 750, 'Primer_2', '1']], intervals)
 
     def test_two_seed_sequence_reach_both_ends(self):
+        ''' Test that two seed sequences that reach both ends are correctly identified '''
         genome_file_fai = 'TestPrimerReachContigEndCalculation/single_contig_1200N.fasta.fai'
         max_distance = 1000
         primer_contig_hits = {'Contig_1': [['Contig_1', 450, 750, 'Primer_1'], ['Contig_1', 600, 750, 'Primer_2']]}
@@ -743,14 +752,14 @@ class TestFlankingRegion(unittest.TestCase): # TODO - check if this is exhaustiv
 
         self.assertEqual(3, flanking_return)
 
-    # TODO - examine and write a test for Chaw's problem.
-
-    # TODO - test warning return - if you can figure out how to do it ;-)
+# TODO - examine and write a test for Chaw's problem.
+# TODO - test warning return - if you can figure out how to do it ;-)
 
 
 class TestWriteBedFromPrimers(unittest.TestCase):
 
     def test_writing_two_primers(self):
+        ''' Test function for writing a bed file from a set of primers '''
         list_of_primers = [['Contig_1', '500', '600', 'Primer_1'], ['Contig_1', '600', '700', 'Primer_2']]
         bed_file_name = 'TestWriteBedFromPrimers/unit_test_file.bed'
 
@@ -767,14 +776,15 @@ class TestWriteBedFromPrimers(unittest.TestCase):
 
 class TestBedMergeHandling(unittest.TestCase):
     def test_single_connection_of_seed_sequences_exclude_primers(self):
+        ''' Test the merge of two seed sequences on single contig and exclude primers '''
         blast_hit_beds = ['TestBedMergeHandling/Contig_1~~simple_connect.bed']
-        exclude_primers = True
+        include_primers = False
         exclude_primer_list = ['TestBedMergeHandling/Contig_1~~simple_connect_exclude_primers_file.bed']
         max_primer_dist = 101
         primer_evidence = {'simple_connect': 7}
 
         merged_bed_files, primer_evidence = search_insertion_sites.bed_merge_handling(blast_hit_beds,
-                                                  exclude_primers,
+                                                  include_primers,
                                                   exclude_primer_list,
                                                   max_primer_dist,
                                                   primer_evidence)
@@ -787,14 +797,15 @@ class TestBedMergeHandling(unittest.TestCase):
         os.remove('TestBedMergeHandling/Contig_1~~simple_connect_merged.bed')
 
     def test_single_connection_of_seed_sequences_include_primers(self):
+        ''' Test merge of two seed sequnces on single contig with inclution of seed seqeunces '''
         blast_hit_beds = ['TestBedMergeHandling/Contig_1~~simple_connect.bed']
-        exclude_primers = False
+        include_primers = True
         exclude_primer_list = ['TestBedMergeHandling/Contig_1~~simple_connect_exclude_primers_file.bed']
         max_primer_dist = 101
         primer_evidence = {'simple_connect': 7}
 
         merged_bed_files, primer_evidence = search_insertion_sites.bed_merge_handling(blast_hit_beds,
-                                                  exclude_primers,
+                                                  include_primers,
                                                   exclude_primer_list,
                                                   max_primer_dist,
                                                   primer_evidence)
@@ -806,15 +817,16 @@ class TestBedMergeHandling(unittest.TestCase):
 
         os.remove('TestBedMergeHandling/Contig_1~~simple_connect_merged.bed')
 
-    def test_overlap_connection_of_seed_sequences_exclude_primers(self): # TODO
+    def test_overlap_connection_of_seed_sequences_exclude_primers(self):
+        ''' Test merge of seed seqeunces that are already overlapping and exclude the primers '''
         blast_hit_beds = ['TestBedMergeHandling/Contig_1~~overlap_connect.bed']
-        exclude_primers = True
+        include_primers = False
         exclude_primer_list = ['TestBedMergeHandling/Contig_1~~overlap_connect_exclude_primers_file.bed']
         max_primer_dist = 101
         primer_evidence = {'overlap_connect': 7}
 
         merged_bed_files, primer_evidence = search_insertion_sites.bed_merge_handling(blast_hit_beds,
-                                                  exclude_primers,
+                                                  include_primers,
                                                   exclude_primer_list,
                                                   max_primer_dist,
                                                   primer_evidence)
@@ -822,14 +834,15 @@ class TestBedMergeHandling(unittest.TestCase):
         self.assertEqual(9000, primer_evidence['overlap_connect'])
 
     def test_overlap_connection_of_seed_sequences_include_primers(self):
+        ''' test the merge of already overlapping seed sequence and include the primers '''
         blast_hit_beds = ['TestBedMergeHandling/Contig_1~~overlap_connect.bed']
-        exclude_primers = False
+        include_primers = True
         exclude_primer_list = ['TestBedMergeHandling/Contig_1~~overlap_connect_exclude_primers_file.bed']
         max_primer_dist = 101
         primer_evidence = {'overlap_connect': 7}
 
         merged_bed_files, primer_evidence = search_insertion_sites.bed_merge_handling(blast_hit_beds,
-                                                  exclude_primers,
+                                                  include_primers,
                                                   exclude_primer_list,
                                                   max_primer_dist,
                                                   primer_evidence)
@@ -840,6 +853,30 @@ class TestBedMergeHandling(unittest.TestCase):
             self.assertEqual(['Contig_1\t500\t800\toverlap_connect_1,overlap_connect_2\t2\n'], result.readlines())
 
         os.remove('TestBedMergeHandling/Contig_1~~overlap_connect_merged.bed')
+
+    def test_merge_with_primer_on_contig_edge_exclude_primer(self): # TODO!!! This test is depending on whether or not an additional evidence level is to be constructed.
+        # TODO - Use to test the implementation of the new evidence levels
+        ''' Test the merge of primers where one primer falls on the edge of a contig '''
+        blast_hit_beds = ['TestBedMergeHandling/double_contig~~primer_edge_placement.bed']
+        include_primers = False
+        exclude_primer_list = ['TestBedMergeHandling/double_contig~~primer_edge_primers.bed']
+        max_primer_dist = 101
+        primer_evidence = {'primer_edge_placement': 6}
+
+        merged_bed_files, primer_evidence = search_insertion_sites.bed_merge_handling(blast_hit_beds,
+                                                                                      include_primers,
+                                                                                      exclude_primer_list,
+                                                                                      max_primer_dist,
+                                                                                      primer_evidence)
+
+        # self.assertEqual(8, primer_evidence['overlap_connect'])
+        print(primer_evidence)
+        print(merged_bed_files)
+
+        # with open(merged_bed_files[0], 'r') as result:
+        #     self.assertEqual(['Contig_1\t500\t800\toverlap_connect_1,overlap_connect_2\t2\n'], result.readlines())
+
+        # os.remove('TestBedMergeHandling/Contig_1~~overlap_connect_merged.bed')
 
 
 class TestExtractSeqsNAnnots(unittest.TestCase):
@@ -1115,6 +1152,7 @@ class TestPartitionOutputs(unittest.TestCase):
         os.remove('TestPartitionOutputs/file.txt')
 
     def tearDown(self):
+        ''' Class to remove the mock output files and folders '''
         for primer in self.primers:
             work_dir = os.path.join('TestPartitionOutputs', primer)
             for file in os.listdir(work_dir):
@@ -1123,6 +1161,7 @@ class TestPartitionOutputs(unittest.TestCase):
             os.rmdir(work_dir)
 
     def test_partitioning_of_output_fasta_files(self):
+        ''' Test that the function for partitioning fasta outputs into separate folder is working as intended '''
         unittest_data_dir = 'TestPartitionOutputs'
         # Construct files to be sorted
         for primer in self.random_fastas:
@@ -1151,6 +1190,7 @@ class TestPartitionOutputs(unittest.TestCase):
         self.assertTrue(all(file_presence))
 
     def test_partitioning_of_output_gff_files(self):
+        ''' Test that the function for partitioning gff outputs into separate folder is working as intended '''
         unittest_data_dir = 'TestPartitionOutputs'
         # Construct files to be sorted
         for primer in self.random_gffs:
@@ -1178,6 +1218,7 @@ class TestPartitionOutputs(unittest.TestCase):
         self.assertTrue(all(file_presence))
 
     def test_partitioning_of_output_break_files(self):
+        ''' Test that the function for partitioning break outputs into separate folder is working as intended '''
         unittest_data_dir = 'TestPartitionOutputs'
         # Construct files to be sorted
         for primer in self.random_breaks:
@@ -1206,6 +1247,7 @@ class TestPartitionOutputs(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
+        ''' Write a placeholder file in the folder until next test '''
         with open('TestPartitionOutputs/file.txt', 'w'):
             pass
 
@@ -1225,6 +1267,7 @@ class TestWritingOutputFiles(unittest.TestCase):
         os.remove('TestWritingOutputFiles/primer_pairing.tsv')
 
     def test_writing_write_primer_hit_matrix(self):
+        ''' Test the function for writing output for the number of hits by each seed sequence in the genome '''
         master_primer_hits = {'genome_1': {'genome': 'genome_1',
                                            'primer_1': 2,
                                            'primer_2': 4},
@@ -1244,6 +1287,7 @@ class TestWritingOutputFiles(unittest.TestCase):
         os.remove('TestWritingOutputFiles/contig_hit_matrix.csv')
 
     def test_writing_annotation_matrix(self):
+        ''' Test the function for writing output for the number of annotations found in the region of interest '''
         master_annotation_hits = {'genome_1': {'genome': 'genome_1',
                                            'primer_1': 2,
                                            'primer_2': 4},
@@ -1263,6 +1307,7 @@ class TestWritingOutputFiles(unittest.TestCase):
         os.remove('TestWritingOutputFiles/annotation_num_matrix.csv')
 
     def test_writing_primer_evidence(self):
+        ''' Test the function for writing output for evidence levels for each seed sequence pair '''
         master_primer_evidence = {'genome_1': {'genome': 'genome_1',
                                            'primer_1': 2,
                                            'primer_2': 4},
@@ -1282,6 +1327,7 @@ class TestWritingOutputFiles(unittest.TestCase):
         os.remove('TestWritingOutputFiles/master_primer_evidence.csv')
 
     def test_writing_inter_primer_distance(self):
+        ''' Test the function for writing output for the distance between connected seed sequences '''
         master_inter_primer_dist = {'genome_1': {'genome': 'genome_1',
                                                'primer_1': 2,
                                                'primer_2': 4},

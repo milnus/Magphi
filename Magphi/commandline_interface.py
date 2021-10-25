@@ -3,7 +3,7 @@ import sys
 
 EXIT_COMMAND_LINE_ERROR = 2
 
-
+# TODO - Change all primer mentions to seed seqeunce
 # def get_commandline_arguments(args, version):
 def get_commandline_arguments(args, version):
     ''' Parse command line arguments.
@@ -38,8 +38,8 @@ def get_commandline_arguments(args, version):
                              '[default: primers are removed]',
                         dest='include_primers',
                         required=False,
-                        action='store_false',
-                        default=True) #TODO - Should it be dest: include primers, default: True is that not backwards?
+                        action='store_true',
+                        default=False)
 
     parser.add_argument('-md',
                         '--max_primer_distance',

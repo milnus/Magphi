@@ -13,7 +13,15 @@ import pybedtools as bedtools
 # pylint: disable=E1123
 
 
-def blast_insertion_site(primers, genome_db, tmp_name):
+def blast_insertion_site(primers, genome_file, tmp_name):
+    # Construct genome_db path and name
+    genome_db = f'{genome_file}_tmp_db'
+    # Make blast database command for given genome
+    c_line_makedb = NcbimakeblastdbCommandline(dbtype='nucl', input_file=genome_file, out=genome_db)
+
+    # Run makeblastdb in command line
+    c_line_makedb()
+
     blast_out_xml = f'{tmp_name}.xml'
     c_line = NcbiblastnCommandline(query=primers,
                                    db=genome_db,
@@ -24,6 +32,11 @@ def blast_insertion_site(primers, genome_db, tmp_name):
 
     # Run the blast command in commandline blast
     c_line()
+
+    # Delete blast database
+    file_list = glob.glob(f'{genome_file}_tmp_db.*')
+    for file in file_list:
+        os.remove(file)
 
     return blast_out_xml
 
@@ -80,7 +93,7 @@ def blast_out_to_sorted_bed(blast_xml_output, include_primers, genome_name, prim
         sorted_bed.saveas(bed_name)
 
         # Check if primers are to be excluded, if then copy primer bed to be used later in bedtools intersect
-        if include_primers:
+        if not include_primers:
             copyfile(f'{genome_name}~~{primer_pair}.bed', f'{genome_name}~~{primer_pair}_primers.bed')
             exclusion_list.append(f'{genome_name}~~{primer_pair}_primers.bed')
 
@@ -148,7 +161,7 @@ def examine_flanking_regions(primer_contig_hits, max_primer_dist, genome_file, b
     :param primer_contig_hits: dict with each key being a contig and values being a list of seed sequence hit on contigs as lists
     :param max_primer_dist: int for the maximum distance allowed between seed sequenes
     :param genome_file: .fai (fasta-index) of a genome used as info on contig sizes
-    :param bed_file_name: GOOD QUESTION # TODO - what does it do?
+    :param bed_file_name: Used for saving updated BED file with coordinates
     :return: Evidence level for a set of seed seuqences that have hit the genome.
     '''
     # If no limits are given and only one contig is hit then no pairs can be predicted
@@ -225,8 +238,8 @@ def examine_flanking_regions(primer_contig_hits, max_primer_dist, genome_file, b
             return 2
 
         elif num_interactions == 1:
-            #TODO - Check that primers do not reach the end of the contig. - combined with below calucaltion?
-            end_reaches, *_ = primer_reach_contig_end_calc(genome_file,max_primer_dist, primer_contig_hits)
+            # Check if primers reach end of contigs
+            end_reaches, *_ = primer_reach_contig_end_calc(genome_file, max_primer_dist, primer_contig_hits)
             if sum(end_reaches) > 0:
                 return 3
 
@@ -254,7 +267,11 @@ def examine_flanking_regions(primer_contig_hits, max_primer_dist, genome_file, b
         if end_reaches[0] == 0 and end_reaches[1] == 0:
             return 2
 
-        # Check if
+        # Check if one primer has reached one or both ends, while the other has reached no ends. # TODO - should this be handled differently? is it in line with evidence levels? Should the evidence level be changed for this?
+        elif (end_reaches[0] == 1 and end_reaches[1] == 0) or (end_reaches[0] == 0 and end_reaches[1] == 1):
+            return 6 # TODO Discuss the evidence level of this. - Maybe 2?
+
+            # Check if
         # two or more primers hit both ends of their contig (end_reaches[0] > 1) or
         # three or more primers all hit one end of their contig (end_reaches[1] > 2) or
         # one primer reaches two ends and two primers reaches one end each (end_reaches[0] == 1 and end_reaches[1] == 2)
@@ -263,11 +280,7 @@ def examine_flanking_regions(primer_contig_hits, max_primer_dist, genome_file, b
 
         # Check if one primer has reached both ends and one primer has reached one end
         elif end_reaches[1] == 1 and end_reaches[0] == 1:
-            return 4 # TODO - Discuss how this should be handled - What would be returned/reported
-
-        # Check if one primer has reached one or both ends, while the other has reached no ends. # TODO - should this be handled differently? is it in line with evidence levels? Should the evidence level be changed for this?
-        elif (end_reaches[0] == 1 and end_reaches[1] == 0) or (end_reaches[0] == 0 and end_reaches[1] == 1):
-            return 6 # TODO - should likely be changed
+            return 4
 
         # Check if two primers have reached one end.
         elif end_reaches[1] == 2:
@@ -454,7 +467,6 @@ def check_primers_placement(bed_files, primer_pairs, primer_hits, max_primer_dis
 
 
 def bed_merge_handling(blast_hit_beds, include_primers, exclude_primer_list, max_primer_dist, primer_evidence):
-    # TODO - Implement so that primers that overlap are handled well, especially when primers are to be not included!
     # initialise list to hold merged bed file names:
     merged_bed_files = []
 
@@ -467,8 +479,6 @@ def bed_merge_handling(blast_hit_beds, include_primers, exclude_primer_list, max
             max_primer_dist = 9999999999
 
         # Merge the bed file and collapse the column containing the names and count the number of intervals collapsed
-        # TODO - insert some maximum distance to be merged over
-        #   * possibly iterativly increase distance over with the merger happens - until two lines are merges
         if len(primer_hits) > 0:
             primer_hits = primer_hits.merge(c=[4, 4], o='collapse,count', d=max_primer_dist)
         else:
@@ -488,12 +498,14 @@ def bed_merge_handling(blast_hit_beds, include_primers, exclude_primer_list, max
 
         # Evaluate if primers are to be excluded from the intervals
         # TODO - Can be problematic if the primer hits the end of a contig, then the primer will be removed. Either make the user aware that a primer is found on the edge of a contig and only extract sequences that have somthing between it and the contig break or other soluton.
-        if include_primers:
+        if not include_primers:
             # Load bed containing primers to be excluded
-            exlusion_bed = bedtools.BedTool(exclude_primer_list[i])
+            exclusion_bed = bedtools.BedTool(exclude_primer_list[i])
 
             # Remove the primer intervals
-            primer_hits = primer_hits.subtract(exlusion_bed)
+            primer_hits = primer_hits.subtract(exclusion_bed)
+
+            # TODO - should there be an evidene level for a primer that is found on the edge of a contig and thus being removed when primers are not included.
 
         # Save the merged intervals
         # Construct name
@@ -550,7 +562,6 @@ def extract_seqs_n_annots(merged_bed_files, file_type, genome_file, annotation_f
                 primer_pair_name = primer_pair_name[0]
             else:
                 primer_pair_name = f'{primers[0]}_break'
-                # TODO - make sure the addition of the contig break primer pairs do not interfere with any other processes!
                 break_primers[primer_pair_name] = [primers[0], 'break']
 
             # Construct output name for extracted sequence
@@ -564,7 +575,6 @@ def extract_seqs_n_annots(merged_bed_files, file_type, genome_file, annotation_f
             fasta_header = f'{genome_name}_{primer_pair_name}'
 
             # Convert interval to string to be made into a BedTool object
-            # TODO - MAKE SURE THE 0-based bed format is converted correctly to the 1-baes gff format, if the primer is excluded and of the primer is not excluded.
             interval = f'{interval[0]} {int(interval[1])} {int(interval[2])} {fasta_header}'
 
             # Create BedTool object from line
@@ -596,7 +606,6 @@ def extract_seqs_n_annots(merged_bed_files, file_type, genome_file, annotation_f
                 annots_per_interval[primer_pair_name] = len(annot)
 
                 # Start writing the output file, if an annotation if found
-                # TODO - Decide if the extracted fasta should be deleted if there are no annotations between two primers
                 if len(annot) > 0:
                     # Increase the evidence level for the primer pair.
                     # Only if the evidence level i 8 and primer pair is valid (no breaks)
@@ -662,22 +671,8 @@ def screen_genome_for_primers(genome_file, primer_pairs, primer_path, tmp_folder
     # Concatenate the genome name and the path to the temporary folder
     genome_name = os.path.join(tmp_folder, genome_name)
 
-    # TODO - following implementation of tests, move the construction and deletion of blast database into blast function.
-    # Construct genome_db path and name
-    genome_db = f'{genome_file}_tmp_db'
-    # Make blast database command for given genome
-    c_line_makedb = NcbimakeblastdbCommandline(dbtype='nucl', input_file=genome_file, out=genome_db)
-
-    # Run makeblastdb in command line
-    c_line_makedb()
-
     # Run blast with genome and insertion site sequences
-    blast_xml_output = blast_insertion_site(primer_path, genome_db, f'{genome_name}_blast')
-
-    # Delete blast database
-    file_list = glob.glob(f'{genome_file}_tmp_db.*')
-    for file in file_list:
-        os.remove(file)
+    blast_xml_output = blast_insertion_site(primer_path, genome_file, f'{genome_name}_blast')
 
     # Construct a bedfile from blast output
     blast_hit_beds, exclude_primer_list, primer_hits = blast_out_to_sorted_bed(blast_xml_output,
@@ -710,5 +705,3 @@ def screen_genome_for_primers(genome_file, primer_pairs, primer_path, tmp_folder
     [os.remove(file) for file in exclude_primer_list]
 
     return primer_hits, annots_per_interval, genome_name, primer_evidence, break_primers, inter_primer_dist
-
-    # TODO - look into pybedtools.parallel.parallel_apply(…[, …]) and possible speed ups from this.

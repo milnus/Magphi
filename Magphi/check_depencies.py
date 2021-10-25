@@ -1,7 +1,7 @@
 import subprocess
 import warnings
 import sys
-# from Magphi.exit_with_error import exit_with_error
+
 try:
     from Magphi.exit_with_error import exit_with_error
 except ModuleNotFoundError:
@@ -117,7 +117,7 @@ def check_for_samtools(verbose):
         exit_with_error(str(exception), EXIT_DEPENDENCY_ERROR)
 
 
-def check_dependencies_for_main(verbose = False):
+def check_dependencies_for_main(verbose=False):
     ''' Function to check dependencies when Magphi is executed. If all programs are found their versions are returned,
     if they are not found False is returned.'''
     # TODO - log the version of tools used for the run. - possibly do this in main when TRUE is returned. or return the versions instead of TRUE
@@ -138,7 +138,6 @@ def check_dependencies_for_main(verbose = False):
 
 
 if __name__ == '__main__':
-    #TODO - add name of tool!
     print('\n------ Checking dependencies for Magphi ------')
     biopython_presence = check_for_biopython(verbose=True)
 

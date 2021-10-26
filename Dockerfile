@@ -11,6 +11,7 @@ RUN pip3 install -r requirements-dev.txt
 RUN apt-get update && apt-get install -y \
   bedtools \
   samtools \
+  ncbi-blast+ \
   && rm -rf /var/lib/apt/lists/*
   # TODO - install BLAST+!
 

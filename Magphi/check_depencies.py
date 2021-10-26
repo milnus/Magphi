@@ -85,7 +85,7 @@ def check_for_bedtools(verbose):
 
 # Samtools
 def check_for_samtools(verbose):
-    '''Check for the presence of samtools and if the version satisfies the required version 1.12, 1.19 or above,
+    ''' Check for the presence of samtools and if the version satisfies the required version 1.12, 1.19 or above,
             if this can not be satisfied then warn the use of a missing dependency and exit.
             '''
     try:
@@ -117,6 +117,42 @@ def check_for_samtools(verbose):
         exit_with_error(str(exception), EXIT_DEPENDENCY_ERROR)
 
 
+def check_for_blast_plus(verbose=False):
+    ''' Check for the presence of Blast+ and if the version satisfies the required version ,
+                if this can not be satisfied then warn the use of a missing dependency and exit. '''
+
+    try:
+        cmd_return = subprocess.run(['makeblastdb', '-version'], capture_output=True)
+
+        if cmd_return.returncode == 0:
+            if verbose:
+                print("Blast+ was successfully found")
+
+            # Isolate version tag
+            version = cmd_return.stdout.decode().split('\n')[1]
+            version = version.split(' ')[3]
+            version = version.rsplit(',', 1)[0]
+
+            if version == '2.6.0':
+                if verbose:
+                    print("Blast+ version is valid")
+                return version
+
+            else:
+                warnings.warn('Blast+ seems to be an untested version! Make sure it is version = 1.19, 1.12 or above.')
+                return False
+        else:
+            warnings.warn('The command "makeblastdb -version" does not seem to give return code = 0')
+            sys.exit(EXIT_DEPENDENCY_ERROR)
+
+    except FileNotFoundError as exception:
+        warnings.warn('Blast+ could not be found!')
+        exit_with_error(str(exception), EXIT_DEPENDENCY_ERROR)
+
+
+
+
+
 def check_dependencies_for_main(verbose=False):
     ''' Function to check dependencies when Magphi is executed. If all programs are found their versions are returned,
     if they are not found False is returned.'''
@@ -146,6 +182,8 @@ if __name__ == '__main__':
     bedtools_presence = check_for_bedtools(verbose=True)
 
     samtools_presence = check_for_samtools(verbose=True)
+
+    check_for_blast_plus(verbose=True)
 
     print('\n------ Summary of dependency check ------')
 

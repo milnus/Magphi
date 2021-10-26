@@ -187,9 +187,30 @@ test_exit_status "$test_program -g random_text.txt -s empty_file > /dev/null 2>&
 test_exit_status "$test_program -g empty_file -s empty_file > /dev/null 2>&1" 3
 
 ## TODO - funcitonal tests
+# GENOMES - ALL As
+# Fasta input
+# Gff input
+# gzipped inputs
+#   - fasta
+#   - gff
+# All evidence levels
+# A  - no hit (All G) - 0
+# B  - single hit (All G with true primer) - 0
+# C  - Multiple hit no overlap (low max distance, single contig multiple hits) - 1
+# D  - Multiple hit multiple overlaps (large max distance, single contig multiple hits) - 2
+# E  - Overlap and exclude seeds - 3
+# F  - Separate contigs one at edge and exclude primers. - 3
+# G  - Two seeds on separate contigs low max distance no connection - 5A
+# H  - Two seeds on separate contigs with medium distance and connection (No annotation) - 5B
+# I  - Two seeds on separate contigs with longer distance and connection (Annotations between) - 5C
+# J  - Two seeds on same contig low max distance no overlap  - 6A
+# K  - Two seeds on same contig medium max distance with overlap no annotations - 6B
+# L  - Two seeds on same contig longer max distance with overlap with annotations - 6C
+
+
 # Use the 'test_output_file'. First run a Magphi command with output into a specific folder, then test the output files one by one using the command.
-#Magphi -g -s
-test_output_file Test_function Test_function.expected
+Magphi -g simple_genome.fasta -s no_primers_match_primers.fasta -o test_out_folder
+test_output_file test_out_folder/master_primer_evidence.csv no_primers_match_evidence_levels.expected
 # One with a primer on edge of contig and one that extracts
 # Chaws problem.
 # Run test where only one seed sequence can connect to a contig break, but the other can not connect to anything.

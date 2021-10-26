@@ -129,8 +129,8 @@ function test_output_file {
         let num_errors+=1
         echo "Test output failed: $1"
         echo "Actual output:"
-        echo "$output"
-        expected_output=$(cat $2)
+        cat $output
+        expected_output=$(cat $expected_output_file)
         echo "Expected output:"
         echo "$expected_output"
         echo "Difference:"

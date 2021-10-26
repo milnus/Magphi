@@ -209,7 +209,7 @@ test_exit_status "$test_program -g empty_file -s empty_file > /dev/null 2>&1" 3
 
 
 # Use the 'test_output_file'. First run a Magphi command with output into a specific folder, then test the output files one by one using the command.
-Magphi -g simple_genome.fasta -s no_primers_match_primers.fasta -o test_out_folder
+Magphi -g evidence_levels_simple_genome.fasta -s no_primers_match_primers.fasta -o test_out_folder
 test_output_file test_out_folder/master_primer_evidence.csv no_primers_match_evidence_levels.expected
 # One with a primer on edge of contig and one that extracts
 # Chaws problem.

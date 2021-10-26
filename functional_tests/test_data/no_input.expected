@@ -1,4 +1,4 @@
-usage: Magphi [-h] -g .fa/.gff [.fa/.gff ...] -p multi_fasta_file.fa [-ip]
+usage: Magphi [-h] -g .fa/.gff [.fa/.gff ...] -s multi_fasta_file.fa [-ip]
               [-md int] [-o path/to/output] [-c] [-l Log_file] [-v]
 
 Welcome to Magphi! This program will extract sequences and possible
@@ -9,7 +9,7 @@ optional arguments:
   -g .fa/.gff [.fa/.gff ...], --input_genomes .fa/.gff [.fa/.gff ...]
                         Give the fasta or gff3 files. (gff3 files should
                         contain the genome fasta sequence)
-  -p multi_fasta_file.fa, --input_primers multi_fasta_file.fa
+  -s multi_fasta_file.fa, --input_seeds multi_fasta_file.fa
                         Give the multi fasta containing the primers to be used
                         for extracting sequnces
   -ip, --include_primers

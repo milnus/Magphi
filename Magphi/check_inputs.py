@@ -21,7 +21,7 @@ def check_if_gzip(input_files):
 
     if all(is_input_gzipped):
         return True
-    else:
+    elif 0 < sum(is_input_gzipped) < len(is_input_gzipped):
         print('UPS! Something went wrong!\n'
               'Some input files found to be gzipped! '
               'Please check that all of your input files are either Gzipped or not')
@@ -29,6 +29,7 @@ def check_if_gzip(input_files):
                       'Please check that all of your input files are either Gzipped or not')
         exit_with_error(message='Some input files found to be Gzipped while other were not!',
                         exit_status=EXIT_INPUT_FILE_ERROR)
+    else:
         return False
 
 

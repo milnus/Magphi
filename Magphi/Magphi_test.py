@@ -148,6 +148,12 @@ class TestFileRecognition(unittest.TestCase):
         with self.assertRaises(SystemExit):
             check_inputs.check_if_gzip(files)
 
+    def test_non_gzipped_files(self):
+        ''' Test that input of gzipped files are recognised as such '''
+        files = ['TestFileRecognition/Fasta_files/GCA_005163865.fna']
+
+        self.assertEqual(False, check_inputs.check_if_gzip(files))
+
 
 class TestSplittingGff(unittest.TestCase):
     def test_gff_split_single_file(self):

@@ -168,7 +168,7 @@ def main():
         annotations = [None] * len(cmd_args.genomes)
 
     # Read in and combine primers into pairs
-    primer_pairs, primer_dict = handle_primers(cmd_args.primers)
+    primer_pairs, primer_dict = handle_primers(cmd_args.seeds)
 
     # Construct master dict to hold the returned information from primers
     master_primer_hits = {}
@@ -182,7 +182,7 @@ def main():
 
     genomes_processed = 0
     with concurrent.futures.ThreadPoolExecutor(max_workers=cmd_args.cpu) as executor:
-        results = [executor.submit(screen_genome_for_primers, genomes[i], primer_pairs, cmd_args.primers,
+        results = [executor.submit(screen_genome_for_primers, genomes[i], primer_pairs, cmd_args.seeds,
                                    tmp_folder, cmd_args.include_primers, file_type, annotations[i],
                                    cmd_args.out_path, cmd_args.max_primer_dist) for i, genome in enumerate(genomes)]
 

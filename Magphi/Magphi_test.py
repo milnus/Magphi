@@ -911,7 +911,7 @@ class TestExtractSeqsNAnnots(unittest.TestCase):
         tmp_folder = 'TestExtractSeqsNAnnots/No_extraction/Single_contig'
         out_path = 'TestExtractSeqsNAnnots/No_extraction/Single_contig'
         primer_pairs = {'Single_contig_primer': ['Single_contig_primer_1', 'Single_contig_primer_2']}
-        primer_evidence = {'Single_contig_primer': 8}
+        primer_evidence = {'Single_contig_primer': '5B'}
 
         copyfile(genome_file, genome_file+'_original')
 
@@ -927,7 +927,7 @@ class TestExtractSeqsNAnnots(unittest.TestCase):
 
         self.assertEqual(0, len(break_seed_sequence_primers))
 
-        self.assertEqual(8, seed_sequence_evidence['Single_contig_primer'])
+        self.assertEqual('5B', seed_sequence_evidence['Single_contig_primer'])
 
         self.assertEqual(10, inter_seed_sequence_dist['Single_contig_primer'])
 
@@ -945,7 +945,7 @@ class TestExtractSeqsNAnnots(unittest.TestCase):
         tmp_folder = 'TestExtractSeqsNAnnots/No_extraction/Single_contig'
         out_path = 'TestExtractSeqsNAnnots/No_extraction/Single_contig'
         primer_pairs = {'Single_contig_primer': ['Single_contig_primer_1', 'Single_contig_primer_2']}
-        primer_evidence = {'Single_contig_primer': 8}
+        primer_evidence = {'Single_contig_primer': '5B'}
 
         copyfile(genome_file, genome_file + '_original')
         copyfile(annotation_file, annotation_file + '_original')
@@ -963,7 +963,7 @@ class TestExtractSeqsNAnnots(unittest.TestCase):
 
         self.assertEqual(0, len(break_seed_sequence_primers))
 
-        self.assertEqual(8, seed_sequence_evidence['Single_contig_primer'])
+        self.assertEqual('5B', seed_sequence_evidence['Single_contig_primer'])
 
         self.assertEqual(10, inter_seed_sequence_dist['Single_contig_primer'])
 
@@ -981,7 +981,7 @@ class TestExtractSeqsNAnnots(unittest.TestCase):
         tmp_folder = 'TestExtractSeqsNAnnots/With_extraction/Single_contig'
         out_path = 'TestExtractSeqsNAnnots/With_extraction/Single_contig'
         primer_pairs = {'Single_contig_primer': ['Single_contig_primer_1', 'Single_contig_primer_2']}
-        primer_evidence = {'Single_contig_primer': 8}
+        primer_evidence = {'Single_contig_primer': '5B'}
 
         copyfile(genome_file, genome_file + '_original')
         copyfile(annotation_file, annotation_file + '_original')
@@ -999,7 +999,7 @@ class TestExtractSeqsNAnnots(unittest.TestCase):
 
         self.assertEqual(0, len(break_seed_sequence_primers))
 
-        self.assertEqual(9, seed_sequence_evidence['Single_contig_primer'])
+        self.assertEqual('5C', seed_sequence_evidence['Single_contig_primer'])
 
         self.assertEqual(20, inter_seed_sequence_dist['Single_contig_primer'])
 
@@ -1028,7 +1028,7 @@ class TestExtractSeqsNAnnots(unittest.TestCase):
         tmp_folder = 'TestExtractSeqsNAnnots/No_extraction/Cross_contig'
         out_path = 'TestExtractSeqsNAnnots/No_extraction/Cross_contig'
         primer_pairs = {'Multi_contig_primer': ['Multi_contig_primer_1', 'Multi_contig_primer_2']}
-        primer_evidence = {'Multi_contig_primer': 6}
+        primer_evidence = {'Multi_contig_primer': '4B'}
 
         copyfile(genome_file, genome_file+'_original')
 
@@ -1046,7 +1046,7 @@ class TestExtractSeqsNAnnots(unittest.TestCase):
         expected_primers_returned = {'Multi_contig_primer_1_break': ['Multi_contig_primer_1', 'break'], 'Multi_contig_primer_2_break': ['Multi_contig_primer_2', 'break']}
         self.assertEqual(expected_primers_returned, break_seed_sequence_primers)
 
-        self.assertEqual(6, seed_sequence_evidence['Multi_contig_primer'])
+        self.assertEqual('4B', seed_sequence_evidence['Multi_contig_primer'])
 
         self.assertEqual(10, inter_seed_sequence_dist['Multi_contig_primer_1_break'])
         self.assertEqual(10, inter_seed_sequence_dist['Multi_contig_primer_2_break'])
@@ -1069,7 +1069,7 @@ class TestExtractSeqsNAnnots(unittest.TestCase):
         tmp_folder = 'TestExtractSeqsNAnnots/No_extraction/Cross_contig'
         out_path = 'TestExtractSeqsNAnnots/No_extraction/Cross_contig'
         primer_pairs = {'Multi_contig_primer': ['Multi_contig_primer_1', 'Multi_contig_primer_2']}
-        primer_evidence = {'Multi_contig_primer': 6}
+        primer_evidence = {'Multi_contig_primer': '4B'}
 
         copyfile(genome_file, genome_file + '_original')
         copyfile(annotation_file, annotation_file + '_original')
@@ -1088,7 +1088,7 @@ class TestExtractSeqsNAnnots(unittest.TestCase):
 
         self.assertEqual(2, len(break_seed_sequence_primers))
 
-        self.assertEqual(6, seed_sequence_evidence['Multi_contig_primer'])
+        self.assertEqual('4B', seed_sequence_evidence['Multi_contig_primer'])
 
         self.assertEqual(10, inter_seed_sequence_dist['Multi_contig_primer_1_break'])
         self.assertEqual(10, inter_seed_sequence_dist['Multi_contig_primer_2_break'])
@@ -1103,9 +1103,7 @@ class TestExtractSeqsNAnnots(unittest.TestCase):
         os.remove(os.path.join(out_path, 'Multi_contig--Multi_contig_primer_2_break.fasta'))
 
     def test_extraction_from_gff_across_contigs_with_annotation_extracted(self):
-        # TODO - Discuss if there should be an evidence level for connection across contigs with annotations between them?
-        # TODO - Discuss if annotations inside primer coordinates should count towards a higher evidence level.
-        ''' Test extraction of annotations and fasta sequences given a gff file, with annotations in the region to be extracted. '''
+        ''' Test extraction of annotations and fasta sequences given a gff file, with annotations in the region to be extracted across contigs. '''
         merged_bed_files = ['TestExtractSeqsNAnnots/With_extraction/Cross_contig/Multi_contig_extraction~~Multi_contig_extraction_primer.bed']
         file_type = 'gff'
         genome_file = 'TestExtractSeqsNAnnots/With_extraction/Cross_contig/Multi_contig_extraction.fna'
@@ -1113,7 +1111,7 @@ class TestExtractSeqsNAnnots(unittest.TestCase):
         tmp_folder = 'TestExtractSeqsNAnnots/With_extraction/Cross_contig'
         out_path = 'TestExtractSeqsNAnnots/With_extraction/Cross_contig'
         primer_pairs = {'Multi_contig_extraction_primer': ['Multi_contig_extraction_primer_1', 'Multi_contig_extraction_primer_2']}
-        primer_evidence = {'Multi_contig_extraction_primer': 6}
+        primer_evidence = {'Multi_contig_extraction_primer': '4B'}
 
         copyfile(genome_file, genome_file + '_original')
         copyfile(annotation_file, annotation_file + '_original')
@@ -1132,7 +1130,7 @@ class TestExtractSeqsNAnnots(unittest.TestCase):
 
         self.assertEqual(2, len(break_seed_sequence_primers))
 
-        self.assertEqual(6, seed_sequence_evidence['Multi_contig_extraction_primer'])
+        self.assertEqual('4C', seed_sequence_evidence['Multi_contig_extraction_primer'])
 
         self.assertEqual(14, inter_seed_sequence_dist['Multi_contig_extraction_primer_1_break'])
         self.assertEqual(14, inter_seed_sequence_dist['Multi_contig_extraction_primer_2_break'])

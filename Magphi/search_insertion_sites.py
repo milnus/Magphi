@@ -590,7 +590,6 @@ def extract_seqs_n_annots(merged_bed_files, file_type, genome_file, annotation_f
 
             # extract annotations if gff is provided as input
             if file_type == 'gff':
-                # TODO - Should there be a way to only extract genes, CDS, other or default all?
                 # Load in the gff as a BedTool object
                 gff_file = bedtools.BedTool(annotation_file)
 
@@ -606,11 +605,22 @@ def extract_seqs_n_annots(merged_bed_files, file_type, genome_file, annotation_f
 
                 # Start writing the output file, if an annotation if found
                 if len(annot) > 0:
-                    # Increase the evidence level for the primer pair.
-                    # Only if the evidence level i 8 and primer pair is valid (no breaks)
-                    if primer_pair_name in primer_evidence.keys():
-                        if primer_evidence[primer_pair_name] == 8:
-                            primer_evidence[primer_pair_name] = 9
+                    # Check if seed sequence reach a contig break
+                    # If then get the primer pair to adjust the evidence level
+                    if '_break' in primer_pair_name:
+                        primer_pair_key = primer_pair_name
+                        primer_pair_key = primer_pair_key.rsplit('_', 1)[0]
+                        primer_pair_key = [key for key in primer_pairs.keys() if primer_pair_key in primer_pairs[key]][0]
+                    else:
+                        primer_pair_key = primer_pair_name
+
+                    # Increase the evidence level for the seed sequence pair.
+                    # Only if the evidence level is 4B or 5B and primer pair is valid (no breaks)
+                    if primer_pair_key in primer_evidence.keys():
+                        if primer_evidence[primer_pair_key] == '4B':
+                            primer_evidence[primer_pair_key] = '4C'
+                        elif primer_evidence[primer_pair_key] == '5B':
+                            primer_evidence[primer_pair_key] = '5C'
 
                     # Construct name for output file
                     output_gff = os.path.join(out_path, f'{out_file_name}.gff')

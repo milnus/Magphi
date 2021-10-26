@@ -25,10 +25,10 @@ def get_commandline_arguments(args, version):
                         metavar='.fa/.gff')
 
     # Add the flag for the multi fasta file containing insertion sequences or primers.
-    parser.add_argument('-p',
-                        '--input_primers',
+    parser.add_argument('-s', # TODO - Should this be changed to --seeds and -s?
+                        '--input_seeds',
                         help='Give the multi fasta containing the primers to be used for extracting sequnces',
-                        dest='primers',
+                        dest='seeds',
                         required=True,
                         metavar='multi_fasta_file.fa')
 

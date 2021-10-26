@@ -115,6 +115,29 @@ function test_stdout_exit {
     fi 
 }
 
+# Run a command and check that the output file is
+# exactly equal the contents of a specified file
+# ARG1: A file returned from program after running
+# ARG2: a file path containing the expected output
+function test_output_file {
+    let num_tests+=1
+    output=$(eval $1)
+    expected_output_file=$2
+    verbose_message "Testing output file: $1"
+    difference=$(diff <(echo "$output") $expected_output_file)
+    if [ -n "$difference" ]; then
+        let num_errors+=1
+        echo "Test output failed: $1"
+        echo "Actual output:"
+        echo "$output"
+        expected_output=$(cat $2)
+        echo "Expected output:"
+        echo "$expected_output"
+        echo "Difference:"
+        echo "$difference"
+    fi
+}
+
 # Run a command and check that the exit status is 
 # equal to an expected value
 # exactly equal the contents of a specified file 
@@ -143,14 +166,6 @@ parse_args $@
 # 2. Change to test directory
 cd $test_data_dir
 # 2. Run tests
-#test_stdout_exit "$test_program one_sequence.fasta" one_sequence.fasta.expected 0
-#test_stdout_exit "$test_program two_sequence.fasta" two_sequence.fasta.expected 0
-#test_stdout_exit "$test_program --minlen 200 two_sequence.fasta" two_sequence.fasta.minlen_200.expected 0
-#test_stdout_exit "$test_program --minlen 200 < two_sequence.fasta" two_sequence.fasta.minlen_200.stdin.expected 0
-#test_stdout_exit "$test_program empty_file" empty_file.expected 0
-# Test when --minlen filters out ALL sequences (empty result)
-#test_stdout_exit "$test_program --minlen 1000 two_sequence.fasta" two_sequence.fasta.minlen_1000.expected 0
-
 ## Test commandline exit status
 # Test output for no no arguments
 test_stdout_exit "$test_program" no_input.expected 2
@@ -161,18 +176,24 @@ test_exit_status "$test_program --this_is_not_a_valid_argument > /dev/null 2>&1"
 
 ## Check exit status for bad input GFF or FASTA files
 # Test exit status when input is mixed fasta and gff
-test_exit_status "$test_program -g test_fasta.fna test_GFF.gff -p empty_file > /dev/null 2>&1" 3
+test_exit_status "$test_program -g test_fasta.fna test_GFF.gff -s empty_file > /dev/null 2>&1" 3
 # Test exit status when fasta is mixed with random text file
-test_exit_status "$test_program -g test_fasta.fna random_text.txt -p empty_file > /dev/null 2>&1" 3
+test_exit_status "$test_program -g test_fasta.fna random_text.txt -s empty_file > /dev/null 2>&1" 3
 # Test exit status when gff is mixed with random text file
-test_exit_status "$test_program -g test_GFF.gff random_text.txt -p empty_file > /dev/null 2>&1" 3
+test_exit_status "$test_program -g test_GFF.gff random_text.txt -s empty_file > /dev/null 2>&1" 3
 # Test when just random text file is given
-test_exit_status "$test_program -g random_text.txt -p empty_file > /dev/null 2>&1" 3
+test_exit_status "$test_program -g random_text.txt -s empty_file > /dev/null 2>&1" 3
 # Test when empty file is given as input
-test_exit_status "$test_program -g empty_file -p empty_file > /dev/null 2>&1" 3
+test_exit_status "$test_program -g empty_file -s empty_file > /dev/null 2>&1" 3
 
-# Test exit status for a non existent input FASTA file
-#test_exit_status "$test_program this_file_does_not_exist.fasta > /dev/null 2>&1" 1
+## TODO - funcitonal tests
+# Use the 'test_output_file'. First run a Magphi command with output into a specific folder, then test the output files one by one using the command.
+#Magphi -g -s
+test_output_file Test_function Test_function.expected
+# One with a primer on edge of contig and one that extracts
+# Chaws problem.
+# Run test where only one seed sequence can connect to a contig break, but the other can not connect to anything.
+
 
 
 # 3. End of testing - check if any errors occurrred

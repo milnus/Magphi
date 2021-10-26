@@ -208,9 +208,14 @@ test_exit_status "$test_program -g empty_file -s empty_file > /dev/null 2>&1" 3
 # L  - Two seeds on same contig longer max distance with overlap with annotations - 6C
 
 
-# Use the 'test_output_file'. First run a Magphi command with output into a specific folder, then test the output files one by one using the command.
+# Run test for evidence level when no seed hits are found
 Magphi -g evidence_levels_simple_genome.fasta -s no_primers_match_primers.fasta -o test_out_folder
 test_output_file test_out_folder/master_primer_evidence.csv no_primers_match_evidence_levels.expected
+rm -r test_out_folder
+# Run test for evidence level when a single seed hit is found
+Magphi -g evidence_levels_simple_genome.fasta -s single_primer_match_primers.fasta -o test_out_folder
+test_output_file test_out_folder/master_primer_evidence.csv one_primer_match_evidence_level.expected
+rm -r test_out_folder
 # One with a primer on edge of contig and one that extracts
 # Chaws problem.
 # Run test where only one seed sequence can connect to a contig break, but the other can not connect to anything.

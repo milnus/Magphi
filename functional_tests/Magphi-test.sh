@@ -121,7 +121,7 @@ function test_stdout_exit {
 # ARG2: a file path containing the expected output
 function test_output_file {
     let num_tests+=1
-    output=$(eval $1)
+    output=$1
     expected_output_file=$2
     verbose_message "Testing output file: $1"
     difference=$(diff <(echo "$output") $expected_output_file)

@@ -131,8 +131,8 @@ def check_dependencies_for_main(verbose=False):
 
     # if all([biopython_presence, pybedtools_presence, bedtools_presence, samtools_presence]):
     if all([biopython_presence, pybedtools_presence]):
-        return [biopython_presence, pybedtools_presence]
-        # return [biopython_presence, pybedtools_presence, bedtools_presence, samtools_presence]
+        # return [biopython_presence, pybedtools_presence]
+        return [biopython_presence, pybedtools_presence, bedtools_presence, samtools_presence]
     else:
         return False
 

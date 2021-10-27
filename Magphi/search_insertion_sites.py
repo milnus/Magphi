@@ -515,7 +515,7 @@ def bed_merge_handling(blast_hit_beds, include_primers, exclude_primer_list, max
             # Remove the primer intervals
             primer_hits = primer_hits.subtract(exclusion_bed)
 
-            if pre_deletion_intervals > len(primer_hits) and (str(primer_evidence[primer_name]) < '3' or primer_evidence[primer_name] == '5B'): # MAY BE WRONG THE LESS THAN LOGIC
+            if pre_deletion_intervals > len(primer_hits) and (str(primer_evidence[primer_name]) < '3' or primer_evidence[primer_name] == '5B' or primer_evidence[primer_name] == '4B'): # MAY BE WRONG THE LESS THAN LOGIC
                 primer_evidence[primer_name] = 3
 
         # Save the merged intervals

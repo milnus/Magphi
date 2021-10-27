@@ -260,12 +260,35 @@ class TestPrimerFunctions(unittest.TestCase):
 
 class TestPrimersPlacement(unittest.TestCase): # TODO - check if this is exhaustive
 
-    def test_single_primer_single_hit(self):
+    def test_single_primer_single_hit_low_max_dist(self):
         ''' Test that a single seed sequence hit returns the correct evidence level '''
         bed_files = ['TestPrimersPlacement/single_contig_1200N~~single_primer.bed']
         primer_pairs = {'single_primer': ['single_primer_1', 'single_primer_2']}
         primer_hits = {'single_primer': 1}
         max_primer_dist = 1
+        genome_file = 'TestFlankingRegion/single_contig/single_contig_1200N.fasta'
+        file_type = 'fasta'
+        tmp_folder = 'TestPrimersPlacement'
+        flanking_return = search_insertion_sites.check_primers_placement(bed_files=bed_files,
+                                                                         primer_pairs=primer_pairs,
+                                                                         primer_hits=primer_hits,
+                                                                         max_primer_dist=max_primer_dist,
+                                                                         genome_file=genome_file,
+                                                                         file_type=file_type,
+                                                                         tmp_folder=tmp_folder)
+        # remove .fai file
+        os.remove('TestPrimersPlacement/single_contig_1200N.fasta.fai')
+        os.remove('TestPrimersPlacement/single_contig_1200N.fasta')
+
+        evidence_level_return = flanking_return[1]['single_primer']
+        self.assertEqual(0, evidence_level_return)
+
+    def test_single_primer_single_hit_large_max_dist(self):
+        ''' Test that a single seed sequence hit returns the correct evidence level '''
+        bed_files = ['TestPrimersPlacement/single_contig_1200N~~single_primer.bed']
+        primer_pairs = {'single_primer': ['single_primer_1', 'single_primer_2']}
+        primer_hits = {'single_primer': 1}
+        max_primer_dist = 10000
         genome_file = 'TestFlankingRegion/single_contig/single_contig_1200N.fasta'
         file_type = 'fasta'
         tmp_folder = 'TestPrimersPlacement'

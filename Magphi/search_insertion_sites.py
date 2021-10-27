@@ -461,7 +461,10 @@ def check_primers_placement(bed_files, primer_pairs, primer_hits, max_primer_dis
                                               f'The primer pair in question is {primer_name} in genome {genome_file}.\n'
                                               f'Please report this along with the following: {primer_bed_lines}')
         else:
+            # set primer evidence and remove bed-file from further processing
             primer_hit_support_dict[primer_name] = 0
+            print(file)
+            bed_files.remove(file)
 
     return genome_file, primer_hit_support_dict
 
@@ -710,8 +713,9 @@ def screen_genome_for_primers(genome_file, primer_pairs, primer_path, tmp_folder
 
     # clean up by removing blast xml output, and merged and primer hit beds from tmp folder:
     os.remove(blast_xml_output)
-    [os.remove(file) for file in blast_hit_beds]
-    [os.remove(file) for file in merged_bed_files]
-    [os.remove(file) for file in exclude_primer_list]
+    tmp_folder_files = os.listdir(tmp_folder)
+    for file in tmp_folder_files:
+        if '.bed' in file:
+            os.remove(os.path.join(tmp_folder, file))
 
     return primer_hits, annots_per_interval, genome_name, primer_evidence, break_primers, inter_primer_dist

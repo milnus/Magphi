@@ -198,8 +198,8 @@ test_exit_status "$test_program -g empty_file -s empty_file > /dev/null 2>&1" 3
 # B  - single hit (All G with true primer) - 0
 # C  - Multiple hit no overlap - single contig (low max distance, single contig multiple hits) - 1
 # D  - Multiple hit multiple overlaps - single contig (large max distance, single contig multiple hits) - 2
-# C.2  - Multiple hit no overlap - multiple contigs (low max distance, single contig multiple hits) - 1 - #TODO
-# D.2  - Multiple hit multiple overlaps - multiple contigs (large max distance, single contig multiple hits) - 2 - #TODO
+# C.2  - Multiple hit no overlap - multiple contigs (low max distance, single contig multiple hits) - 1
+# D.2  - Multiple hit multiple overlaps - multiple contigs (large max distance, single contig multiple hits) - 2
 # E  - Overlap and exclude seeds - 3 - #TODO
 # F  - Separate contigs one at edge and exclude primers. - 3 - #TODO
 # G  - Two seeds on separate contigs low max distance no connection - 4A - #TODO
@@ -208,6 +208,8 @@ test_exit_status "$test_program -g empty_file -s empty_file > /dev/null 2>&1" 3
 # J  - Two seeds on same contig low max distance no overlap  - 5A - #TODO
 # K  - Two seeds on same contig medium max distance with overlap no annotations - 5B - #TODO
 # L  - Two seeds on same contig longer max distance with overlap with annotations - 5C - #TODO
+# M  - Test multiple hits where two can be found to connect - same contig - # TODO
+# N  - Test multiple hits where two can be found to connect - across contigs. - # TODO
 
 
 # Run test for evidence level when no seed hits are found
@@ -234,6 +236,13 @@ rm -r test_out_folder
 Magphi -g evidence_levels_simple_two_contigs.fasta -s two_primers_simple_match_primers.fasta -o test_out_folder -md 1000
 test_output_file test_out_folder/master_primer_evidence.csv two_primers_two_contigs_muti_hit_multi_connect.expected
 rm -r test_out_folder
+# Run test for evidence level when two seeds overlap and are excluded because primers are deleted
+Magphi -g evidence_levels_overlap_two_contigs.fasta -s overlap_primers.fasta -o test_out_folder -md 1
+test_output_file test_out_folder/master_primer_evidence.csv evidence_levels_overlapping_seeds.expected
+rm -r test_out_folder
+# Run test for evidence level when one seed is on the edge of a contig and is deleted due to being excluded
+Magphi -g evidence_levels_overlap_two_contigs.fasta -s contig_edge_primers.fasta -o test_out_folder -md 180
+test_output_file test_out_folder/master_primer_evidence.csv evidence_levels_contig_edge.expected
 # One with a primer on edge of contig and one that extracts
 # Chaws problem.
 # Run test where only one seed sequence can connect to a contig break, but the other can not connect to anything.

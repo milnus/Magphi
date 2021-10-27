@@ -517,7 +517,7 @@ def bed_merge_handling(blast_hit_beds, include_primers, exclude_primer_list, max
             primer_hits = primer_hits.subtract(exclusion_bed)
 
             if pre_deletion_intervals > len(primer_hits):
-                primer_evidence[primer_name] = 4
+                primer_evidence[primer_name] = 3
 
         # Save the merged intervals
         # Construct name

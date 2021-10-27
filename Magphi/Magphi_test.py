@@ -942,7 +942,7 @@ class TestBedMergeHandling(unittest.TestCase):
                                                                                       max_primer_dist,
                                                                                       primer_evidence)
 
-        self.assertEqual(4, primer_evidence['primer_edge_placement'])
+        self.assertEqual(3, primer_evidence['primer_edge_placement'])
 
         with open(merged_bed_files[0], 'r') as result:
             self.assertEqual(['Contig_2\t0\t100\tprimer_edge_placement_2\t1\n'], result.readlines())

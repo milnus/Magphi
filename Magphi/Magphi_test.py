@@ -502,7 +502,6 @@ class TestPrimersPlacement(unittest.TestCase): # TODO - check if this is exhaust
         os.remove('TestPrimersPlacement/double_contig.fasta')
 
         # Copy back input file
-        os.rename(bed_files[0]+'original', bed_files[0])
         evidence_level_return = flanking_return[1]['primer_close_placement']
         self.assertEqual(2, evidence_level_return)
 

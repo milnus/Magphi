@@ -265,6 +265,7 @@ def examine_flanking_regions(primer_contig_hits, max_primer_dist, genome_file, b
 
         # See if no ends has been reached
         if end_reaches[0] == 0 and end_reaches[1] == 0:
+            print("ends reached")
             return 1
 
         # Check if one primer has reached one or both ends, while the other has reached no ends. # TODO - should this be handled differently? is it in line with evidence levels? Should the evidence level be changed for this?
@@ -399,6 +400,7 @@ def check_primers_placement(bed_files, primer_pairs, primer_hits, max_primer_dis
                         # 2 or 4 means more examination is required
                         if return_value == 2:
                             primer_hit_support_dict[primer_name] = return_value
+                            bed_files.remove(file)
                         elif return_value == 1:
                         # elif return_value == 1 or return_value == 4:
                             # Examine the remaining junctions to see if two primers can be found to connect across contigs
@@ -406,6 +408,10 @@ def check_primers_placement(bed_files, primer_pairs, primer_hits, max_primer_dis
                                                                                             max_primer_dist,
                                                                                             f'{genome_file}.fai',
                                                                                             file)
+                            # Check if no connection could be made on or across contigs, if then delete bed from further processing
+                            if primer_hit_support_dict[primer_name] == 1:
+                                bed_files.remove(file)
+
                         elif return_value == '5B':
                             primer_hit_support_dict[primer_name] = return_value
                             alternative_return_value = examine_flanking_regions(primer_to_contig,

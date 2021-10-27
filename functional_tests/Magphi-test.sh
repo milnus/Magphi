@@ -196,8 +196,8 @@ test_exit_status "$test_program -g empty_file -s empty_file > /dev/null 2>&1" 3
 # All evidence levels
 # A  - no hit (All G) - 0
 # B  - single hit (All G with true primer) - 0
-# C  - Multiple hit no overlap - single contig (low max distance, single contig multiple hits) - 1 - #TODO
-# D  - Multiple hit multiple overlaps - single contig (large max distance, single contig multiple hits) - 2 - #TODO
+# C  - Multiple hit no overlap - single contig (low max distance, single contig multiple hits) - 1
+# D  - Multiple hit multiple overlaps - single contig (large max distance, single contig multiple hits) - 2
 # C.2  - Multiple hit no overlap - multiple contigs (low max distance, single contig multiple hits) - 1 - #TODO
 # D.2  - Multiple hit multiple overlaps - multiple contigs (large max distance, single contig multiple hits) - 2 - #TODO
 # E  - Overlap and exclude seeds - 3 - #TODO
@@ -225,6 +225,14 @@ rm -r test_out_folder
 # Run test for evidence level when two primers hit the same contig multiple times and they can connect multiple ways
 Magphi -g evidence_levels_simple_genome.fasta -s two_primers_simple_match_primers.fasta -o test_out_folder -md 1000
 test_output_file test_out_folder/master_primer_evidence.csv two_primers_multiple_hits_single_contig_multiple_connections.expected
+rm -r test_out_folder
+# Run test for evidence level when two primers hit multiple contigs multiple times and no connection between them
+Magphi -g evidence_levels_simple_two_contigs.fasta -s two_primers_simple_match_primers.fasta -o test_out_folder -md 1
+test_output_file test_out_folder/master_primer_evidence.csv two_primers_two_contigs_multipe_hits_no_connection.expected
+rm -r test_out_folder
+# run test for evidence level when two seeds hit multiple contigs multiple times and multiple connections
+Magphi -g evidence_levels_simple_two_contigs.fasta -s two_primers_simple_match_primers.fasta -o test_out_folder -md 1000
+test_output_file test_out_folder/master_primer_evidence.csv two_primers_two_contigs_muti_hit_multi_connect.expected
 rm -r test_out_folder
 # One with a primer on edge of contig and one that extracts
 # Chaws problem.

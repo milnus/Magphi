@@ -265,12 +265,11 @@ def examine_flanking_regions(primer_contig_hits, max_primer_dist, genome_file, b
 
         # See if no ends has been reached
         if end_reaches[0] == 0 and end_reaches[1] == 0:
-            print("ends reached")
             return 1
 
-        # Check if one primer has reached one or both ends, while the other has reached no ends. # TODO - should this be handled differently? is it in line with evidence levels? Should the evidence level be changed for this?
+        # Check if one primer has reached one or both ends, while the other has reached no ends.
         elif (end_reaches[0] == 1 and end_reaches[1] == 0) or (end_reaches[0] == 0 and end_reaches[1] == 1):
-            return 6 # TODO Discuss the evidence level of this. - Maybe 2? # - test
+            return 3 # TODO - POSSIBLY WRONG??
 
         # Check if
         # two or more primers hit both ends of their contig (end_reaches[0] > 1) or
@@ -434,7 +433,7 @@ def check_primers_placement(bed_files, primer_pairs, primer_hits, max_primer_dis
                         else:
                             sys.exit(100)
                 else:
-                    # Examine the primer hits across different contigs ***
+                    # Examine the primer hits across different contigs
                     return_value = examine_flanking_regions(primer_to_contig,
                                                             max_primer_dist,
                                                             f'{genome_file}.fai',
@@ -449,7 +448,7 @@ def check_primers_placement(bed_files, primer_pairs, primer_hits, max_primer_dis
                 # Check if precisely two primers hit the contig and that the mates from the pair hit one time each
                 if primer_hits[primer_name] == 2 and uniq_primers == 2:
                     # Score primer hit
-                    primer_hit_support_dict[primer_name] = '5A' # TODO - POSSIBLY WRONG - WAS 7
+                    primer_hit_support_dict[primer_name] = '5A'
 
                 # Check if two unique primers hit, but one/both may have hit multiple times
                 elif primer_hits[primer_name] > 2 and uniq_primers == 2:
@@ -516,7 +515,7 @@ def bed_merge_handling(blast_hit_beds, include_primers, exclude_primer_list, max
             # Remove the primer intervals
             primer_hits = primer_hits.subtract(exclusion_bed)
 
-            if pre_deletion_intervals > len(primer_hits):
+            if pre_deletion_intervals > len(primer_hits) and (str(primer_evidence[primer_name]) < '3' or primer_evidence[primer_name] == '5B'): # MAY BE WRONG THE LESS THAN LOGIC
                 primer_evidence[primer_name] = 3
 
         # Save the merged intervals
@@ -531,7 +530,8 @@ def bed_merge_handling(blast_hit_beds, include_primers, exclude_primer_list, max
             # Add to list
             merged_bed_files.append(merged_bed_file)
         else:
-            primer_evidence[primer_name] = 3
+            if str(primer_evidence[primer_name]) < '3':
+                primer_evidence[primer_name] = 3
 
     return merged_bed_files, primer_evidence
 

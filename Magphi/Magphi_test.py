@@ -934,7 +934,7 @@ class TestBedMergeHandling(unittest.TestCase):
         include_primers = False
         exclude_primer_list = ['TestBedMergeHandling/double_contig~~primer_edge_primers.bed']
         max_primer_dist = 101
-        primer_evidence = {'primer_edge_placement': 6}
+        primer_evidence = {'primer_edge_placement': 3}
 
         merged_bed_files, primer_evidence = search_insertion_sites.bed_merge_handling(blast_hit_beds,
                                                                                       include_primers,

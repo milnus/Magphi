@@ -399,7 +399,8 @@ def check_primers_placement(bed_files, primer_pairs, primer_hits, max_primer_dis
                         # 2 or 4 means more examination is required
                         if return_value == 2:
                             primer_hit_support_dict[primer_name] = return_value
-                        elif return_value == 1 or return_value == 4:
+                        elif return_value == 1:
+                        # elif return_value == 1 or return_value == 4:
                             # Examine the remaining junctions to see if two primers can be found to connect across contigs
                             primer_hit_support_dict[primer_name] = examine_flanking_regions(primer_to_contig,
                                                                                             max_primer_dist,
@@ -450,6 +451,8 @@ def check_primers_placement(bed_files, primer_pairs, primer_hits, max_primer_dis
                     primer_hit_support_dict[primer_name] = examine_flanking_regions(primer_to_contig,
                                                                                     max_primer_dist,
                                                                                     f'{genome_file}.fai')
+                    if primer_hit_support_dict[primer_name] == 1:
+                        bed_files.remove(file)
 
                 # Check that only one primer has hit, but it has hit multiple times
                 elif uniq_primers == 1:
@@ -463,7 +466,6 @@ def check_primers_placement(bed_files, primer_pairs, primer_hits, max_primer_dis
         else:
             # set primer evidence and remove bed-file from further processing
             primer_hit_support_dict[primer_name] = 0
-            print(file)
             bed_files.remove(file)
 
     return genome_file, primer_hit_support_dict
@@ -499,7 +501,6 @@ def bed_merge_handling(blast_hit_beds, include_primers, exclude_primer_list, max
             primer_evidence[primer_name] = '5B'
 
         # Evaluate if primers are to be excluded from the intervals
-        # TODO - Can be problematic if the primer hits the end of a contig, then the primer will be removed. Either make the user aware that a primer is found on the edge of a contig and only extract sequences that have somthing between it and the contig break or other soluton.
         if not include_primers:
             # Load bed containing primers to be excluded
             exclusion_bed = bedtools.BedTool(exclude_primer_list[i])

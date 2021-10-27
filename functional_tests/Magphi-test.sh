@@ -196,16 +196,18 @@ test_exit_status "$test_program -g empty_file -s empty_file > /dev/null 2>&1" 3
 # All evidence levels
 # A  - no hit (All G) - 0
 # B  - single hit (All G with true primer) - 0
-# C  - Multiple hit no overlap (low max distance, single contig multiple hits) - 1
-# D  - Multiple hit multiple overlaps (large max distance, single contig multiple hits) - 2
-# E  - Overlap and exclude seeds - 3
-# F  - Separate contigs one at edge and exclude primers. - 3
-# G  - Two seeds on separate contigs low max distance no connection - 5A
-# H  - Two seeds on separate contigs with medium distance and connection (No annotation) - 5B
-# I  - Two seeds on separate contigs with longer distance and connection (Annotations between) - 5C
-# J  - Two seeds on same contig low max distance no overlap  - 6A
-# K  - Two seeds on same contig medium max distance with overlap no annotations - 6B
-# L  - Two seeds on same contig longer max distance with overlap with annotations - 6C
+# C  - Multiple hit no overlap - single contig (low max distance, single contig multiple hits) - 1 - #TODO
+# D  - Multiple hit multiple overlaps - single contig (large max distance, single contig multiple hits) - 2 - #TODO
+# C.2  - Multiple hit no overlap - multiple contigs (low max distance, single contig multiple hits) - 1 - #TODO
+# D.2  - Multiple hit multiple overlaps - multiple contigs (large max distance, single contig multiple hits) - 2 - #TODO
+# E  - Overlap and exclude seeds - 3 - #TODO
+# F  - Separate contigs one at edge and exclude primers. - 3 - #TODO
+# G  - Two seeds on separate contigs low max distance no connection - 4A - #TODO
+# H  - Two seeds on separate contigs with medium distance and connection (No annotation) - 4B - #TODO
+# I  - Two seeds on separate contigs with longer distance and connection (Annotations between) - 4C - #TODO
+# J  - Two seeds on same contig low max distance no overlap  - 5A - #TODO
+# K  - Two seeds on same contig medium max distance with overlap no annotations - 5B - #TODO
+# L  - Two seeds on same contig longer max distance with overlap with annotations - 5C - #TODO
 
 
 # Run test for evidence level when no seed hits are found
@@ -215,6 +217,14 @@ rm -r test_out_folder
 # Run test for evidence level when a single seed hit is found
 Magphi -g evidence_levels_simple_genome.fasta -s single_primer_match_primers.fasta -o test_out_folder
 test_output_file test_out_folder/master_primer_evidence.csv one_primer_match_evidence_level.expected
+rm -r test_out_folder
+# Run test for evidence level when two primers hit multiple times on same contig, but cannot connect
+Magphi -g evidence_levels_simple_genome.fasta -s two_primers_simple_match_primers.fasta -o test_out_folder -md 1
+test_output_file test_out_folder/master_primer_evidence.csv two_primers_multiple_hits_single_contig_no_connections.expected
+rm -r test_out_folder
+# Run test for evidence level when two primers hit the same contig multiple times and they can connect multiple ways
+Magphi -g evidence_levels_simple_genome.fasta -s two_primers_simple_match_primers.fasta -o test_out_folder -md 1000
+test_output_file test_out_folder/master_primer_evidence.csv two_primers_multiple_hits_single_contig_multiple_connections.expected
 rm -r test_out_folder
 # One with a primer on edge of contig and one that extracts
 # Chaws problem.

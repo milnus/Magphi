@@ -398,7 +398,7 @@ class TestPrimersPlacement(unittest.TestCase): # TODO - check if this is exhaust
         evidence_level_return = flanking_return[1]['primer_same']
         self.assertEqual(0, evidence_level_return)
 
-    def test_single_primer_multiple_hit_multiple_contigs(self):
+    def test_multiple_primers_multiple_hit_single_contig(self):
         ''' Test that both seed sequences hit once on one contig with no overlap and that the evidence level is correct '''
         bed_files = ['TestPrimersPlacement/single_contig_1200N~~primer_different.bed']
         primer_pairs = {'primer_different': ['primer_different_1', 'primer_different_2']}
@@ -420,6 +420,27 @@ class TestPrimersPlacement(unittest.TestCase): # TODO - check if this is exhaust
 
         evidence_level_return = flanking_return[1]['primer_different']
         self.assertEqual('5A', evidence_level_return)
+        ''' Test that two unique seed seed sequence hitting the same contig multiple times returns the correct evidence level '''
+        bed_files = ['TestPrimersPlacement/single_contig_1200N~~primer_multi_different.bed']
+        primer_pairs = {'primer_multi_different': ['primer_multi_different_1', 'primer_multi_different_2']}
+        primer_hits = {'primer_multi_different': 3}
+        max_primer_dist = 1
+        genome_file = 'TestFlankingRegion/single_contig/single_contig_1200N.fasta'
+        file_type = 'fasta'
+        tmp_folder = 'TestPrimersPlacement'
+        flanking_return = search_insertion_sites.check_primers_placement(bed_files=bed_files,
+                                                                         primer_pairs=primer_pairs,
+                                                                         primer_hits=primer_hits,
+                                                                         max_primer_dist=max_primer_dist,
+                                                                         genome_file=genome_file,
+                                                                         file_type=file_type,
+                                                                         tmp_folder=tmp_folder)
+        # remove .fai file
+        os.remove('TestPrimersPlacement/single_contig_1200N.fasta.fai')
+        os.remove('TestPrimersPlacement/single_contig_1200N.fasta')
+
+        evidence_level_return = flanking_return[1]['primer_multi_different']
+        self.assertEqual(1, evidence_level_return)
 
     def test_multiple_hits_multiple_contigs_inter_contig_connect(self):
         ''' Test the outcome with two seed sequences that can connect on same contig, but not across contigs

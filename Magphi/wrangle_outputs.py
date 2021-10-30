@@ -2,8 +2,16 @@ import os
 import warnings
 
 
-def partition_outputs(primer_pairs, out_path):
-    # Go through each primer set, construct folder and populate the folder.
+def partition_outputs(primer_pairs, out_path, file_logger):
+    """
+    Function to distribute output files into appropriate output folders
+    :param primer_pairs: Name of seed sequence pairs in a list
+    :param out_path: Path to the output folder
+    :param file_logger: Logger that outputs files to log
+    :return:
+    """
+    file_logger.debug('Partitioning output files into primer folders')
+    # Go through each seed sequence pair, construct sub output folder and populate with output files.
     for primer in primer_pairs:
         # List all output files in output folder
         out_folder_content = os.listdir(out_path)
@@ -14,7 +22,7 @@ def partition_outputs(primer_pairs, out_path):
         try:
             os.mkdir(primer_out_path)
         except FileExistsError:
-            Warning(f"Output folder for primer pair: {primer} already exists")
+            file_logger.warning(f"Output folder for seed sequence pair: '{primer}' already exists")
 
         # find and move files into folder
         for i, file in enumerate(out_folder_content_paths):
@@ -38,8 +46,10 @@ def partition_outputs(primer_pairs, out_path):
                         round_count += 1
 
                         if round_count == 100:
-                            warnings.warn(f'Problem in placing outfile: {file} in an appropriate output folder for a primer.\n'
-                                          f'Please report this!')
+                            warnings.warn(f"Problem in placing outfile: '{file}' in an appropriate output folder for a primer.\n"
+                                          f"Please report this!")
+                            file_logger.warning(f"Problem in placing outfile: '{file}' in an appropriate output folder for a primer.\n"
+                                                f"Please report this!")
                             continue
 
                 # Check if a file in the output folder contain the primer name and is a fasta or gff file.

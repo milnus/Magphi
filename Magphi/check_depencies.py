@@ -8,7 +8,7 @@ except ModuleNotFoundError:
     from exit_with_error import exit_with_error
 EXIT_DEPENDENCY_ERROR = 4
 
-
+# TODO - write nice doc strings
 def check_for_biopython(verbose):
     '''Check for the presence of Biopython and if the version satisfies the required version 1.78 or above,
     if this can not be satisfied then warn the use of a missing dependency and exit.
@@ -150,25 +150,19 @@ def check_for_blast_plus(verbose=False):
         exit_with_error(str(exception), EXIT_DEPENDENCY_ERROR)
 
 
-
-
-
 def check_dependencies_for_main(verbose=False):
     ''' Function to check dependencies when Magphi is executed. If all programs are found their versions are returned,
     if they are not found False is returned.'''
-    # TODO - log the version of tools used for the run. - possibly do this in main when TRUE is returned. or return the versions instead of TRUE
-    biopython_presence = check_for_biopython(verbose)
+    biopython_present = check_for_biopython(verbose)
 
-    pybedtools_presence = check_for_pybedtools(verbose)
+    pybedtools_present = check_for_pybedtools(verbose)
 
-    bedtools_presence = check_for_bedtools(verbose)
+    bedtools_present = check_for_bedtools(verbose)
 
-    samtools_presence = check_for_samtools(verbose)
+    samtools_present = check_for_samtools(verbose)
 
-    # if all([biopython_presence, pybedtools_presence, bedtools_presence, samtools_presence]):
-    if all([biopython_presence, pybedtools_presence]):
-        # return [biopython_presence, pybedtools_presence]
-        return [biopython_presence, pybedtools_presence, bedtools_presence, samtools_presence]
+    if all([biopython_present, pybedtools_present, bedtools_present, samtools_present]):
+        return [biopython_present, pybedtools_present, bedtools_present, samtools_present]
     else:
         return False
 

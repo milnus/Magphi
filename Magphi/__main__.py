@@ -15,6 +15,7 @@ import os
 import time
 import logging
 from sys import argv
+from math import floor
 import pkg_resources # ??
 import concurrent.futures
 
@@ -86,32 +87,54 @@ except pkg_resources.DistributionNotFound:
     PROGRAM_VERSION = "undefined_version"
 
 
-def init_logging(log_filename):
+def init_logging(debug_log, out_path):
     '''If the log_filename is defined, then
     initialise the logging facility, and write log statement
     indicating the program has started, and also write out the
     command line from sys.argv
 
     Arguments:
-        log_filename: either None, if logging is not required, or the
-            string name of the log file to write to
+        debug_log: Boolean if the logger should be a debug of info log
+        out_path: Path to the output folder
     Result:
-        None
+        a stream and a file logger for logging to file and stdout
     '''
-    if log_filename is not None:
-        logging.basicConfig(filename=log_filename,
-                            level=logging.DEBUG,
-                            filemode='w',
-                            format='%(asctime)s %(levelname)s - %(message)s',
-                            datefmt="%Y-%m-%dT%H:%M:%S%z")
-        logging.info('program started')
-        logging.info(f"command line: {' '.join(argv)}")
+    if debug_log:
+        level = logging.DEBUG
+    else: #TODO - make verboses controlled. increase logging level
+        level = logging.INFO
 
-        # TODO - should default logging be command-line arguements, time of run, dependency versions, Errors and progress?
-        #   -log flag can be given for more info?
+    # Construct logger logging to file
+    file_logger = logging.getLogger(__name__)
+    file_logger.setLevel(level)
+
+    formatter = logging.Formatter('[%(asctime)s] %(levelname)s - %(module)s - %(message)s',
+                                                                datefmt="%Y-%m-%dT%H:%M:%S%z")
+
+    file_handler = logging.FileHandler(os.path.join(out_path, 'Magphi.log'))
+    file_handler.setLevel(level)
+    file_handler.setFormatter(formatter)
+    file_logger.addHandler(file_handler)
+
+    # Log command-line argument and debug line for Magphi start
+    file_logger.info(f"command line: {' '.join(argv)}")
+
+    return file_logger
+
+
+def stream_logging(file_logger):
+    stream_handler = logging.StreamHandler()
+    stream_handler.setLevel(logging.INFO)
+
+    file_logger.addHandler(stream_handler)
+
+    file_logger.info('Processing started')
+
+    return file_logger
 
 
 def main():
+    ''' This is the main function for running Magphi. Required arguments are genomes and seeds as a multi fasta file'''
     start_time = time.time()
 
     # Retrieve the flags given by the user in the commandline
@@ -119,56 +142,56 @@ def main():
     # TODO - add in argument to not output sequences and gffs but only overview tables.
     cmd_args = get_commandline_arguments(argv[1:], PROGRAM_VERSION)
 
+    # Try to construct the output folder and except if it does exist
+    try:
+        os.mkdir(cmd_args.out_path)
+    except FileExistsError:
+        pass
 
     "Orchestrate the execution of the program"
-    # options = parse_args()
-    init_logging(cmd_args.log)
+    file_logger = init_logging(cmd_args.log, cmd_args.out_path)
 
-    # Check dependencies for Magphi
-    dependencies_return = check_dependencies_for_main(verbose=False) # TODO make commandline verbose controlled.
+    # Check dependencies for Magphi and logging of versions to file
+    dependencies_return = check_dependencies_for_main(verbose=False)
     if dependencies_return:
-        logging.info("All dependencies are go!")
-        logging.info("Dependency versions:")
+        file_logger.info("Dependency versions:")
         dependencies = ['Biopython', 'Pybedtools', 'Bedtools', 'Samtools']
         for i in range(0, len(dependencies_return)):
-            logging.info(f"{dependencies[i]} v.{dependencies_return[i]}")
+            version = str(dependencies_return[i]).replace("\n", "")
+            file_logger.info(f'{dependencies[i]} v.{version}')
     else:
-        warnings.warn("Some dependencies are untested versions")
+        file_logger.warning("Some dependencies are untested version(s)")
+
+    file_logger = stream_logging(file_logger)
 
     # Check the input files
-    file_type, is_input_gzipped = check_inputs(cmd_args.genomes)
-
-    # Try to construct the output folder and except if it does exist
-    # TODO - make verbose controlled and log
-    try:
-        print("Trying to construct output folder...")
-        os.mkdir(cmd_args.out_path)
-        print("Succeeded!")
-    except FileExistsError:
-        print("Output folder exists")
+    file_type, is_input_gzipped = check_inputs(cmd_args.genomes, file_logger)
 
     # construct a temporary folder to hold files
-    # TODO - log construction of tmp folder
+    file_logger.debug("Try to construct output folder")
     tmp_folder = os.path.join(cmd_args.out_path, "Magphi_tmp_folder")
     try:
         os.mkdir(tmp_folder)
+        file_logger.debug("Output folder construction successful")
     except FileExistsError:
-        raise Warning("A temporary folder already exists at the given output location. "
-                      "Most likely from an incomplete analysis")
+        file_logger.warning("A temporary folder already exists at the given output location. "
+                                     "Most likely from an incomplete analysis")
 
-    # Check if input is GFF3 files and split genome from annotations and assign to be handed over to blast,
-    # If files are not gff then assign the fastas from the input an no annotations.
+    # If input is GFF3 split genome from annotations and assign to be handed over to blast,
+    # If files are not gff then assign the Fastas from the input and no annotations.
     # TODO - make verbose controlled - add logging
     # TODO - should this splitting be done when each genome is being searched for primers? This will decrease the load of memory used
     if file_type == 'gff':
-        print("Splitting GFF files into annotations and genomes")
+        file_logger.debug("Splitting GFF files into annotations and genomes")
         genomes, annotations = split_gff_files(cmd_args.genomes, tmp_folder, is_input_gzipped)
     else:
+        file_logger.debug("Setting fasta files as genomes and annotation to list of None")
         genomes = cmd_args.genomes
         annotations = [None] * len(cmd_args.genomes)
 
     # Read in and combine primers into pairs
-    primer_pairs, primer_dict = handle_primers(cmd_args.seeds)
+    file_logger.debug("Start handling of input seed sequences")
+    primer_pairs, primer_dict = handle_primers(cmd_args.seeds, file_logger) # TODO - Can we remove primer dict?
 
     # Construct master dict to hold the returned information from primers
     master_primer_hits = {}
@@ -177,25 +200,28 @@ def main():
     primers_w_breaks = primer_pairs.copy()
     master_inter_primer_dist = {}
 
-    # TODO - make verbose controlled - logging
-    print(f'{len(genomes)} input files to be processed, starting now!')
-
+    num_genomes = len(genomes)
+    file_logger.info(f'{num_genomes} input files to be processed, starting now!')
     genomes_processed = 0
     with concurrent.futures.ThreadPoolExecutor(max_workers=cmd_args.cpu) as executor:
         results = [executor.submit(screen_genome_for_primers, genomes[i], primer_pairs, cmd_args.seeds,
                                    tmp_folder, cmd_args.include_primers, file_type, annotations[i],
-                                   cmd_args.out_path, cmd_args.max_primer_dist) for i, genome in enumerate(genomes)]
+                                   cmd_args.out_path, cmd_args.max_primer_dist, file_logger) for i, genome in enumerate(genomes)]
 
         for f in concurrent.futures.as_completed(results):
             genomes_processed += 1
 
-            if genomes_processed % 25 == 0 or genomes_processed == 0:
-                print(f'   File number {genomes_processed} has been processed')
+            progress_num = floor(num_genomes/10)
+            progress_num = progress_num if progress_num > 1 else 1
+
+            if genomes_processed % progress_num == 0 or genomes_processed == 1:
+                file_logger.info(f'\tFile number {genomes_processed} has been processed')
 
             primer_hits, annots_per_interval, genome_name, primer_evidence, break_primers, inter_primer_dist = f.result()
 
             # Polish the genome name for the output dict:
             genome_name = genome_name.rsplit('/', 1)[-1]
+            file_logger.debug(f'\t\tCurrently handling results from: {genome_name}')
 
             # Update the master dicts with information from current run.
             master_annotation_hits[genome_name] = annots_per_interval
@@ -215,32 +241,30 @@ def main():
             if len(break_primers.keys()) > 0:
                 primers_w_breaks.update(break_primers)
 
-    print('Partitioning output files into primer folders')
     # Partition output files into their primer set of origin.
-    partition_outputs(primer_pairs, cmd_args.out_path)
+    partition_outputs(primer_pairs, cmd_args.out_path, file_logger)
 
-    print('Writing output matrices')
+    file_logger.debug('Start writing output files')
+    file_logger.debug('\tStart writing hit matrix file')
     write_primer_hit_matrix(master_primer_hits, primer_pairs, cmd_args.out_path)
     if file_type == 'gff':
+        file_logger.debug('\tStart writing hit extracted annotation file')
         write_annotation_num_matrix(master_annotation_hits, primers_w_breaks, cmd_args.out_path)
+    file_logger.debug('\tStart writing evidence for seed sequence pair file')
     write_primer_hit_evidence(master_primer_evidence, primer_pairs, cmd_args.out_path)
+    file_logger.debug('\tStart writing distance between seed sequence pair file')
     write_inter_primer_dist(master_inter_primer_dist, primers_w_breaks, cmd_args.out_path)
-
-    # Write a file specifying which primers were paired and their common name
+    file_logger.debug('\tStart writing seed sequence pairing file')
     write_paired_primers(primer_pairs, cmd_args.out_path)
 
     # log quick stats for the evidence levels
-
+    file_logger.debug("Remove temporary folder")
     os.rmdir(tmp_folder)
 
     time_to_finish = time.time() - start_time
     time_to_finish = int(round(time_to_finish, 0))
-    print(f"Done in: {time_to_finish} Seconds")
-
-    # TODO - How does Log work? Do we print something to terminal?
-    # TODO - Functional tests
+    file_logger.info(f"Magphi completed in: {time_to_finish//60} minutes {time_to_finish%60} Seconds")
 
 
-# If this script is run from the command line then call the main function.
 if __name__ == '__main__':
     main()

@@ -73,10 +73,11 @@ def get_commandline_arguments(args, version):
 
     parser.add_argument('-l',
                         '--log',
-                        help='record program progress in LOG_FILE',
-                        metavar='Log_file',
-                        type=str,
+                        help='record program progress in for debugging purpose',
+                        action='store_true',
+                        default=False,
                         required=False)
+
     parser.add_argument('-v',
                         '--version',
                         action='version',

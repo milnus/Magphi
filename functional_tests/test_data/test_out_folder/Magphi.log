@@ -1,0 +1,85 @@
+[2021-10-29T15:09:52+1100] INFO - __main__ - command line: Magphi/__main__.py -g functional_tests/test_data/evidence_levels_single_contig.gff -s functional_tests/test_data/two_seeds_w_annotation_between.fasta -o functional_tests/test_data/test_out_folder -md 750
+[2021-10-29T15:09:52+1100] INFO - __main__ - Dependency versions:
+[2021-10-29T15:09:52+1100] INFO - __main__ - Biopython v.1.79
+[2021-10-29T15:09:52+1100] INFO - __main__ - Pybedtools v.0.8.2
+[2021-10-29T15:09:52+1100] INFO - __main__ - Bedtools v.2.30.0
+[2021-10-29T15:09:52+1100] INFO - __main__ - Samtools v.1.12
+[2021-10-29T15:09:52+1100] INFO - __main__ - Magphi started
+[2021-10-29T15:09:52+1100] INFO - __main__ - 1 input files to be processed, starting now!
+[2021-10-29T15:09:53+1100] INFO - __main__ - 	File number 1 has been processed
+[2021-10-29T15:09:53+1100] INFO - __main__ - Done in: 0 Seconds
+[2021-10-31T08:33:00+1100] INFO - __main__ - command line: Magphi/__main__.py -g functional_tests/test_data/evidence_levels_single_contig.gff -s functional_tests/test_data/two_seeds_w_annotation_between.fasta -o functional_tests/test_data/test_out_folder -md 750
+[2021-10-31T08:33:00+1100] INFO - __main__ - Dependency versions:
+[2021-10-31T08:33:00+1100] INFO - __main__ - Biopython v.1.79
+[2021-10-31T08:33:00+1100] INFO - __main__ - Pybedtools v.0.8.2
+[2021-10-31T08:33:00+1100] INFO - __main__ - Bedtools v.2.30.0
+[2021-10-31T08:33:00+1100] INFO - __main__ - Samtools v.1.12
+[2021-10-31T08:33:00+1100] INFO - __main__ - Processing started
+[2021-10-31T08:33:00+1100] INFO - __main__ - 1 input files to be processed, starting now!
+[2021-10-31T08:33:00+1100] INFO - __main__ - 	File number 1 has been processed
+[2021-10-31T08:33:00+1100] WARNING - wrangle_outputs - Output folder for seed sequence pair: 'annotation_primers' already exists
+[2021-10-31T08:33:00+1100] INFO - __main__ - Magphi completed in: 0 1 Seconds
+[2021-10-31T08:33:13+1100] INFO - __main__ - command line: Magphi/__main__.py -g functional_tests/test_data/evidence_levels_single_contig.gff -s functional_tests/test_data/two_seeds_w_annotation_between.fasta -o functional_tests/test_data/test_out_folder -md 750
+[2021-10-31T08:33:13+1100] INFO - __main__ - Dependency versions:
+[2021-10-31T08:33:13+1100] INFO - __main__ - Biopython v.1.79
+[2021-10-31T08:33:13+1100] INFO - __main__ - Pybedtools v.0.8.2
+[2021-10-31T08:33:13+1100] INFO - __main__ - Bedtools v.2.30.0
+[2021-10-31T08:33:13+1100] INFO - __main__ - Samtools v.1.12
+[2021-10-31T08:33:13+1100] INFO - __main__ - Processing started
+[2021-10-31T08:33:13+1100] INFO - __main__ - 1 input files to be processed, starting now!
+[2021-10-31T08:33:14+1100] INFO - __main__ - 	File number 1 has been processed
+[2021-10-31T08:33:14+1100] WARNING - wrangle_outputs - Output folder for seed sequence pair: 'annotation_primers' already exists
+[2021-10-31T08:33:14+1100] INFO - __main__ - Magphi completed in: 0 minutes 0 Seconds
+[2021-10-31T08:48:59+1100] INFO - __main__ - command line: Magphi/__main__.py -g functional_tests/test_data/evidence_levels_single_contig.gff -s functional_tests/test_data/two_seeds_w_annotation_between.fasta -o functional_tests/test_data/test_out_folder -md 750
+[2021-10-31T08:48:59+1100] INFO - __main__ - Dependency versions:
+[2021-10-31T08:48:59+1100] INFO - __main__ - Biopython v.1.79
+[2021-10-31T08:48:59+1100] INFO - __main__ - Pybedtools v.0.8.2
+[2021-10-31T08:48:59+1100] INFO - __main__ - Bedtools v.2.30.0
+[2021-10-31T08:48:59+1100] INFO - __main__ - Samtools v.1.12
+[2021-10-31T08:48:59+1100] INFO - __main__ - Processing started
+[2021-10-31T08:48:59+1100] INFO - __main__ - 1 input files to be processed, starting now!
+[2021-10-31T08:48:59+1100] INFO - __main__ - 	File number 1 has been processed
+[2021-10-31T08:48:59+1100] WARNING - wrangle_outputs - Output folder for seed sequence pair: 'annotation_primers' already exists
+[2021-10-31T08:48:59+1100] INFO - __main__ - Magphi completed in: 0 minutes 0 Seconds
+[2021-10-31T08:49:07+1100] INFO - __main__ - command line: Magphi/__main__.py -g functional_tests/test_data/evidence_levels_single_contig.gff -s functional_tests/test_data/two_seeds_w_annotation_between.fasta -o functional_tests/test_data/test_out_folder -md 750 -l
+[2021-10-31T08:49:07+1100] INFO - __main__ - Dependency versions:
+[2021-10-31T08:49:07+1100] INFO - __main__ - Biopython v.1.79
+[2021-10-31T08:49:07+1100] INFO - __main__ - Pybedtools v.0.8.2
+[2021-10-31T08:49:07+1100] INFO - __main__ - Bedtools v.2.30.0
+[2021-10-31T08:49:07+1100] INFO - __main__ - Samtools v.1.12
+[2021-10-31T08:49:07+1100] INFO - __main__ - Processing started
+[2021-10-31T08:49:07+1100] DEBUG - check_inputs - Check input files: Initiating verifying input files are either FASTA or GFF3 with genome attached. Also checking for gzipped state
+[2021-10-31T08:49:07+1100] DEBUG - check_inputs - Check if input genomes are in gzipped state
+[2021-10-31T08:49:07+1100] DEBUG - check_inputs - Files were not found to be gzipped
+[2021-10-31T08:49:07+1100] DEBUG - check_inputs - Check if input genomes are fasta format
+[2021-10-31T08:49:07+1100] DEBUG - check_inputs - Files were not found to be Fasta files
+[2021-10-31T08:49:07+1100] DEBUG - check_inputs - Check input files: Check if GFF3
+[2021-10-31T08:49:07+1100] DEBUG - check_inputs - Files were found to be GFF files
+[2021-10-31T08:49:07+1100] DEBUG - __main__ - Try to construct output folder
+[2021-10-31T08:49:07+1100] DEBUG - __main__ - Output folder construction successful
+[2021-10-31T08:49:07+1100] DEBUG - __main__ - Splitting GFF files into annotations and genomes
+[2021-10-31T08:49:07+1100] DEBUG - __main__ - Start handling of input seed sequences
+[2021-10-31T08:49:07+1100] DEBUG - primer_handling - Initiating count of seed sequences
+[2021-10-31T08:49:07+1100] DEBUG - primer_handling - Number of seed sequences given is equal
+[2021-10-31T08:49:07+1100] DEBUG - primer_handling - Start extraction of seed sequence names
+[2021-10-31T08:49:07+1100] DEBUG - primer_handling - Initiate pairing of seed sequence names into pairs
+[2021-10-31T08:49:07+1100] DEBUG - primer_handling - 2 primers found in primer file. - This leads to 1 pairs of primers.
+[2021-10-31T08:49:07+1100] INFO - __main__ - 1 input files to be processed, starting now!
+[2021-10-31T08:49:07+1100] DEBUG - search_insertion_sites - Start search of sequences is functional_tests/test_data/test_out_folder/Magphi_tmp_folder/evidence_levels_single_contig_tmp.fasta
+[2021-10-31T08:49:07+1100] DEBUG - search_insertion_sites - 	BLASTing: functional_tests/test_data/test_out_folder/Magphi_tmp_folder/evidence_levels_single_contig_tmp.fasta
+[2021-10-31T08:49:07+1100] DEBUG - search_insertion_sites - 	Constructing bed file: functional_tests/test_data/test_out_folder/Magphi_tmp_folder/evidence_levels_single_contig_tmp.fasta
+[2021-10-31T08:49:07+1100] DEBUG - search_insertion_sites - 	Checking seed sequence placement: functional_tests/test_data/test_out_folder/Magphi_tmp_folder/evidence_levels_single_contig_tmp.fasta
+[2021-10-31T08:49:07+1100] DEBUG - search_insertion_sites - 	Merging seed sequences: functional_tests/test_data/test_out_folder/Magphi_tmp_folder/evidence_levels_single_contig_tmp.fasta
+[2021-10-31T08:49:07+1100] DEBUG - search_insertion_sites - 	Extracting sequences from intervals: functional_tests/test_data/test_out_folder/Magphi_tmp_folder/evidence_levels_single_contig_tmp.fasta
+[2021-10-31T08:49:07+1100] INFO - __main__ - 	File number 1 has been processed
+[2021-10-31T08:49:07+1100] DEBUG - __main__ - 		Currently handling results from: evidence_levels_single_contig
+[2021-10-31T08:49:07+1100] DEBUG - wrangle_outputs - Partitioning output files into primer folders
+[2021-10-31T08:49:07+1100] WARNING - wrangle_outputs - Output folder for seed sequence pair: 'annotation_primers' already exists
+[2021-10-31T08:49:07+1100] DEBUG - __main__ - Start writing output files
+[2021-10-31T08:49:07+1100] DEBUG - __main__ - 	Start writing hit matrix file
+[2021-10-31T08:49:07+1100] DEBUG - __main__ - 	Start writing hit extracted annotation file
+[2021-10-31T08:49:07+1100] DEBUG - __main__ - 	Start writing evidence for seed sequence pair file
+[2021-10-31T08:49:07+1100] DEBUG - __main__ - 	Start writing distance between seed sequence pair file
+[2021-10-31T08:49:07+1100] DEBUG - __main__ - 	Start writing seed sequence pairing file
+[2021-10-31T08:49:07+1100] DEBUG - __main__ - Remove temporary folder
+[2021-10-31T08:49:07+1100] INFO - __main__ - Magphi completed in: 0 minutes 0 Seconds

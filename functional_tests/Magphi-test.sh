@@ -186,30 +186,8 @@ test_exit_status "$test_program -g random_text.txt -s empty_file > /dev/null 2>&
 # Test when empty file is given as input
 test_exit_status "$test_program -g empty_file -s empty_file > /dev/null 2>&1" 3
 
-## TODO - funcitonal tests
-# GENOMES - ALL As
-# Fasta input
-# Gff input
-# gzipped inputs
-#   - fasta
-#   - gff
-# All evidence levels
-# A  - no hit (All G) - 0
-# B  - single hit (All G with true primer) - 0
-# C  - Multiple hit no overlap - single contig (low max distance, single contig multiple hits) - 1
-# D  - Multiple hit multiple overlaps - single contig (large max distance, single contig multiple hits) - 2
-# C.2  - Multiple hit no overlap - multiple contigs (low max distance, single contig multiple hits) - 1
-# D.2  - Multiple hit multiple overlaps - multiple contigs (large max distance, single contig multiple hits) - 2
-# E  - Overlap and exclude seeds - 3
-# F  - Separate contigs one at edge and exclude primers. - 3
 # M  - Test multiple hits where two can be found to connect - same contig - # TODO
 # N  - Test multiple hits where two can be found to connect - across contigs. - # TODO
-# G  - Two seeds on separate contigs low max distance no connection - 4A
-# H  - Two seeds on separate contigs with medium distance and connection (No annotation) - 4B
-# I  - Two seeds on separate contigs with longer distance and connection (Annotations between) - 4C
-# J  - Two seeds on same contig low max distance no overlap  - 5A - #TODO
-# K  - Two seeds on same contig medium max distance with overlap no annotations - 5B - #TODO
-# L  - Two seeds on same contig longer max distance with overlap with annotations - 5C - #TODO
 
 
 

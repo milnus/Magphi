@@ -1418,3 +1418,6 @@ class TestWritingOutputFiles(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+# TODO - set up a test with a fasta file that contain a new line in seqeunce, but has > in first line.
+# TODO - set up test with seed sequnces that contain space in their header? - should this be handles by just splitting first space and using index zero
+# TODO - set up test with duplicate seed seqeunce names

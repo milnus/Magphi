@@ -515,7 +515,7 @@ def bed_merge_handling(blast_hit_beds, include_primers, exclude_primer_list, max
             # Remove the primer intervals
             primer_hits = primer_hits.subtract(exclusion_bed)
 
-            if pre_deletion_intervals > len(primer_hits) and (str(primer_evidence[primer_name]) < '3' or primer_evidence[primer_name] == '5B' or primer_evidence[primer_name] == '4B'): # MAY BE WRONG THE LESS THAN LOGIC
+            if pre_deletion_intervals > len(primer_hits) and (str(primer_evidence[primer_name]) < '3' or primer_evidence[primer_name] == '5B' or primer_evidence[primer_name] == '4B'):
                 primer_evidence[primer_name] = 3
 
         # Save the merged intervals
@@ -681,7 +681,28 @@ def extract_seqs_n_annots(merged_bed_files, file_type, genome_file, annotation_f
 
 
 def screen_genome_for_primers(genome_file, primer_pairs, primer_path, tmp_folder,
-                              include_primers, file_type, annotation_file, out_path, max_primer_dist):
+                              include_primers, file_type, annotation_file, out_path, max_primer_dist, file_logger):
+    """
+    Function that summarise the search of seeds sequences, determination of position and extraction.
+    :param genome_file: Path to genome to be searched for seed sequences
+    :param primer_pairs: Dict of seed sequences that are matched into pairs
+    :param primer_path: Path to the file containing the seed sequence fasta
+    :param tmp_folder: The working temporary folder Magphi has created
+    :param include_primers: Boolean to indicate if the coordinates of the seed sequences should be included in results
+    :param file_type: Variable indicating if input genomes are gff or fasta files
+    :param annotation_file: Path to the annotations part of an input gff file, previously split from the genome part
+    :param out_path: Path to the output folder
+    :param max_primer_dist: Integer indicating the maximum distance allowed between two seed sequences
+    :param file_logger: File to with debug log statements should be written.
+    :return: Number of times a seed sequence pairs hit the genome,
+    number of annotations in the interval found between seed sequences,
+    name of the genome extracted from,
+    evidence for how seed sequences hit and connected in the genome,
+    Any seed sequences that were next to a sequences break
+    distance between seed sequences that could be connected.
+    """
+
+    file_logger.debug(f"Start search of sequences is {genome_file}")
     # Clean the genome name for path, .gff and possible _tmp if gff is given
     # genome_name = genome_file.rsplit('/', 1)[1]
     genome_name = os.path.basename(genome_file)
@@ -692,23 +713,28 @@ def screen_genome_for_primers(genome_file, primer_pairs, primer_path, tmp_folder
     genome_name = os.path.join(tmp_folder, genome_name)
 
     # Run blast with genome and insertion site sequences
+    file_logger.debug(f"\tBLASTing: {genome_file}")
     blast_xml_output = blast_insertion_site(primer_path, genome_file, f'{genome_name}_blast')
 
     # Construct a bedfile from blast output
+    file_logger.debug(f"\tConstructing bed file: {genome_file}")
     blast_hit_beds, exclude_primer_list, primer_hits = blast_out_to_sorted_bed(blast_xml_output,
                                                                                include_primers,
                                                                                genome_name,
                                                                                primer_pairs)
 
     # Examine the primer hits and try to find solutions when multiple primers hit at once
+    file_logger.debug(f"\tChecking seed sequence placement: {genome_file}")
     genome_file, primer_evidence = check_primers_placement(blast_hit_beds, primer_pairs, primer_hits, max_primer_dist,
                                                            genome_file, file_type, tmp_folder)
 
     # sort and merge the bed files
+    file_logger.debug(f"\tMerging seed sequences: {genome_file}")
     merged_bed_files, primer_evidence = bed_merge_handling(blast_hit_beds, include_primers, exclude_primer_list,
                                                            max_primer_dist, primer_evidence)
 
     # Extract sequences and annotations using merged intervals.
+    file_logger.debug(f"\tExtracting sequences from intervals: {genome_file}")
     annots_per_interval, break_primers, primer_evidence, inter_primer_dist = extract_seqs_n_annots(merged_bed_files,
                                                                                                    file_type,
                                                                                                    genome_file,

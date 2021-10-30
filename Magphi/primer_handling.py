@@ -30,9 +30,8 @@ def check_number_of_primers(primer_file, file_logger):
     if num_primers % 2 != 0:
         file_logger.exception("The number of seed sequences given is not even! This means that not all seed sequences can be given a mate\n"
               "If you have a seed sequence that should be used twice it should be in the file twice.")
-        exit_with_error.exit_with_error(message=
-                                        "The number of seed sequences given is not even! This means that not all seed sequences can be given a mate\n"
-                                        "If you have a seed sequence that should be used twice it should be in the file twice.",
+        exit_with_error(message="The number of seed sequences given is not even! This means that not all seed sequences can be given a mate\n"
+                                "If you have a seed sequence that should be used twice it should be in the file twice.",
                                         exit_status=EXIT_INPUT_FILE_ERROR)
     else:
         file_logger.debug("Number of seed sequences given is equal")
@@ -62,7 +61,7 @@ def extract_primer_info(primer_file, file_logger):
 
                 if primer_name in primer_dict.keys():
                     file_logger.exception("Duplicate seed sequence names were identified! This is not allowed and should be changed")
-                    exit_with_error.exit_with_error(message="Duplicate seed sequence names were identified! This is not allowed and should be changed",
+                    exit_with_error(message="Duplicate seed sequence names were identified! This is not allowed and should be changed",
                                                     exit_status=EXIT_INPUT_FILE_ERROR)
 
                 primer_dict[primer_name] = []
@@ -127,7 +126,7 @@ def construct_pair_primers(primer_names, file_logger):
 
     if n_loops == 1000:
         file_logger.exception(f'Seed sequence pairing failed due to more than 1000 rounds of pairing tested. primers remaining to be paired: primer_names = {primer_names}')
-        exit_with_error.exit_with_error(message=f'Seed sequence pairing failed due to more than 1000 rounds of pairing tested. primers remaining to be paired: primer_names = {primer_names}',
+        exit_with_error(message=f'Seed sequence pairing failed due to more than 1000 rounds of pairing tested. primers remaining to be paired: primer_names = {primer_names}',
                                         exit_status=EXIT_INPUT_FILE_ERROR)
 
     return primer_pairs

@@ -8,6 +8,7 @@ import unittest
 import os
 import json
 from shutil import copyfile
+import logging
 
 from Magphi import check_inputs
 from Magphi import split_gff_file
@@ -46,13 +47,18 @@ class TestExitWithError(unittest.TestCase):
 
 
 class TestFileRecognition(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.logger = logging.getLogger('test_logger.log')
+        cls.logger.setLevel(logging.INFO)
+
     def test_fasta_recognition(self):
         ''' test the recognition of fasta files '''
         path = 'TestFileRecognition/Fasta_files'
         files = os.listdir(path)
         files = [os.path.join(path, file) for file in files]
 
-        file_type = check_inputs.check_if_fasta(files)
+        file_type = check_inputs.check_if_fasta(files, self.logger)
 
         self.assertEqual('fasta', file_type)
 
@@ -62,7 +68,7 @@ class TestFileRecognition(unittest.TestCase):
         files = os.listdir(path)
         files = [os.path.join(path, file) for file in files]
 
-        file_type = check_inputs.check_if_fasta(files)
+        file_type = check_inputs.check_if_fasta(files, self.logger)
 
         self.assertEqual(None, file_type)
 
@@ -73,7 +79,7 @@ class TestFileRecognition(unittest.TestCase):
         files = [os.path.join(path, file) for file in files]
 
         with self.assertRaises(SystemExit):
-            check_inputs.check_if_fasta(files)
+            check_inputs.check_if_fasta(files, self.logger)
 
     def test_fasta_and_random_text_recognition(self):
         ''' test that a mix of fasta and random text files results in exiting Magphi with an error '''
@@ -82,7 +88,7 @@ class TestFileRecognition(unittest.TestCase):
         files = [os.path.join(path, file) for file in files]
 
         with self.assertRaises(SystemExit):
-            check_inputs.check_if_fasta(files)
+            check_inputs.check_if_fasta(files, self.logger)
 
     def test_complete_gff_recognition(self):
         ''' test that gff files with an attached genome are recognised correctly '''
@@ -90,7 +96,7 @@ class TestFileRecognition(unittest.TestCase):
         files = os.listdir(path)
         files = [os.path.join(path, file) for file in files]
 
-        file_type = check_inputs.check_if_gff(files)
+        file_type = check_inputs.check_if_gff(files, self.logger)
 
         self.assertEqual('gff', file_type)
 
@@ -100,7 +106,7 @@ class TestFileRecognition(unittest.TestCase):
         files = os.listdir(path)
         files = [os.path.join(path, file) for file in files]
 
-        file_type = check_inputs.check_if_gff(files)
+        file_type = check_inputs.check_if_gff(files, self.logger)
 
         self.assertEqual(None, file_type)
 
@@ -110,7 +116,7 @@ class TestFileRecognition(unittest.TestCase):
         files = os.listdir(path)
         files = [os.path.join(path, file) for file in files]
         with self.assertRaises(SystemExit):
-            check_inputs.check_if_gff(files)
+            check_inputs.check_if_gff(files, self.logger)
 
     def test_gff_and_random_text_recognition(self):
         ''' test that a mix of GFF3 and random text files results in exiting Magphi with an error '''
@@ -119,40 +125,40 @@ class TestFileRecognition(unittest.TestCase):
         files = [os.path.join(path, file) for file in files]
 
         with self.assertRaises(SystemExit):
-            check_inputs.check_if_gff(files)
+            check_inputs.check_if_gff(files, self.logger)
 
     def test_not_incompatible_recognition(self):
         ''' test that a text file not being a Fasta or GFF3 files results in an error '''
         files = ['TestFileRecognition/Mixed_miscellaneous_files/Random_text.txt']
 
         with self.assertRaises(SystemExit):
-            check_inputs.check_inputs(files)
+            check_inputs.check_inputs(files, self.logger)
 
     def test_empty_file(self):
         ''' Test that an empty file results in an error '''
         files = ['TestFileRecognition/Mixed_miscellaneous_files/empty_file.txt']
 
         with self.assertRaises(SystemExit):
-            check_inputs.check_inputs(files)
+            check_inputs.check_inputs(files, self.logger)
 
     def test_gzipped_files(self):
         ''' Test that input of gzipped files are recognised as such '''
         files = ['TestFileRecognition/All_gzipped/GCA_005163865.fna.gz', 'TestFileRecognition/All_gzipped/GCA_900475985.fna.gz']
 
-        self.assertEqual(True, check_inputs.check_if_gzip(files))
+        self.assertEqual(True, check_inputs.check_if_gzip(files, self.logger))
 
     def test_mixed_gzipped_and_none_compressed_files(self):
         ''' Test that input of gzipped files are recognised as such '''
         files = ['TestFileRecognition/Mixed_gzipped/GCA_005163865.fna.gz', 'TestFileRecognition/Mixed_gzipped/GCA_900475985.fna']
 
         with self.assertRaises(SystemExit):
-            check_inputs.check_if_gzip(files)
+            check_inputs.check_if_gzip(files, self.logger)
 
     def test_non_gzipped_files(self):
         ''' Test that input of gzipped files are recognised as such '''
         files = ['TestFileRecognition/Fasta_files/GCA_005163865.fna']
 
-        self.assertEqual(False, check_inputs.check_if_gzip(files))
+        self.assertEqual(False, check_inputs.check_if_gzip(files, self.logger))
 
 
 class TestSplittingGff(unittest.TestCase):
@@ -210,17 +216,22 @@ class TestSplittingGff(unittest.TestCase):
 
 
 class TestPrimerFunctions(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.logger = logging.getLogger('test_logger.log')
+        cls.logger.setLevel(logging.INFO)
+
     def test_uneven_primer_number(self):
         ''' test that program exits if an uneven number of primers is given, as this can not be made into a number of sets '''
         with self.assertRaises(SystemExit):
-            primer_handling.check_number_of_primers('TestPrimerFunctions/Uneven_number_primers.txt')
+            primer_handling.check_number_of_primers('TestPrimerFunctions/Uneven_number_primers.txt', self.logger)
 
     def test_correct_primer_pairing(self):
         ''' test that a file with correctly named primers can be paired as expected '''
         # TODO - make the primers randomly named with extended _1 and _2, and a random number of primer pairs?
         ''' Test that primers with correct naming can be paired correctly '''
         primer_names = ['D_1', 'D_2', 'mutsD_1', 'mutsD_2']
-        primer_pairs = primer_handling.construct_pair_primers(primer_names)
+        primer_pairs = primer_handling.construct_pair_primers(primer_names, self.logger)
 
         expected_names = {'D': ['D_1', 'D_2'], 'mutsD': ['mutsD_1', 'mutsD_2']}
 
@@ -234,12 +245,12 @@ class TestPrimerFunctions(unittest.TestCase):
         ''' Test that giving primers that can not be matched by name makes the program exit '''
         primer_names = ['D_2', 'B_1', 'Z_1', 'A_1']
         with self.assertRaises(SystemExit):
-            primer_handling.construct_pair_primers(primer_names)
+            primer_handling.construct_pair_primers(primer_names, self.logger)
 
     def test_identical_primer_names(self):
         ''' Test that giving primers with the exact same name will result in an exit of the program '''
         with self.assertRaises(SystemExit):
-            primer_handling.extract_primer_info('TestPrimerFunctions/Same_name_primers.txt')
+            primer_handling.extract_primer_info('TestPrimerFunctions/Same_name_primers.txt', self.logger)
 
 
 # TODO - test blast function?
@@ -1220,6 +1231,10 @@ class TestPartitionOutputs(unittest.TestCase):
 
         os.remove('TestPartitionOutputs/file.txt')
 
+        # Construct mock logger
+        cls.logger = logging.getLogger('test_logger.log')
+        cls.logger.setLevel(logging.INFO)
+
     def tearDown(self):
         ''' Class to remove the mock output files and folders '''
         for primer in self.primers:
@@ -1245,7 +1260,7 @@ class TestPartitionOutputs(unittest.TestCase):
             pass
 
         # Run test to wrangle outputs
-        wrangle_outputs.partition_outputs(self.primers, unittest_data_dir)
+        wrangle_outputs.partition_outputs(self.primers, unittest_data_dir, self.logger)
 
         # Check that all files are in their expected place
         file_presence = []
@@ -1274,7 +1289,7 @@ class TestPartitionOutputs(unittest.TestCase):
             pass
 
         # Run test to wrangle outputs
-        wrangle_outputs.partition_outputs(self.primers, unittest_data_dir)
+        wrangle_outputs.partition_outputs(self.primers, unittest_data_dir, self.logger)
 
         # Check that all files are in their expected place
         file_presence = []
@@ -1302,7 +1317,7 @@ class TestPartitionOutputs(unittest.TestCase):
             pass
 
         # Run test to wrangle outputs
-        wrangle_outputs.partition_outputs(self.primers, unittest_data_dir)
+        wrangle_outputs.partition_outputs(self.primers, unittest_data_dir, self.logger)
 
         # Check that all files are in their expected place
         file_presence = []

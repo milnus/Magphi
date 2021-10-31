@@ -45,7 +45,7 @@ def check_if_gzip(input_files, file_logger):
         return False
 
 
-def check_if_fasta(input_files, file_logger):
+def check_if_fasta(input_files, file_logger, is_input_gzipped):
     """
     Function to check if input files are Fasta format identified by > in first line
     returns 'fasta' if all files are fasta, exits and logs error if only some are fasta indicating mixed input
@@ -59,9 +59,15 @@ def check_if_fasta(input_files, file_logger):
     # Search all files for fasta signature > in first line.
     is_input_fasta = [False]*len(input_files)
     for i, file in enumerate(input_files):
-        with open(file, 'r') as in_file:
-            if '>' in in_file.readline():
-                is_input_fasta[i] = True
+        if is_input_gzipped:
+            in_file = gzip.open(file, 'rt')
+        else:
+            in_file = open(file, 'r')
+
+        # Test first line
+        if '>' in in_file.readline():
+            is_input_fasta[i] = True
+        in_file.close()
 
     # Check if all input genomes are fasta, if then return 'fasta'
     # else check if only some input genomes are fasta - if: Give error
@@ -81,7 +87,7 @@ def check_if_fasta(input_files, file_logger):
         return None
 
 
-def check_if_gff(input_files, file_logger):
+def check_if_gff(input_files, file_logger, is_input_gzipped):
     """
     Function to check in input genomes are given in a gff3 format with the appended genome.
     :param
@@ -93,18 +99,24 @@ def check_if_gff(input_files, file_logger):
     file_logger.debug('Check input files: Check if GFF3')
     is_input_gff = [False] * len(input_files)
     for i, file in enumerate(input_files):
-        with open(file, 'r') as in_file:
-            if '##gff-version 3' in in_file.readline():
-                for line in in_file.readlines():
-                    if '##FASTA' in line:
-                        is_input_gff[i] = True
-                # Check that a genome has been found in file
-                if is_input_gff[i] is False:
-                    print(f'UPS! {file} does seem to be a GFF3 version, but not one that contain the genome '
-                          f'following a ##FASTA line - Please check the file')
-                    file_logger.error('Check input files: Input is GFF but seems to miss ##FASTA line or entire genome')
-                    exit_with_error(message='Input is GFF but seems to miss ##FASTA line or entire genome',
-                                    exit_status=EXIT_INPUT_FILE_ERROR)
+        if is_input_gzipped:
+            in_file = gzip.open(file, 'rt')
+        else:
+            in_file = open(file, 'r')
+
+        if '##gff-version 3' in in_file.readline():
+            for line in in_file.readlines():
+                if '##FASTA' in line:
+                    is_input_gff[i] = True
+            # Check that a genome has been found in file
+            if is_input_gff[i] is False:
+                in_file.close()
+                print(f'UPS! {file} does seem to be a GFF3 version, but not one that contain the genome '
+                      f'following a ##FASTA line - Please check the file')
+                file_logger.error('Check input files: Input is GFF but seems to miss ##FASTA line or entire genome')
+                exit_with_error(message='Input is GFF but seems to miss ##FASTA line or entire genome',
+                                exit_status=EXIT_INPUT_FILE_ERROR)
+        in_file.close()
 
     if all(is_input_gff):
         file_logger.debug('Files were found to be GFF files')
@@ -138,11 +150,11 @@ def check_inputs(input_files, file_logger):
     is_input_gzipped = check_if_gzip(input_files, file_logger)
 
     # check if input file is fasta
-    file_type = check_if_fasta(input_files, file_logger)
+    file_type = check_if_fasta(input_files, file_logger, is_input_gzipped)
 
     # Check if input files are GFF3
     if file_type is None:
-        file_type = check_if_gff(input_files, file_logger)
+        file_type = check_if_gff(input_files, file_logger, is_input_gzipped)
 
     # If file_type is still None, exit as input files are not recognized
     if file_type is None:

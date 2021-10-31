@@ -46,7 +46,7 @@ class TestExitWithError(unittest.TestCase):
         os.rename(tmp_folder_copy, tmp_folder)
 
 
-class TestFileRecognition(unittest.TestCase):
+class TestFileRecognition(unittest.TestCase):#TODO - Test gzipped input files
     @classmethod
     def setUpClass(cls):
         cls.logger = logging.getLogger('test_logger.log')
@@ -58,7 +58,17 @@ class TestFileRecognition(unittest.TestCase):
         files = os.listdir(path)
         files = [os.path.join(path, file) for file in files]
 
-        file_type = check_inputs.check_if_fasta(files, self.logger)
+        file_type = check_inputs.check_if_fasta(files, self.logger, False)
+
+        self.assertEqual('fasta', file_type)
+
+    def test_gzipped_fasta_recognition(self):
+        ''' test the recognition of fasta files '''
+        path = 'TestFileRecognition/All_gzipped_fasta'
+        files = os.listdir(path)
+        files = [os.path.join(path, file) for file in files]
+
+        file_type = check_inputs.check_if_fasta(files, self.logger, True)
 
         self.assertEqual('fasta', file_type)
 
@@ -68,7 +78,7 @@ class TestFileRecognition(unittest.TestCase):
         files = os.listdir(path)
         files = [os.path.join(path, file) for file in files]
 
-        file_type = check_inputs.check_if_fasta(files, self.logger)
+        file_type = check_inputs.check_if_fasta(files, self.logger, False)
 
         self.assertEqual(None, file_type)
 
@@ -79,7 +89,7 @@ class TestFileRecognition(unittest.TestCase):
         files = [os.path.join(path, file) for file in files]
 
         with self.assertRaises(SystemExit):
-            check_inputs.check_if_fasta(files, self.logger)
+            check_inputs.check_if_fasta(files, self.logger, False)
 
     def test_fasta_and_random_text_recognition(self):
         ''' test that a mix of fasta and random text files results in exiting Magphi with an error '''
@@ -88,15 +98,25 @@ class TestFileRecognition(unittest.TestCase):
         files = [os.path.join(path, file) for file in files]
 
         with self.assertRaises(SystemExit):
-            check_inputs.check_if_fasta(files, self.logger)
+            check_inputs.check_if_fasta(files, self.logger, False)
 
-    def test_complete_gff_recognition(self):
+    def test_gff_recognition(self):
         ''' test that gff files with an attached genome are recognised correctly '''
         path = 'TestFileRecognition/Gff3_files'
         files = os.listdir(path)
         files = [os.path.join(path, file) for file in files]
 
-        file_type = check_inputs.check_if_gff(files, self.logger)
+        file_type = check_inputs.check_if_gff(files, self.logger, False)
+
+        self.assertEqual('gff', file_type)
+
+    def test_gzipped_gff_recognition(self):
+        ''' test that gff files with an attached genome are recognised correctly '''
+        path = 'TestFileRecognition/All_gzipped_gff'
+        files = os.listdir(path)
+        files = [os.path.join(path, file) for file in files]
+
+        file_type = check_inputs.check_if_gff(files, self.logger, True)
 
         self.assertEqual('gff', file_type)
 
@@ -106,7 +126,7 @@ class TestFileRecognition(unittest.TestCase):
         files = os.listdir(path)
         files = [os.path.join(path, file) for file in files]
 
-        file_type = check_inputs.check_if_gff(files, self.logger)
+        file_type = check_inputs.check_if_gff(files, self.logger, False)
 
         self.assertEqual(None, file_type)
 
@@ -116,7 +136,7 @@ class TestFileRecognition(unittest.TestCase):
         files = os.listdir(path)
         files = [os.path.join(path, file) for file in files]
         with self.assertRaises(SystemExit):
-            check_inputs.check_if_gff(files, self.logger)
+            check_inputs.check_if_gff(files, self.logger, False)
 
     def test_gff_and_random_text_recognition(self):
         ''' test that a mix of GFF3 and random text files results in exiting Magphi with an error '''
@@ -125,7 +145,7 @@ class TestFileRecognition(unittest.TestCase):
         files = [os.path.join(path, file) for file in files]
 
         with self.assertRaises(SystemExit):
-            check_inputs.check_if_gff(files, self.logger)
+            check_inputs.check_if_gff(files, self.logger, False)
 
     def test_not_incompatible_recognition(self):
         ''' test that a text file not being a Fasta or GFF3 files results in an error '''
@@ -143,7 +163,7 @@ class TestFileRecognition(unittest.TestCase):
 
     def test_gzipped_files(self):
         ''' Test that input of gzipped files are recognised as such '''
-        files = ['TestFileRecognition/All_gzipped/GCA_005163865.fna.gz', 'TestFileRecognition/All_gzipped/GCA_900475985.fna.gz']
+        files = ['TestFileRecognition/All_gzipped_fasta/GCA_005163865.fna.gz', 'TestFileRecognition/All_gzipped_fasta/GCA_900475985.fna.gz']
 
         self.assertEqual(True, check_inputs.check_if_gzip(files, self.logger))
 

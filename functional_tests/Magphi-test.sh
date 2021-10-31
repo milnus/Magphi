@@ -315,8 +315,8 @@ test_output_file test_out_folder/annotation_num_matrix.csv evidence_level_single
 rm -r test_out_folder
 
 # Test gzipped fasta file evidence level when only two unique seeds hit with connection but no annotation #TODO
-call_new_test "Test for evidence level when only two unique seeds hit with connection but no annotation #TODO"
-Magphi -g two_contigs_two_primers_single_hit_gzipped.fasta.gz -s two_primers_simple_match_primers.fasta -o test_out_folder -md 70 > /dev/null 2>&1
+call_new_test "Test gzipped fasta file evidence level when only two unique seeds hit with connection but no annotation #TODO"
+Magphi -g two_contigs_two_primers_single_hit.fasta.gz -s two_primers_simple_match_primers.fasta -o test_out_folder -md 70 > /dev/null 2>&1
 test_output_file test_out_folder/master_primer_evidence.csv evidence_levels_simple_hits_cross_contig_connected/master_primer_evidence.csv
 test_output_file test_out_folder/inter_primer_distance.csv evidence_levels_simple_hits_cross_contig_connected/inter_primer_distance.csv
 test_output_file test_out_folder/two_primers_simple/two_contigs_two_primers_single_hit-two_primers_simple_1_break.fasta evidence_levels_simple_hits_cross_contig_connected/two_contigs_two_primers_single_hit-two_primers_simple_1_break.fasta

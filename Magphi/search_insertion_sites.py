@@ -732,6 +732,7 @@ def screen_genome_for_primers(genome_file, primer_pairs, primer_path, tmp_folder
 
         if is_input_gzipped:
             file_logger.debug("\tCopying gzipped fasta file into tmp dir")
+            tmp_genome = tmp_genome.split('.gz')[0]
             with gzip.open(genome_file, 'rt') as in_file:
                 with open(tmp_genome, 'w') as out_file:
                     for line in in_file:

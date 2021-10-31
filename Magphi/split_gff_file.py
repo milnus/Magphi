@@ -6,6 +6,7 @@ import gzip
 def split_single_gff(gff, tmp_folder, is_input_gzipped):
     # Trim the name/path of the input file
     base_name = gff.split('/')[-1]
+    base_name = base_name.rsplit('.gz', 1)[0]
     base_name = base_name.rsplit('.', 1)[0]
 
     # Add the path to the temporary folder

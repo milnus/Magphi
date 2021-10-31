@@ -258,8 +258,8 @@ Magphi -g two_contigs_two_primers_single_hit.fasta -s two_primers_simple_match_p
 test_output_file test_out_folder/master_primer_evidence.csv evidence_levels_simple_hits_cross_contig_no_connect.expected
 rm -r test_out_folder
 
-# Run test for evidence level when only two unique seeds hit with connection but no annotation #TODO
-call_new_test "Test for evidence level when only two unique seeds hit with connection but no annotation #TODO"
+# Run test for evidence level when only two unique seeds hit with connection but no annotation
+call_new_test "Test for evidence level when only two unique seeds hit with connection but no annotation"
 Magphi -g two_contigs_two_primers_single_hit.fasta -s two_primers_simple_match_primers.fasta -o test_out_folder -md 70 > /dev/null 2>&1
 test_output_file test_out_folder/master_primer_evidence.csv evidence_levels_simple_hits_cross_contig_connected/master_primer_evidence.csv
 test_output_file test_out_folder/inter_primer_distance.csv evidence_levels_simple_hits_cross_contig_connected/inter_primer_distance.csv

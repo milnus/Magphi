@@ -208,7 +208,7 @@ def main():
     with concurrent.futures.ThreadPoolExecutor(max_workers=cmd_args.cpu) as executor:
         results = [executor.submit(screen_genome_for_primers, genomes[i], primer_pairs, cmd_args.seeds,
                                    tmp_folder, cmd_args.include_primers, file_type, annotations[i],
-                                   cmd_args.out_path, cmd_args.max_primer_dist, file_logger) for i, genome in enumerate(genomes)]
+                                   cmd_args.out_path, cmd_args.max_primer_dist, file_logger, is_input_gzipped) for i, genome in enumerate(genomes)]
 
         for f in concurrent.futures.as_completed(results):
             genomes_processed += 1

@@ -3,6 +3,7 @@ import glob
 import csv
 import warnings
 import sys
+import gzip
 from itertools import combinations
 from shutil import copyfile, copyfileobj
 from Bio.Blast.Applications import NcbimakeblastdbCommandline
@@ -337,10 +338,10 @@ def check_primers_placement(bed_files, primer_pairs, primer_hits, max_primer_dis
     ''' Function to determine the placement of primers and how to search for connections between them
     Returns a genome file in the temporary directory and an evidence score for each bed file and its primer connections'''
     # Copy fasta to tmp folder to avoid .fai in input folder and possible clashed with permissions
-    if file_type == 'fasta':
-        tmp_genome = os.path.join(tmp_folder, genome_file.rsplit('/')[-1])
-        copyfile(genome_file, tmp_genome)
-        genome_file = tmp_genome
+    # if file_type == 'fasta':
+    #     tmp_genome = os.path.join(tmp_folder, genome_file.rsplit('/')[-1])
+    #     copyfile(genome_file, tmp_genome)
+    #     genome_file = tmp_genome ***
 
     # Produce genome index file using samtools
     samtools_faidx_cmd = SamtoolsFaidxCommandline(ref=genome_file)
@@ -575,7 +576,6 @@ def extract_seqs_n_annots(merged_bed_files, file_type, genome_file, annotation_f
 
             # Construct output name for extracted sequence
             genome_name = genome_file.rsplit('/', 1)[-1]
-            genome_name = genome_name.rsplit('.gz', 1)[0]
             genome_name = genome_name.rsplit('.', 1)[0]
             genome_name = genome_name.rsplit('_tmp', 1)[0]
             out_file_name = f'{genome_name}--{primer_pair_name}'
@@ -682,7 +682,7 @@ def extract_seqs_n_annots(merged_bed_files, file_type, genome_file, annotation_f
 
 
 def screen_genome_for_primers(genome_file, primer_pairs, primer_path, tmp_folder,
-                              include_primers, file_type, annotation_file, out_path, max_primer_dist, file_logger):
+                              include_primers, file_type, annotation_file, out_path, max_primer_dist, file_logger, is_input_gzipped):
     """
     Function that summarise the search of seeds sequences, determination of position and extraction.
     :param genome_file: Path to genome to be searched for seed sequences
@@ -695,6 +695,7 @@ def screen_genome_for_primers(genome_file, primer_pairs, primer_path, tmp_folder
     :param out_path: Path to the output folder
     :param max_primer_dist: Integer indicating the maximum distance allowed between two seed sequences
     :param file_logger: File to with debug log statements should be written.
+    :param is_input_gzipped: Bool to tell if the input file is gzipped
     :return: Number of times a seed sequence pairs hit the genome,
     number of annotations in the interval found between seed sequences,
     name of the genome extracted from,
@@ -707,9 +708,23 @@ def screen_genome_for_primers(genome_file, primer_pairs, primer_path, tmp_folder
     # Clean the genome name for path, .gff and possible _tmp if gff is given
     # genome_name = genome_file.rsplit('/', 1)[1]
     genome_name = os.path.basename(genome_file)
-    genome_name = genome_name.rsplit('.gz', 1)[0]
     genome_name = genome_name.rsplit('.', 1)[0]
     genome_name = genome_name.rsplit('_tmp', 1)[0]
+
+    if file_type == 'fasta':
+        tmp_genome = os.path.join(tmp_folder, genome_file.rsplit('/')[-1])
+
+        if is_input_gzipped:
+            file_logger.debug("\tCopying gzipped fasta file into tmp dir")
+            with gzip.open(genome_file, 'rt') as in_file:
+                with open(tmp_genome, 'w') as out_file:
+                    for line in in_file:
+                        out_file.write(line)
+        else:
+            file_logger.debug("\tCopying ungzipped fasta file into tmp dir")
+            copyfile(genome_file, tmp_genome)
+
+        genome_file = tmp_genome
 
     # Concatenate the genome name and the path to the temporary folder
     genome_name = os.path.join(tmp_folder, genome_name)

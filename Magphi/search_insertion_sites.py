@@ -404,9 +404,6 @@ def check_primers_placement(bed_files, primer_pairs, primer_hits, max_primer_dis
                             # Check if no connection could be made on or across contigs, if then delete bed from further processing
                             if primer_hit_support_dict[primer_name] == 1 or primer_hit_support_dict[primer_name] == 2:
                                 bed_files.remove(file)
-                            else:
-                                # TODO add in nice exit that lets the use know somethings is wrong!
-                                raise NotImplementedError
 
                         elif return_value == '5B':
                             primer_hit_support_dict[primer_name] = return_value
@@ -460,8 +457,6 @@ def check_primers_placement(bed_files, primer_pairs, primer_hits, max_primer_dis
                                                                                     f'{genome_file}.fai')
                     if primer_hit_support_dict[primer_name] == 1 or primer_hit_support_dict[primer_name] == 2:
                         bed_files.remove(file)
-                    else:
-                        raise NotImplementedError
 
                 # Check that only one primer has hit, but it has hit multiple times
                 elif uniq_primers == 1:

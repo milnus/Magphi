@@ -15,7 +15,7 @@ import os
 import time
 import logging
 from sys import argv
-from math import floor
+from math import floor, ceil
 import pkg_resources # ??
 import concurrent.futures
 
@@ -213,8 +213,9 @@ def main():
         for f in concurrent.futures.as_completed(results):
             genomes_processed += 1
 
-            progress_num = floor(num_genomes/10)
+            progress_num = num_genomes/10
             progress_num = progress_num if progress_num > 1 else 1
+            progress_num = ceil(progress_num)
 
             if genomes_processed % progress_num == 0 or genomes_processed == 1:
                 file_logger.info(f'\tFile number {genomes_processed} has been processed')

@@ -343,7 +343,14 @@ rm -r test_out_folder
 
 
 # Chaws problem.
-
+call_new_test "Test gzipped fasta file evidence level when only two unique seeds hit with connection but no annotation"
+Magphi -g larger_Magphi_test/*.gff -s larger_test_primers.fa -o test_out_folder -md 15000 > /dev/null 2>&1
+test_output_file test_out_folder/annotation_num_matrix.csv larger_Magphi_test/annotation_num_matrix.csv
+test_output_file test_out_folder/inter_primer_distance.csv larger_Magphi_test/inter_primer_distance.csv
+test_output_file test_out_folder/contig_hit_matrix.csv larger_Magphi_test/contig_hit_matrix.csv
+test_output_file test_out_folder/master_primer_evidence.csv larger_Magphi_test/master_primer_evidence.csv
+rm -r test_out_folder
+larger_Magphi_test
 
 
 

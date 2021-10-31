@@ -337,28 +337,6 @@ def examine_flanking_regions(primer_contig_hits, max_primer_dist, genome_file, b
 def check_primers_placement(bed_files, primer_pairs, primer_hits, max_primer_dist, genome_file, file_type, tmp_folder):
     ''' Function to determine the placement of primers and how to search for connections between them
     Returns a genome file in the temporary directory and an evidence score for each bed file and its primer connections'''
-    # Copy fasta to tmp folder to avoid .fai in input folder and possible clashed with permissions
-    # if file_type == 'fasta':
-    #     tmp_genome = os.path.join(tmp_folder, genome_file.rsplit('/')[-1])
-    #     copyfile(genome_file, tmp_genome)
-    #     genome_file = tmp_genome ***
-
-    # if file_type == 'fasta':
-    #     tmp_genome = os.path.join(tmp_folder, genome_file.rsplit('/')[-1])
-    #
-    #     if is_input_gzipped:
-    #         file_logger.debug("\tCopying gzipped fasta file into tmp dir")
-    #         with gzip.open(genome_file, 'rt') as in_file:
-    #             with open(tmp_genome, 'w') as out_file:
-    #                 for line in in_file:
-    #                     out_file.write(line)
-    #     else:
-    #         file_logger.debug("\tCopying ungzipped fasta file into tmp dir")
-    #         copyfile(genome_file, tmp_genome)
-    #
-    #     genome_file = tmp_genome
-
-
     # Produce genome index file using samtools
     samtools_faidx_cmd = SamtoolsFaidxCommandline(ref=genome_file)
     samtools_faidx_cmd()
@@ -367,7 +345,7 @@ def check_primers_placement(bed_files, primer_pairs, primer_hits, max_primer_dis
     primer_hit_support_dict = dict.fromkeys(primer_pairs)
 
     # Check each BED file
-    for file in bed_files:
+    for file in bed_files.copy():
         # Strip file name to get name of genome
         primer_name = file.rsplit('.', 1)[0]
         primer_name = primer_name.rsplit('~~', 1)[-1]
@@ -412,21 +390,23 @@ def check_primers_placement(bed_files, primer_pairs, primer_hits, max_primer_dis
 
                         return_value = examine_flanking_regions(hit_contig, max_primer_dist, f'{genome_file}.fai', file+'_5')
 
-                        # Record the return value as evidence (3 = multiple overlaps)
-                        # 2 or 4 means more examination is required
+                        # Record the return value as evidence
+                        # 1 or 2 means more examination is required
                         if return_value == 2:
                             primer_hit_support_dict[primer_name] = return_value
                             bed_files.remove(file)
                         elif return_value == 1:
-                        # elif return_value == 1 or return_value == 4:
                             # Examine the remaining junctions to see if two primers can be found to connect across contigs
                             primer_hit_support_dict[primer_name] = examine_flanking_regions(primer_to_contig,
                                                                                             max_primer_dist,
                                                                                             f'{genome_file}.fai',
                                                                                             file)
                             # Check if no connection could be made on or across contigs, if then delete bed from further processing
-                            if primer_hit_support_dict[primer_name] == 1:
+                            if primer_hit_support_dict[primer_name] == 1 or primer_hit_support_dict[primer_name] == 2:
                                 bed_files.remove(file)
+                            else:
+                                # TODO add in nice exit that lets the use know somethings is wrong!
+                                raise NotImplementedError
 
                         elif return_value == '5B':
                             primer_hit_support_dict[primer_name] = return_value
@@ -478,8 +458,10 @@ def check_primers_placement(bed_files, primer_pairs, primer_hits, max_primer_dis
                     primer_hit_support_dict[primer_name] = examine_flanking_regions(primer_to_contig,
                                                                                     max_primer_dist,
                                                                                     f'{genome_file}.fai')
-                    if primer_hit_support_dict[primer_name] == 1:
+                    if primer_hit_support_dict[primer_name] == 1 or primer_hit_support_dict[primer_name] == 2:
                         bed_files.remove(file)
+                    else:
+                        raise NotImplementedError
 
                 # Check that only one primer has hit, but it has hit multiple times
                 elif uniq_primers == 1:

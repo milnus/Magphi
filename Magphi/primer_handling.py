@@ -48,7 +48,7 @@ def extract_primer_info(primer_file, file_logger):
     """
     file_logger.debug("Start extraction of seed sequence names")
     # Initiate dict to hold primers with their name as the key and sequence as the value.
-    primer_dict = {}
+    primer_list = []
 
     # Go through primer file
     with open(primer_file, 'r') as primers:
@@ -59,17 +59,14 @@ def extract_primer_info(primer_file, file_logger):
             if ">" in line:
                 primer_name = line[1:]
 
-                if primer_name in primer_dict.keys():
+                if primer_name in primer_list:
                     file_logger.exception("Duplicate seed sequence names were identified! This is not allowed and should be changed")
                     exit_with_error(message="Duplicate seed sequence names were identified! This is not allowed and should be changed",
                                                     exit_status=EXIT_INPUT_FILE_ERROR)
 
-                primer_dict[primer_name] = []
-            else:
-                # TODO - AT THE MOMENT WE DO NOT USE THE SEQUENCE OF THE PRIMER AS WE CAN BLAST ALL PRIMERS AT ONCE. - Maybe keep them if we want to do the iterative decrease of blast parameters to get a specific primer pair to fit.
-                primer_dict[primer_name].append(line)
+                primer_list.append(primer_name)
 
-    return primer_dict
+    return primer_list
 
 
 def construct_pair_primers(primer_names, file_logger):
@@ -138,16 +135,16 @@ def handle_primers(primer_file, file_logger):
     returns the Seed sequence pairs and a dict with name and sequences of primers
     :param primer_file: File name of multi sequence fasta file containing the seed sequences
     :param file_logger: Logger that outputs files to log
-    :return: pairs of seed sequences and a dict with name and sequence of primers
+    :return: pairs of seed sequences
     """
 
     num_primers = check_number_of_primers(primer_file, file_logger)
 
-    primer_dict = extract_primer_info(primer_file, file_logger) # TODO - Collapse the above and this funtion to both check number and name of seed sequences at once.
+    primer_list = extract_primer_info(primer_file, file_logger) # TODO - Collapse the above and this funtion to both check number and name of seed sequences at once.
 
-    primer_pairs = construct_pair_primers(list(primer_dict.keys()), file_logger)
+    primer_pairs = construct_pair_primers(primer_list, file_logger)
 
     file_logger.debug(f'{num_primers} primers found in primer file. - '
                       f'This leads to {len(primer_pairs)} pairs of primers.')
 
-    return primer_pairs, primer_dict
+    return primer_pairs

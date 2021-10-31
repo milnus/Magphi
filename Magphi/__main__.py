@@ -193,7 +193,7 @@ def main():
 
     # Read in and combine primers into pairs
     file_logger.debug("Start handling of input seed sequences")
-    primer_pairs, primer_dict = handle_primers(cmd_args.seeds, file_logger) # TODO - Can we remove primer dict?
+    primer_pairs = handle_primers(cmd_args.seeds, file_logger) # TODO - Can we remove primer dict?
 
     # Construct master dict to hold the returned information from primers
     master_primer_hits = {}

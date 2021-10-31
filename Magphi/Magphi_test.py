@@ -46,7 +46,7 @@ class TestExitWithError(unittest.TestCase):
         os.rename(tmp_folder_copy, tmp_folder)
 
 
-class TestFileRecognition(unittest.TestCase):#TODO - Test gzipped input files
+class TestFileRecognition(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.logger = logging.getLogger('test_logger.log')
@@ -248,8 +248,6 @@ class TestPrimerFunctions(unittest.TestCase):
 
     def test_correct_primer_pairing(self):
         ''' test that a file with correctly named primers can be paired as expected '''
-        # TODO - make the primers randomly named with extended _1 and _2, and a random number of primer pairs?
-        ''' Test that primers with correct naming can be paired correctly '''
         primer_names = ['D_1', 'D_2', 'mutsD_1', 'mutsD_2']
         primer_pairs = primer_handling.construct_pair_primers(primer_names, self.logger)
 
@@ -289,7 +287,7 @@ class TestPrimerFunctions(unittest.TestCase):
 #   8. Run
 
 
-class TestPrimersPlacement(unittest.TestCase): # TODO - check if this is exhaustive
+class TestPrimersPlacement(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         # Construct mock logger
@@ -761,7 +759,7 @@ class TestPrimerReachContigEndCalculation(unittest.TestCase):
         self.assertEqual([['Contig_1', 450, 750, 'Primer_1', '0'], ['Contig_1', 600, 750, 'Primer_2', '1']], intervals)
 
 
-class TestFlankingRegion(unittest.TestCase): # TODO - check if this is exhaustive
+class TestFlankingRegion(unittest.TestCase):
 
     def test_no_max_distance_limit(self):
         ''' Test that the correct evidence level is returned when no max limit is given. '''
@@ -786,7 +784,7 @@ class TestFlankingRegion(unittest.TestCase): # TODO - check if this is exhaustiv
         with open('TestFlankingRegion/single_contig/single_contig_multi_hit.json', 'r') as primer_hit_json:
             primer_hit_dict = json.load(primer_hit_json)
         genome_fai_file = 'TestFlankingRegion/single_contig/single_contig_1200N.fasta.fai'
-        flanking_return = search_insertion_sites.examine_flanking_regions(primer_hit_dict, 51, genome_fai_file) # TODO Should primers overlap by minimum 1 bp or can they be 'kissing', meaning they hit adjcent basepairs?
+        flanking_return = search_insertion_sites.examine_flanking_regions(primer_hit_dict, 51, genome_fai_file)
 
         self.assertEqual('5B', flanking_return)
 
@@ -799,7 +797,7 @@ class TestFlankingRegion(unittest.TestCase): # TODO - check if this is exhaustiv
 
         self.assertEqual(2, flanking_return)
 
-    def test_multiple_hit_single_contig_w_same_primer_single_overlap_and_mix_pair(self):# TODO Change path
+    def test_multiple_hit_single_contig_w_same_primer_single_overlap_and_mix_pair(self):
         ''' Test that when two seed seqeunces overlap they can still be recognised as connected. '''
         with open('TestFlankingRegion/single_contig/single_contig_multi_hit_same_overlap_n_mix_pair.json', 'r') as primer_hit_json:
             primer_hit_dict = json.load(primer_hit_json)
@@ -808,7 +806,7 @@ class TestFlankingRegion(unittest.TestCase): # TODO - check if this is exhaustiv
 
         self.assertEqual('5B', flanking_return)
 
-    def test_multiple_hit_single_contig_w_same_primer_multiple_overlap_and_mix_pair(self): # TODO Change path
+    def test_multiple_hit_single_contig_w_same_primer_multiple_overlap_and_mix_pair(self):
         ''' Test that multiple seed seqeunces on the same contig can be connected even when two primers from a pair overlap '''
         with open('TestFlankingRegion/single_contig/single_contig_multi_hit_same_overlap_n_mix_pair.json', 'r') as primer_hit_json:
             primer_hit_dict = json.load(primer_hit_json)
@@ -861,9 +859,6 @@ class TestFlankingRegion(unittest.TestCase): # TODO - check if this is exhaustiv
         flanking_return = search_insertion_sites.examine_flanking_regions(primer_hit_dict, 351, genome_fai_file)
 
         self.assertEqual(2, flanking_return)
-
-# TODO - examine and write a test for Chaw's problem.
-# TODO - test warning return - if you can figure out how to do it ;-)
 
 
 class TestWriteBedFromPrimers(unittest.TestCase):
@@ -965,7 +960,6 @@ class TestBedMergeHandling(unittest.TestCase):
         os.remove('TestBedMergeHandling/Contig_1~~overlap_connect_merged.bed')
 
     def test_merge_with_primer_on_contig_edge_exclude_primer(self):
-        # TODO - Use to test the implementation of the new evidence levels
         ''' Test the merge of primers where one primer falls on the edge of a contig '''
         blast_hit_beds = ['TestBedMergeHandling/double_contig~~primer_edge_placement.bed']
         include_primers = False
@@ -1459,6 +1453,3 @@ class TestWritingOutputFiles(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-# TODO - set up a test with a fasta file that contain a new line in seqeunce, but has > in first line.
-# TODO - set up test with seed sequnces that contain space in their header? - should this be handles by just splitting first space and using index zero
-# TODO - set up test with duplicate seed seqeunce names

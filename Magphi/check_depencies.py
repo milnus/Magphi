@@ -8,11 +8,13 @@ except ModuleNotFoundError:
     from exit_with_error import exit_with_error
 EXIT_DEPENDENCY_ERROR = 4
 
-# TODO - write nice doc strings
+
 def check_for_biopython(verbose):
-    '''Check for the presence of Biopython and if the version satisfies the required version 1.78 or above,
-    if this can not be satisfied then warn the use of a missing dependency and exit.
-    '''
+    """
+    Function to test presence and version of BioPython
+    :param verbose: To print or not to print
+    :return: Version of BioPython if present else False
+    """
     try:
         import Bio
         if verbose:
@@ -32,9 +34,11 @@ def check_for_biopython(verbose):
 
 
 def check_for_pybedtools(verbose):
-    '''Check for the presence of pybedtools and if the version satisfies the required version 0.8.2 or above,
-        if this can not be satisfied then warn the use of a missing dependency and exit.
-        '''
+    """
+    Function to test presence and version of PyBedtools
+    :param verbose: To print or not to print
+    :return: Version of PyBedtools if present else False
+    """
     try:
         import pybedtools
         if verbose:
@@ -54,9 +58,11 @@ def check_for_pybedtools(verbose):
 
 
 def check_for_bedtools(verbose):
-    '''Check for the presence of bedtools and if the version satisfies the required version 2.29.2 or above,
-            if this can not be satisfied then warn the use of a missing dependency and exit.
-            '''
+    """
+    Function to test presence and version of Bedtools
+    :param verbose: To print or not to print
+    :return: Version of Bedtools if present else False
+    """
     try:
         cmd_return = subprocess.run(['bedtools', '-h'], capture_output=True)
 
@@ -85,6 +91,11 @@ def check_for_bedtools(verbose):
 
 # Samtools
 def check_for_samtools(verbose):
+    """
+    Function to test presence and version of samtools
+    :param verbose: To print or not to print
+    :return: Version of samtools if present else False
+    """
     ''' Check for the presence of samtools and if the version satisfies the required version 1.12, 1.19 or above,
             if this can not be satisfied then warn the use of a missing dependency and exit.
             '''
@@ -118,6 +129,11 @@ def check_for_samtools(verbose):
 
 
 def check_for_blast_plus(verbose=False):
+    """
+    Function to test presence and version of Blast+
+    :param verbose: To print or not to print
+    :return: Version of Blast+ if present else False
+    """
     ''' Check for the presence of Blast+ and if the version satisfies the required version ,
                 if this can not be satisfied then warn the use of a missing dependency and exit. '''
 
@@ -151,6 +167,11 @@ def check_for_blast_plus(verbose=False):
 
 
 def check_dependencies_for_main(verbose=False):
+    """
+    Function to be called from main of Magphi to check the dependecies before running
+    :param verbose: To print or not to print
+    :return: Versions of programs of False if one of them are not present.
+    """
     ''' Function to check dependencies when Magphi is executed. If all programs are found their versions are returned,
     if they are not found False is returned.'''
     biopython_present = check_for_biopython(verbose)

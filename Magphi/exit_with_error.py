@@ -12,7 +12,7 @@ def exit_with_error(message, exit_status, tmp_folder=None):
             program.
     '''
 
-    # Delete tmp files and folder #TODO - Add that this should not occur when -log is given! or that the tmp folder should be copied and its name logged!
+    # Delete tmp files and folder
     try:
         if tmp_folder is not None:
             tmp_files = os.listdir(tmp_folder)

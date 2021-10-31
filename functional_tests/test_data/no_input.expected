@@ -1,5 +1,5 @@
 usage: Magphi [-h] -g .fa/.gff [.fa/.gff ...] -s multi_fasta_file.fa [-ip]
-              [-md int] [-o path/to/output] [-c] [-l Log_file] [-v]
+              [-md int] [-o path/to/output] [-c int] [-l] [-v]
 
 Welcome to Magphi! This program will extract sequences and possible
 annotations within a set of insertion sequences or primers given as input.
@@ -23,7 +23,6 @@ optional arguments:
                         wanted then set to 0 [default: 50,000bp]
   -o path/to/output, --output_folder path/to/output
                         Give path to output folder [default: current folder]
-  -c , --cpu            Give max number of CPUs [default: 1]
-  -l Log_file, --log Log_file
-                        record program progress in LOG_FILE
+  -c int, --cpu int     Give max number of CPUs [default: 1]
+  -l, --log             Record program progress in for debugging purpose
   -v, --version         show program's version number and exit

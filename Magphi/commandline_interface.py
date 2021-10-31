@@ -66,14 +66,14 @@ def get_commandline_arguments(args, version):
                         '--cpu',
                         help='Give max number of CPUs [default: 1]',
                         required=False,
-                        metavar='',
+                        metavar='int',
                         default=1,
                         type=int,
                         dest='cpu')
 
     parser.add_argument('-l',
                         '--log',
-                        help='record program progress in for debugging purpose',
+                        help='Record program progress in for debugging purpose',
                         action='store_true',
                         default=False,
                         required=False)

@@ -124,6 +124,7 @@ function test_output_file {
     output=$1
     expected_output_file=$2
     verbose_message "Testing output file: $1"
+    verbose_message "Expected file path: $2"
     difference=$(diff $output $expected_output_file)
     if [ -n "$difference" ]; then
         let num_errors+=1
@@ -298,7 +299,7 @@ call_new_test "Test of a gff with a single contig with connection and annotation
 Magphi -g evidence_levels_single_contig.gff -s two_seeds_w_annotation_between.fasta -o test_out_folder -md 750 -ip > /dev/null 2>&1
 test_output_file test_out_folder/master_primer_evidence.csv evidence_level_single_contigs_connect_annotations_include_seeds/master_primer_evidence.csv
 test_output_file test_out_folder/inter_primer_distance.csv evidence_level_single_contigs_connect_annotations_include_seeds/inter_primer_distance.csv
-test_output_file test_out_folder/annotation_primers/evidence_levels_single_contig-annotation_primers.fasta evidence_level_single_contigs_connect_annotations_include_seeds/evidence_levels_single_contig-annotation_primers.gff
+test_output_file test_out_folder/annotation_primers/evidence_levels_single_contig-annotation_primers.gff evidence_level_single_contigs_connect_annotations_include_seeds/evidence_levels_single_contig-annotation_primers.gff
 test_output_file test_out_folder/annotation_primers/evidence_levels_single_contig-annotation_primers.fasta evidence_level_single_contigs_connect_annotations_include_seeds/evidence_levels_single_contig-annotation_primers.fasta
 test_output_file test_out_folder/annotation_num_matrix.csv evidence_level_single_contigs_connect_annotations_include_seeds/annotation_num_matrix.csv
 rm -r test_out_folder
@@ -308,7 +309,7 @@ call_new_test 'Test gzipped file'
 Magphi -g evidence_levels_single_contig.gff.gz -s two_seeds_w_annotation_between.fasta -o test_out_folder -md 750 -ip > /dev/null 2>&1
 test_output_file test_out_folder/master_primer_evidence.csv evidence_level_single_contigs_connect_annotations_include_seeds/master_primer_evidence.csv
 test_output_file test_out_folder/inter_primer_distance.csv evidence_level_single_contigs_connect_annotations_include_seeds/inter_primer_distance.csv
-test_output_file test_out_folder/annotation_primers/evidence_levels_single_contig-annotation_primers.fasta evidence_level_single_contigs_connect_annotations_include_seeds/evidence_levels_single_contig-annotation_primers.gff
+test_output_file test_out_folder/annotation_primers/evidence_levels_single_contig-annotation_primers.gff evidence_level_single_contigs_connect_annotations_include_seeds/evidence_levels_single_contig-annotation_primers.gff
 test_output_file test_out_folder/annotation_primers/evidence_levels_single_contig-annotation_primers.fasta evidence_level_single_contigs_connect_annotations_include_seeds/evidence_levels_single_contig-annotation_primers.fasta
 test_output_file test_out_folder/annotation_num_matrix.csv evidence_level_single_contigs_connect_annotations_include_seeds/annotation_num_matrix.csv
 rm -r test_out_folder

@@ -575,6 +575,7 @@ def extract_seqs_n_annots(merged_bed_files, file_type, genome_file, annotation_f
 
             # Construct output name for extracted sequence
             genome_name = genome_file.rsplit('/', 1)[-1]
+            genome_name = genome_name.rsplit('.gz', 1)[0]
             genome_name = genome_name.rsplit('.', 1)[0]
             genome_name = genome_name.rsplit('_tmp', 1)[0]
             out_file_name = f'{genome_name}--{primer_pair_name}'

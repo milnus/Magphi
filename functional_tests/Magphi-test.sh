@@ -160,6 +160,10 @@ function test_exit_status {
     fi 
 }
 
+function call_new_test {
+  echo ''
+  echo $1
+}
 
 # 1. Parse command line arguments.
 parse_args $@
@@ -167,23 +171,31 @@ parse_args $@
 cd $test_data_dir
 # 2. Run tests
 ## Test commandline exit status
-# Test output for no no arguments
+# Test output for no arguments
+call_new_test "Test output for no arguments"
 test_stdout_exit "$test_program" no_input.expected 2
 # Test output for -help argument given
+call_new_test "Test output for -help argument given"
 test_stdout_exit "$test_program -help" no_input.expected 0
 # Test exit status for a bad command line invocation
+call_new_test "Test exit status for a bad command line invocation"
 test_exit_status "$test_program --this_is_not_a_valid_argument > /dev/null 2>&1" 2
 
 ## Check exit status for bad input GFF or FASTA files
 # Test exit status when input is mixed fasta and gff
+call_new_test "Test exit status when input is mixed fasta and gff"
 test_exit_status "$test_program -g test_fasta.fna test_GFF.gff -s empty_file > /dev/null 2>&1" 3
 # Test exit status when fasta is mixed with random text file
+call_new_test "Test exit status when fasta is mixed with random text file"
 test_exit_status "$test_program -g test_fasta.fna random_text.txt -s empty_file > /dev/null 2>&1" 3
 # Test exit status when gff is mixed with random text file
+call_new_test "Test exit status when gff is mixed with random text file"
 test_exit_status "$test_program -g test_GFF.gff random_text.txt -s empty_file > /dev/null 2>&1" 3
-# Test when just random text file is given
+# Test when just random text file is given as input
+call_new_test "Test when just random text file is given as input"
 test_exit_status "$test_program -g random_text.txt -s empty_file > /dev/null 2>&1" 3
 # Test when empty file is given as input
+call_new_test "Test when empty file is given as input"
 test_exit_status "$test_program -g empty_file -s empty_file > /dev/null 2>&1" 3
 
 # M  - Test multiple hits where two can be found to connect - same contig - # TODO
@@ -192,49 +204,70 @@ test_exit_status "$test_program -g empty_file -s empty_file > /dev/null 2>&1" 3
 
 
 # Run test for evidence level when no seed hits are found
+call_new_test "Run test for evidence level when no seed hits are found"
 Magphi -g evidence_levels_simple_genome.fasta -s no_primers_match_primers.fasta -o test_out_folder > /dev/null 2>&1
 test_output_file test_out_folder/master_primer_evidence.csv no_primers_match_evidence_levels.expected
 rm -r test_out_folder
+
 # Run test for evidence level when a single seed hit is found
+call_new_test "Test for evidence level when a single seed hit is found"
 Magphi -g evidence_levels_simple_genome.fasta -s single_primer_match_primers.fasta -o test_out_folder > /dev/null 2>&1
 test_output_file test_out_folder/master_primer_evidence.csv one_primer_match_evidence_level.expected
 rm -r test_out_folder
+
 # Run test for evidence level when two primers hit multiple times on same contig, but cannot connect
+call_new_test "Test for evidence level when two primers hit multiple times on same contig, but cannot connect"
 Magphi -g evidence_levels_simple_genome.fasta -s two_primers_simple_match_primers.fasta -o test_out_folder -md 1 > /dev/null 2>&1
 test_output_file test_out_folder/master_primer_evidence.csv two_primers_multiple_hits_single_contig_no_connections.expected
 rm -r test_out_folder
+
 # Run test for evidence level when two primers hit the same contig multiple times and they can connect multiple ways
+call_new_test "Test for evidence level when two primers hit the same contig multiple times and they can connect multiple ways"
 Magphi -g evidence_levels_simple_genome.fasta -s two_primers_simple_match_primers.fasta -o test_out_folder -md 1000 > /dev/null 2>&1
 test_output_file test_out_folder/master_primer_evidence.csv two_primers_multiple_hits_single_contig_multiple_connections.expected
 rm -r test_out_folder
+
 # Run test for evidence level when two primers hit multiple contigs multiple times and no connection between them
+call_new_test "Test for evidence level when two primers hit multiple contigs multiple times and no connection between them"
 Magphi -g evidence_levels_simple_two_contigs.fasta -s two_primers_simple_match_primers.fasta -o test_out_folder -md 1 > /dev/null 2>&1
 test_output_file test_out_folder/master_primer_evidence.csv two_primers_two_contigs_multipe_hits_no_connection.expected
 rm -r test_out_folder
+
 # run test for evidence level when two seeds hit multiple contigs multiple times and multiple connections
+call_new_test "Test for evidence level when two seeds hit multiple contigs multiple times and multiple connections"
 Magphi -g evidence_levels_simple_two_contigs.fasta -s two_primers_simple_match_primers.fasta -o test_out_folder -md 1000 > /dev/null 2>&1
 test_output_file test_out_folder/master_primer_evidence.csv two_primers_two_contigs_multi_hit_multi_connect.expected
 rm -r test_out_folder
+
 # Run test for evidence level when two seeds overlap and are excluded because primers are deleted
+call_new_test "Test for evidence level when two seeds overlap and are excluded because primers are deleted"
 Magphi -g evidence_levels_overlap_two_contigs.fasta -s overlap_primers.fasta -o test_out_folder -md 1 > /dev/null 2>&1
 test_output_file test_out_folder/master_primer_evidence.csv evidence_levels_overlapping_seeds.expected
 rm -r test_out_folder
+
 # Run test for evidence level when one seed is on the edge of a contig and is deleted due to being excluded
+call_new_test "Test for evidence level when one seed is on the edge of a contig and is deleted due to being excluded"
 Magphi -g evidence_levels_overlap_two_contigs.fasta -s contig_edge_primers.fasta -o test_out_folder -md 180 > /dev/null 2>&1
 test_output_file test_out_folder/master_primer_evidence.csv evidence_levels_contig_edge.expected
 rm -r test_out_folder
+
 # Run test for evidence level when only two unique seeds hit but can not connect
+call_new_test "Test for evidence level when only two unique seeds hit but can not connect"
 Magphi -g two_contigs_two_primers_single_hit.fasta -s two_primers_simple_match_primers.fasta -o test_out_folder -md 1 > /dev/null 2>&1
 test_output_file test_out_folder/master_primer_evidence.csv evidence_levels_simple_hits_cross_contig_no_connect.expected
 rm -r test_out_folder
+
 # Run test for evidence level when only two unique seeds hit with connection but no annotation #TODO
+call_new_test "Test for evidence level when only two unique seeds hit with connection but no annotation #TODO"
 Magphi -g two_contigs_two_primers_single_hit.fasta -s two_primers_simple_match_primers.fasta -o test_out_folder -md 70 > /dev/null 2>&1
 test_output_file test_out_folder/master_primer_evidence.csv evidence_levels_simple_hits_cross_contig_connected/master_primer_evidence.csv
 test_output_file test_out_folder/inter_primer_distance.csv evidence_levels_simple_hits_cross_contig_connected/inter_primer_distance.csv
 test_output_file test_out_folder/two_primers_simple/two_contigs_two_primers_single_hit-two_primers_simple_1_break.fasta evidence_levels_simple_hits_cross_contig_connected/two_contigs_two_primers_single_hit-two_primers_simple_1_break.fasta
 test_output_file test_out_folder/two_primers_simple/two_contigs_two_primers_single_hit-two_primers_simple_2_break.fasta evidence_levels_simple_hits_cross_contig_connected/two_contigs_two_primers_single_hit-two_primers_simple_2_break.fasta
 rm -r test_out_folder
+
 # Run test for evidence level when only two unique seeds hit with connection and annotation
+call_new_test "Test for evidence level when only two unique seeds hit with connection and annotation"
 Magphi -g two_contigs_two_primers_single_hit.gff -s two_seeds_w_annotation_between.fasta -o test_out_folder -md 375 > /dev/null 2>&1
 test_output_file test_out_folder/master_primer_evidence.csv evidence_levels_simple_primers_connect_cross_contig_with_annotations/master_primer_evidence.csv
 test_output_file test_out_folder/inter_primer_distance.csv evidence_levels_simple_primers_connect_cross_contig_with_annotations/inter_primer_distance.csv
@@ -244,18 +277,24 @@ test_output_file test_out_folder/annotation_primers/two_contigs_two_primers_sing
 test_output_file test_out_folder/annotation_primers/two_contigs_two_primers_single_hit-annotation_primers_1_break.gff evidence_levels_simple_primers_connect_cross_contig_with_annotations/two_contigs_two_primers_single_hit-annotation_primers_1_break.gff
 test_output_file test_out_folder/annotation_primers/two_contigs_two_primers_single_hit-annotation_primers_2_break.gff evidence_levels_simple_primers_connect_cross_contig_with_annotations/two_contigs_two_primers_single_hit-annotation_primers_2_break.gff
 rm -r test_out_folder
+
 # Run test on a gff with a single contig no connection between primers
+call_new_test 'Test of a gff with a single contig no connection between primers'
 Magphi -g evidence_levels_single_contig.gff -s two_primers_simple_match_primers.fasta -o test_out_folder -md 1 > /dev/null 2>&1
 test_output_file test_out_folder/master_primer_evidence.csv evidence_levels_single_contig_no_connection/master_primer_evidence.csv
 rm -r test_out_folder
+
 # Run test on a gff with a single contig with connection between primers
+call_new_test "Test of a gff with a single contig with connection between primers"
 Magphi -g evidence_levels_single_contig.gff -s two_primers_simple_match_primers.fasta -o test_out_folder -md 100 > /dev/null 2>&1
 test_output_file test_out_folder/master_primer_evidence.csv evidence_levels_single_contig_connection/master_primer_evidence.csv
 test_output_file test_out_folder/inter_primer_distance.csv evidence_levels_single_contig_connection/inter_primer_distance.csv
 test_output_file test_out_folder/two_primers_simple/evidence_levels_single_contig-two_primers_simple.fasta evidence_levels_single_contig_connection/evidence_levels_single_contig-two_primers_simple.fasta
 test_output_file test_out_folder/annotation_num_matrix.csv evidence_levels_single_contig_connection/annotation_num_matrix.csv
 rm -r test_out_folder
+
 # Run test on a gff with a single contig with connection and annotation between primers - exclude seeds
+call_new_test "Test of a gff with a single contig with connection and annotation between primers - exclude seeds"
 Magphi -g evidence_levels_single_contig.gff -s two_seeds_w_annotation_between.fasta -o test_out_folder -md 750 -ip > /dev/null 2>&1
 test_output_file test_out_folder/master_primer_evidence.csv evidence_level_single_contigs_connect_annotations_include_seeds/master_primer_evidence.csv
 test_output_file test_out_folder/inter_primer_distance.csv evidence_level_single_contigs_connect_annotations_include_seeds/inter_primer_distance.csv
@@ -263,7 +302,9 @@ test_output_file test_out_folder/annotation_primers/evidence_levels_single_conti
 test_output_file test_out_folder/annotation_primers/evidence_levels_single_contig-annotation_primers.fasta evidence_level_single_contigs_connect_annotations_include_seeds/evidence_levels_single_contig-annotation_primers.fasta
 test_output_file test_out_folder/annotation_num_matrix.csv evidence_level_single_contigs_connect_annotations_include_seeds/annotation_num_matrix.csv
 rm -r test_out_folder
+
 # Test gzipped file
+call_new_test 'Test gzipped file'
 Magphi -g evidence_levels_single_contig.gff.gz -s two_seeds_w_annotation_between.fasta -o test_out_folder -md 750 -ip > /dev/null 2>&1
 test_output_file test_out_folder/master_primer_evidence.csv evidence_level_single_contigs_connect_annotations_include_seeds/master_primer_evidence.csv
 test_output_file test_out_folder/inter_primer_distance.csv evidence_level_single_contigs_connect_annotations_include_seeds/inter_primer_distance.csv

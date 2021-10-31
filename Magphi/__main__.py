@@ -146,6 +146,8 @@ def main():
     try:
         os.mkdir(cmd_args.out_path)
     except FileExistsError:
+        warnings.warn("Output folder already exists")
+        # TODO - Terminate? to not overwrite?
         pass
 
     "Orchestrate the execution of the program"

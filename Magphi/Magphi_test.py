@@ -290,6 +290,11 @@ class TestPrimerFunctions(unittest.TestCase):
 
 
 class TestPrimersPlacement(unittest.TestCase): # TODO - check if this is exhaustive
+    @classmethod
+    def setUpClass(cls):
+        # Construct mock logger
+        cls.logger = logging.getLogger('test_logger.log')
+        cls.logger.setLevel(logging.INFO)
 
     def test_single_primer_single_hit_low_max_dist(self):
         ''' Test that a single seed sequence hit returns the correct evidence level '''
@@ -297,9 +302,10 @@ class TestPrimersPlacement(unittest.TestCase): # TODO - check if this is exhaust
         primer_pairs = {'single_primer': ['single_primer_1', 'single_primer_2']}
         primer_hits = {'single_primer': 1}
         max_primer_dist = 1
-        genome_file = 'TestFlankingRegion/single_contig/single_contig_1200N.fasta'
+        genome_file = 'TestPrimersPlacement/single_contig_1200N.fasta'
         file_type = 'fasta'
         tmp_folder = 'TestPrimersPlacement'
+
         flanking_return = search_insertion_sites.check_primers_placement(bed_files=bed_files,
                                                                          primer_pairs=primer_pairs,
                                                                          primer_hits=primer_hits,
@@ -309,7 +315,6 @@ class TestPrimersPlacement(unittest.TestCase): # TODO - check if this is exhaust
                                                                          tmp_folder=tmp_folder)
         # remove .fai file
         os.remove('TestPrimersPlacement/single_contig_1200N.fasta.fai')
-        os.remove('TestPrimersPlacement/single_contig_1200N.fasta')
 
         evidence_level_return = flanking_return[1]['single_primer']
         self.assertEqual(0, evidence_level_return)
@@ -320,9 +325,10 @@ class TestPrimersPlacement(unittest.TestCase): # TODO - check if this is exhaust
         primer_pairs = {'single_primer': ['single_primer_1', 'single_primer_2']}
         primer_hits = {'single_primer': 1}
         max_primer_dist = 10000
-        genome_file = 'TestFlankingRegion/single_contig/single_contig_1200N.fasta'
+        genome_file = 'TestPrimersPlacement/single_contig_1200N.fasta'
         file_type = 'fasta'
         tmp_folder = 'TestPrimersPlacement'
+
         flanking_return = search_insertion_sites.check_primers_placement(bed_files=bed_files,
                                                                          primer_pairs=primer_pairs,
                                                                          primer_hits=primer_hits,
@@ -332,7 +338,6 @@ class TestPrimersPlacement(unittest.TestCase): # TODO - check if this is exhaust
                                                                          tmp_folder=tmp_folder)
         # remove .fai file
         os.remove('TestPrimersPlacement/single_contig_1200N.fasta.fai')
-        os.remove('TestPrimersPlacement/single_contig_1200N.fasta')
 
         evidence_level_return = flanking_return[1]['single_primer']
         self.assertEqual(0, evidence_level_return)
@@ -343,9 +348,10 @@ class TestPrimersPlacement(unittest.TestCase): # TODO - check if this is exhaust
         primer_pairs = {'primer': ['primer_1', 'primer_2']}
         primer_hits = {'primer': 2}
         max_primer_dist = 1
-        genome_file = 'TestFlankingRegion/single_contig/single_contig_1200N.fasta'
+        genome_file = 'TestPrimersPlacement/single_contig_1200N.fasta'
         file_type = 'fasta'
         tmp_folder = 'TestPrimersPlacement'
+
         flanking_return = search_insertion_sites.check_primers_placement(bed_files=bed_files,
                                                                          primer_pairs=primer_pairs,
                                                                          primer_hits=primer_hits,
@@ -355,7 +361,6 @@ class TestPrimersPlacement(unittest.TestCase): # TODO - check if this is exhaust
                                                                          tmp_folder=tmp_folder)
         # remove .fai file
         os.remove('TestPrimersPlacement/single_contig_1200N.fasta.fai')
-        os.remove('TestPrimersPlacement/single_contig_1200N.fasta')
 
         evidence_level_return = flanking_return[1]['primer']
         self.assertEqual(0, evidence_level_return)
@@ -366,9 +371,10 @@ class TestPrimersPlacement(unittest.TestCase): # TODO - check if this is exhaust
         primer_pairs = {'primer': ['primer_1', 'primer_2']}
         primer_hits = {'primer': 2}
         max_primer_dist = 500
-        genome_file = 'TestFlankingRegion/single_contig/single_contig_1200N.fasta'
+        genome_file = 'TestPrimersPlacement/single_contig_1200N.fasta'
         file_type = 'fasta'
         tmp_folder = 'TestPrimersPlacement'
+
         flanking_return = search_insertion_sites.check_primers_placement(bed_files=bed_files,
                                                                          primer_pairs=primer_pairs,
                                                                          primer_hits=primer_hits,
@@ -378,7 +384,6 @@ class TestPrimersPlacement(unittest.TestCase): # TODO - check if this is exhaust
                                                                          tmp_folder=tmp_folder)
         # remove .fai file
         os.remove('TestPrimersPlacement/single_contig_1200N.fasta.fai')
-        os.remove('TestPrimersPlacement/single_contig_1200N.fasta')
 
         evidence_level_return = flanking_return[1]['primer']
         self.assertEqual(0, evidence_level_return)
@@ -389,9 +394,10 @@ class TestPrimersPlacement(unittest.TestCase): # TODO - check if this is exhaust
         primer_pairs = {'primer_same': ['primer_same_1', 'primer_same_2']}
         primer_hits = {'primer_same': 2}
         max_primer_dist = 1
-        genome_file = 'TestFlankingRegion/double_contig/double_contig.fasta'
+        genome_file = 'TestPrimersPlacement/double_contig.fasta'
         file_type = 'fasta'
         tmp_folder = 'TestPrimersPlacement'
+
         flanking_return = search_insertion_sites.check_primers_placement(bed_files=bed_files,
                                                                          primer_pairs=primer_pairs,
                                                                          primer_hits=primer_hits,
@@ -401,7 +407,6 @@ class TestPrimersPlacement(unittest.TestCase): # TODO - check if this is exhaust
                                                                          tmp_folder=tmp_folder)
         # remove .fai file
         os.remove('TestPrimersPlacement/double_contig.fasta.fai')
-        os.remove('TestPrimersPlacement/double_contig.fasta')
 
         evidence_level_return = flanking_return[1]['primer_same']
         self.assertEqual(0, evidence_level_return)
@@ -412,9 +417,10 @@ class TestPrimersPlacement(unittest.TestCase): # TODO - check if this is exhaust
         primer_pairs = {'primer_same': ['primer_same_1', 'primer_same_2']}
         primer_hits = {'primer_same': 2}
         max_primer_dist = 1000
-        genome_file = 'TestFlankingRegion/double_contig/double_contig.fasta'
+        genome_file = 'TestPrimersPlacement/double_contig.fasta'
         file_type = 'fasta'
         tmp_folder = 'TestPrimersPlacement'
+
         flanking_return = search_insertion_sites.check_primers_placement(bed_files=bed_files,
                                                                          primer_pairs=primer_pairs,
                                                                          primer_hits=primer_hits,
@@ -424,7 +430,6 @@ class TestPrimersPlacement(unittest.TestCase): # TODO - check if this is exhaust
                                                                          tmp_folder=tmp_folder)
         # remove .fai file
         os.remove('TestPrimersPlacement/double_contig.fasta.fai')
-        os.remove('TestPrimersPlacement/double_contig.fasta')
 
         evidence_level_return = flanking_return[1]['primer_same']
         self.assertEqual(0, evidence_level_return)
@@ -435,9 +440,10 @@ class TestPrimersPlacement(unittest.TestCase): # TODO - check if this is exhaust
         primer_pairs = {'primer_different': ['primer_different_1', 'primer_different_2']}
         primer_hits = {'primer_different': 2}
         max_primer_dist = 1
-        genome_file = 'TestFlankingRegion/single_contig/single_contig_1200N.fasta'
+        genome_file = 'TestPrimersPlacement/single_contig_1200N.fasta'
         file_type = 'fasta'
         tmp_folder = 'TestPrimersPlacement'
+
         flanking_return = search_insertion_sites.check_primers_placement(bed_files=bed_files,
                                                                          primer_pairs=primer_pairs,
                                                                          primer_hits=primer_hits,
@@ -447,18 +453,20 @@ class TestPrimersPlacement(unittest.TestCase): # TODO - check if this is exhaust
                                                                          tmp_folder=tmp_folder)
         # remove .fai file
         os.remove('TestPrimersPlacement/single_contig_1200N.fasta.fai')
-        os.remove('TestPrimersPlacement/single_contig_1200N.fasta')
 
         evidence_level_return = flanking_return[1]['primer_different']
         self.assertEqual('5A', evidence_level_return)
-        ''' Test that two unique seed seed sequence hitting the same contig multiple times returns the correct evidence level '''
+
+    def test_multiple_hits_two_seeds_single_contig(self):
+        ''' Test that two unique seed sequence hitting the same contig multiple times returns the correct evidence level '''
         bed_files = ['TestPrimersPlacement/single_contig_1200N~~primer_multi_different.bed']
         primer_pairs = {'primer_multi_different': ['primer_multi_different_1', 'primer_multi_different_2']}
         primer_hits = {'primer_multi_different': 3}
         max_primer_dist = 1
-        genome_file = 'TestFlankingRegion/single_contig/single_contig_1200N.fasta'
+        genome_file = 'TestPrimersPlacement/single_contig_1200N.fasta'
         file_type = 'fasta'
         tmp_folder = 'TestPrimersPlacement'
+
         flanking_return = search_insertion_sites.check_primers_placement(bed_files=bed_files,
                                                                          primer_pairs=primer_pairs,
                                                                          primer_hits=primer_hits,
@@ -468,7 +476,6 @@ class TestPrimersPlacement(unittest.TestCase): # TODO - check if this is exhaust
                                                                          tmp_folder=tmp_folder)
         # remove .fai file
         os.remove('TestPrimersPlacement/single_contig_1200N.fasta.fai')
-        os.remove('TestPrimersPlacement/single_contig_1200N.fasta')
 
         evidence_level_return = flanking_return[1]['primer_multi_different']
         self.assertEqual(1, evidence_level_return)
@@ -480,9 +487,10 @@ class TestPrimersPlacement(unittest.TestCase): # TODO - check if this is exhaust
         primer_pairs = {'primer_close_placement': ['primer_close_placement_1', 'primer_close_placement_2']}
         primer_hits = {'primer_close_placement': 2}
         max_primer_dist = 51
-        genome_file = 'TestFlankingRegion/double_contig/double_contig.fasta'
+        genome_file = 'TestPrimersPlacement/double_contig.fasta'
         file_type = 'fasta'
         tmp_folder = 'TestPrimersPlacement'
+
 
         # Copy input bed file as it gets altered
         copyfile(bed_files[0], bed_files[0] + 'original')
@@ -496,7 +504,6 @@ class TestPrimersPlacement(unittest.TestCase): # TODO - check if this is exhaust
                                                                          tmp_folder=tmp_folder)
 
         os.remove('TestPrimersPlacement/double_contig.fasta.fai')
-        os.remove('TestPrimersPlacement/double_contig.fasta')
 
         # Check altered input file
         with open(bed_files[0], 'r') as altered_file:
@@ -506,7 +513,7 @@ class TestPrimersPlacement(unittest.TestCase): # TODO - check if this is exhaust
         # Copy back input file
         os.rename(bed_files[0] + 'original', bed_files[0])
         evidence_level_return = flanking_return[1]['primer_close_placement']
-        self.assertEqual('5B', evidence_level_return)
+        self.assertEqual('5B', evidence_level_return) #***
 
     def test_multiple_hits_multiple_contigs_cross_contig_connect(self):
         ''' Test the outcome with two unique seed sequences that can connect on same contig and across contigs'''
@@ -514,9 +521,10 @@ class TestPrimersPlacement(unittest.TestCase): # TODO - check if this is exhaust
         primer_pairs = {'primer_close_placement': ['primer_close_placement_1', 'primer_close_placement_2']}
         primer_hits = {'primer_close_placement': 2}
         max_primer_dist = 101
-        genome_file = 'TestFlankingRegion/double_contig/double_contig.fasta'
+        genome_file = 'TestPrimersPlacement/double_contig.fasta'
         file_type = 'fasta'
         tmp_folder = 'TestPrimersPlacement'
+
 
         # Copy input bed file as it gets altered
         copyfile(bed_files[0], bed_files[0]+'original')
@@ -530,7 +538,6 @@ class TestPrimersPlacement(unittest.TestCase): # TODO - check if this is exhaust
                                                                          tmp_folder=tmp_folder)
 
         os.remove('TestPrimersPlacement/double_contig.fasta.fai')
-        os.remove('TestPrimersPlacement/double_contig.fasta')
 
         # Copy back input file
         evidence_level_return = flanking_return[1]['primer_close_placement']
@@ -542,9 +549,10 @@ class TestPrimersPlacement(unittest.TestCase): # TODO - check if this is exhaust
         primer_pairs = {'primer_long_placement': ['primer_long_placement_1', 'primer_long_placement_2']}
         primer_hits = {'primer_long_placement': 2}
         max_primer_dist = 101
-        genome_file = 'TestFlankingRegion/double_contig/double_contig.fasta'
+        genome_file = 'TestPrimersPlacement/double_contig.fasta'
         file_type = 'fasta'
         tmp_folder = 'TestPrimersPlacement'
+
 
         # Copy input bed file as it gets altered
         copyfile(bed_files[0], bed_files[0] + 'original')
@@ -558,7 +566,6 @@ class TestPrimersPlacement(unittest.TestCase): # TODO - check if this is exhaust
                                                                          tmp_folder=tmp_folder)
 
         os.remove('TestPrimersPlacement/double_contig.fasta.fai')
-        os.remove('TestPrimersPlacement/double_contig.fasta')
 
         # Check altered input file
         with open(bed_files[0], 'r') as altered_file:
@@ -578,7 +585,7 @@ class TestPrimersPlacement(unittest.TestCase): # TODO - check if this is exhaust
         primer_pairs = {'primer_long_placement': ['primer_long_placement_1', 'primer_long_placement_2']}
         primer_hits = {'primer_long_placement': 2}
         max_primer_dist = 401
-        genome_file = 'TestFlankingRegion/double_contig/double_contig.fasta'
+        genome_file = 'TestPrimersPlacement/double_contig.fasta'
         file_type = 'fasta'
         tmp_folder = 'TestPrimersPlacement'
 
@@ -591,7 +598,6 @@ class TestPrimersPlacement(unittest.TestCase): # TODO - check if this is exhaust
                                                                          tmp_folder=tmp_folder)
 
         os.remove('TestPrimersPlacement/double_contig.fasta.fai')
-        os.remove('TestPrimersPlacement/double_contig.fasta')
 
         evidence_level_return = flanking_return[1]['primer_long_placement']
         self.assertEqual(2, evidence_level_return)
@@ -602,9 +608,10 @@ class TestPrimersPlacement(unittest.TestCase): # TODO - check if this is exhaust
         primer_pairs = {'primer_short_placement': ['primer_short_placement_1', 'primer_short_placement_2']}
         primer_hits = {'primer_short_placement': 2}
         max_primer_dist = 126
-        genome_file = 'TestFlankingRegion/double_contig/double_contig.fasta'
+        genome_file = 'TestPrimersPlacement/double_contig.fasta'
         file_type = 'fasta'
         tmp_folder = 'TestPrimersPlacement'
+
 
         flanking_return = search_insertion_sites.check_primers_placement(bed_files=bed_files,
                                                                          primer_pairs=primer_pairs,
@@ -615,7 +622,6 @@ class TestPrimersPlacement(unittest.TestCase): # TODO - check if this is exhaust
                                                                          tmp_folder=tmp_folder)
 
         os.remove('TestPrimersPlacement/double_contig.fasta.fai')
-        os.remove('TestPrimersPlacement/double_contig.fasta')
 
         evidence_level_return = flanking_return[1]['primer_short_placement']
         self.assertEqual(2, evidence_level_return)
@@ -626,9 +632,10 @@ class TestPrimersPlacement(unittest.TestCase): # TODO - check if this is exhaust
         primer_pairs = {'primer_short_placement': ['primer_short_placement_1', 'primer_short_placement_2']}
         primer_hits = {'primer_short_placement': 2}
         max_primer_dist = 1000
-        genome_file = 'TestFlankingRegion/double_contig/double_contig.fasta'
+        genome_file = 'TestPrimersPlacement/double_contig.fasta'
         file_type = 'fasta'
         tmp_folder = 'TestPrimersPlacement'
+
 
         flanking_return = search_insertion_sites.check_primers_placement(bed_files=bed_files,
                                                                          primer_pairs=primer_pairs,
@@ -639,7 +646,6 @@ class TestPrimersPlacement(unittest.TestCase): # TODO - check if this is exhaust
                                                                          tmp_folder=tmp_folder)
 
         os.remove('TestPrimersPlacement/double_contig.fasta.fai')
-        os.remove('TestPrimersPlacement/double_contig.fasta')
 
         evidence_level_return = flanking_return[1]['primer_short_placement']
         self.assertEqual(2, evidence_level_return)
@@ -650,9 +656,10 @@ class TestPrimersPlacement(unittest.TestCase): # TODO - check if this is exhaust
         primer_pairs = {'single_primers_across_contigs': ['single_primers_across_contigs_1', 'single_primers_across_contigs_2']}
         primer_hits = {'single_primers_across_contigs': 2}
         max_primer_dist = 1
-        genome_file = 'TestFlankingRegion/double_contig/double_contig.fasta'
+        genome_file = 'TestPrimersPlacement/double_contig.fasta'
         file_type = 'fasta'
         tmp_folder = 'TestPrimersPlacement'
+
 
         flanking_return = search_insertion_sites.check_primers_placement(bed_files=bed_files,
                                                                          primer_pairs=primer_pairs,
@@ -663,7 +670,6 @@ class TestPrimersPlacement(unittest.TestCase): # TODO - check if this is exhaust
                                                                          tmp_folder=tmp_folder)
 
         os.remove('TestPrimersPlacement/double_contig.fasta.fai')
-        os.remove('TestPrimersPlacement/double_contig.fasta')
 
         evidence_level_return = flanking_return[1]['single_primers_across_contigs']
         self.assertEqual('4A', evidence_level_return)

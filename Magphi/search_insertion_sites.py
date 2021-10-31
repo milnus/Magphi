@@ -343,6 +343,22 @@ def check_primers_placement(bed_files, primer_pairs, primer_hits, max_primer_dis
     #     copyfile(genome_file, tmp_genome)
     #     genome_file = tmp_genome ***
 
+    # if file_type == 'fasta':
+    #     tmp_genome = os.path.join(tmp_folder, genome_file.rsplit('/')[-1])
+    #
+    #     if is_input_gzipped:
+    #         file_logger.debug("\tCopying gzipped fasta file into tmp dir")
+    #         with gzip.open(genome_file, 'rt') as in_file:
+    #             with open(tmp_genome, 'w') as out_file:
+    #                 for line in in_file:
+    #                     out_file.write(line)
+    #     else:
+    #         file_logger.debug("\tCopying ungzipped fasta file into tmp dir")
+    #         copyfile(genome_file, tmp_genome)
+    #
+    #     genome_file = tmp_genome
+
+
     # Produce genome index file using samtools
     samtools_faidx_cmd = SamtoolsFaidxCommandline(ref=genome_file)
     samtools_faidx_cmd()
@@ -448,8 +464,13 @@ def check_primers_placement(bed_files, primer_pairs, primer_hits, max_primer_dis
             else:
                 # Check if precisely two primers hit the contig and that the mates from the pair hit one time each
                 if primer_hits[primer_name] == 2 and uniq_primers == 2:
+                    # Test if seeds can reach end of contig
+                    return_value = examine_flanking_regions(primer_to_contig, max_primer_dist, f'{genome_file}.fai')
                     # Score primer hit
-                    primer_hit_support_dict[primer_name] = '5A'
+                    if return_value == 1:
+                        primer_hit_support_dict[primer_name] = '5A'
+                    else:
+                        primer_hit_support_dict[primer_name] = return_value
 
                 # Check if two unique primers hit, but one/both may have hit multiple times
                 elif primer_hits[primer_name] > 2 and uniq_primers == 2:
@@ -705,11 +726,6 @@ def screen_genome_for_primers(genome_file, primer_pairs, primer_path, tmp_folder
     """
 
     file_logger.debug(f"Start search of sequences is {genome_file}")
-    # Clean the genome name for path, .gff and possible _tmp if gff is given
-    # genome_name = genome_file.rsplit('/', 1)[1]
-    genome_name = os.path.basename(genome_file)
-    genome_name = genome_name.rsplit('.', 1)[0]
-    genome_name = genome_name.rsplit('_tmp', 1)[0]
 
     if file_type == 'fasta':
         tmp_genome = os.path.join(tmp_folder, genome_file.rsplit('/')[-1])
@@ -725,6 +741,12 @@ def screen_genome_for_primers(genome_file, primer_pairs, primer_path, tmp_folder
             copyfile(genome_file, tmp_genome)
 
         genome_file = tmp_genome
+
+    # Clean the genome name for path, .gff and possible _tmp if gff is given
+    # genome_name = genome_file.rsplit('/', 1)[1]
+    genome_name = os.path.basename(genome_file)
+    genome_name = genome_name.rsplit('.', 1)[0]
+    genome_name = genome_name.rsplit('_tmp', 1)[0]
 
     # Concatenate the genome name and the path to the temporary folder
     genome_name = os.path.join(tmp_folder, genome_name)

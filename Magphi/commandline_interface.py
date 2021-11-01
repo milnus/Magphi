@@ -31,7 +31,7 @@ def get_commandline_arguments(args, version):
                         required=True,
                         metavar='multi_fasta_file.fa')
 
-    parser.add_argument('-ip',
+    parser.add_argument('-is',
                         '--include_seeds',
                         help='Argument to include the seeds in the sequence/annotations extracted '
                              '[default: seeds are removed]',

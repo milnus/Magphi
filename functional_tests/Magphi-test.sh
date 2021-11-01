@@ -296,7 +296,7 @@ rm -r test_out_folder
 
 # Run test on a gff with a single contig with connection and annotation between primers - exclude seeds
 call_new_test "Test of a gff with a single contig with connection and annotation between primers - exclude seeds"
-Magphi -g evidence_levels_single_contig.gff -s two_seeds_w_annotation_between.fasta -o test_out_folder -md 750 -ip > /dev/null 2>&1
+Magphi -g evidence_levels_single_contig.gff -s two_seeds_w_annotation_between.fasta -o test_out_folder -md 750 -is > /dev/null 2>&1
 test_output_file test_out_folder/master_primer_evidence.csv evidence_level_single_contigs_connect_annotations_include_seeds/master_primer_evidence.csv
 test_output_file test_out_folder/inter_primer_distance.csv evidence_level_single_contigs_connect_annotations_include_seeds/inter_primer_distance.csv
 test_output_file test_out_folder/annotation_primers/evidence_levels_single_contig-annotation_primers.gff evidence_level_single_contigs_connect_annotations_include_seeds/evidence_levels_single_contig-annotation_primers.gff
@@ -324,7 +324,7 @@ rm -r test_out_folder
 
 # Test gzipped gff file
 call_new_test 'Test gzipped file'
-test_exit_status "Magphi -g evidence_levels_single_contig.gff.gz -s two_seeds_w_annotation_between.fasta -o test_out_folder -md 750 -ip" 0
+test_exit_status "Magphi -g evidence_levels_single_contig.gff.gz -s two_seeds_w_annotation_between.fasta -o test_out_folder -md 750 -is" 0
 test_output_file test_out_folder/master_primer_evidence.csv evidence_level_single_contigs_connect_annotations_include_seeds/master_primer_evidence.csv
 test_output_file test_out_folder/inter_primer_distance.csv evidence_level_single_contigs_connect_annotations_include_seeds/inter_primer_distance.csv
 test_output_file test_out_folder/annotation_primers/evidence_levels_single_contig-annotation_primers.gff evidence_level_single_contigs_connect_annotations_include_seeds/evidence_levels_single_contig-annotation_primers.gff
@@ -343,14 +343,13 @@ rm -r test_out_folder
 
 
 # Chaws problem.
-call_new_test "Test gzipped fasta file evidence level when only two unique seeds hit with connection but no annotation"
-Magphi -g larger_Magphi_test/*.gff -s larger_test_primers.fa -o test_out_folder -md 15000 > /dev/null 2>&1
+call_new_test "Test larger mock up of problem reported in emm4"
+Magphi -g larger_Magphi_test/*.gff -s larger_test_primers.fa -o test_out_folder -md 15000 -is
 test_output_file test_out_folder/annotation_num_matrix.csv larger_Magphi_test/annotation_num_matrix.csv
 test_output_file test_out_folder/inter_primer_distance.csv larger_Magphi_test/inter_primer_distance.csv
 test_output_file test_out_folder/contig_hit_matrix.csv larger_Magphi_test/contig_hit_matrix.csv
 test_output_file test_out_folder/master_primer_evidence.csv larger_Magphi_test/master_primer_evidence.csv
 rm -r test_out_folder
-larger_Magphi_test
 
 
 

@@ -11,7 +11,9 @@ def write_primer_hit_matrix(master_primer_hits, primer_pairs, out_path):
         writer.writeheader()
 
         # Write the remaining lines
-        for line in master_primer_hits.keys():
+        keys = list(master_primer_hits.keys())
+        keys.sort()
+        for line in keys:
             writer.writerow(master_primer_hits[line])
 
         out_file.close()
@@ -26,7 +28,9 @@ def write_annotation_num_matrix(master_annotation_hits, primer_pairs, out_path):
         writer.writeheader()
 
         # Write the remaining lines
-        for line in master_annotation_hits.keys():
+        keys = list(master_annotation_hits.keys())
+        keys.sort()
+        for line in keys:
             writer.writerow(master_annotation_hits[line])
 
         out_file.close()
@@ -41,7 +45,9 @@ def write_primer_hit_evidence(master_primer_evidence, primer_pairs, out_path):
         writer.writeheader()
 
         # Write the remaining lines
-        for line in master_primer_evidence.keys():
+        keys = list(master_primer_evidence.keys())
+        keys.sort()
+        for line in keys:
             writer.writerow(master_primer_evidence[line])
 
         out_file.close()
@@ -56,7 +62,9 @@ def write_inter_primer_dist(master_inter_primer_dist, primer_pairs, out_path):
         writer.writeheader()
 
         # Write the remaining lines
-        for line in master_inter_primer_dist.keys():
+        keys = list(master_inter_primer_dist.keys())
+        keys.sort()
+        for line in keys:
             writer.writerow(master_inter_primer_dist[line])
 
         out_file.close()

@@ -1,5 +1,5 @@
 usage: Magphi [-h] -g .fa/.gff [.fa/.gff ...] -s multi_fasta_file.fa [-is]
-              [-md int] [-o path/to/output] [-c int] [-l] [-q] [-v]
+              [-md int] [-b | -n] [-o path/to/output] [-c int] [-l | -q] [-v]
 
 Welcome to Magphi! This program will extract sequences and possible
 annotations within a set of seed sequences given as input.
@@ -20,6 +20,11 @@ optional arguments:
                         This can often be set a bit higher than an expected
                         size of a region If no maximum distance is wanted then
                         set to 0 [default: 50,000bp]
+  -b, --print_breaks    Argument to print outputs when seeds are next to
+                        contig breaks [default: sequences are not printed]
+  -n, --no_sequences    Argument to not print outputs related to annotations
+                        or sequences found between seeds [default: sequences
+                        are printed]
   -o path/to/output, --output_folder path/to/output
                         Give path to output folder [default: current folder]
   -c int, --cpu int     Give max number of CPUs [default: 1]

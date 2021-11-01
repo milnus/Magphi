@@ -108,7 +108,7 @@ def init_logging(debug_log, quiet, out_path):
     file_logger.setLevel(level)
 
     formatter = logging.Formatter('[%(asctime)s] %(levelname)s - %(module)s - %(message)s',
-                                                                datefmt="%Y-%m-%dT%H:%M:%S%z")
+                                  datefmt="%Y-%m-%dT%H:%M:%S%z")
 
     file_handler = logging.FileHandler(os.path.join(out_path, 'Magphi.log'))
     file_handler.setLevel(level)
@@ -193,6 +193,14 @@ def main():
     file_logger.debug("Start handling of input seed sequences")
     primer_pairs = handle_primers(cmd_args.seeds, file_logger)
 
+    # Evaluate if fasta and gff files should be given as output.
+    #   if no sequences should be outputted, then do not evaluate breaks
+    #   if sequences should be outputted, then evaluate if breaks should be printed
+    print_seq_out = 'output' if cmd_args.no_seqs else 'None'
+    if print_seq_out == 'output':
+        print_seq_out = 'All' if cmd_args.print_breaks else print_seq_out
+
+
     # Construct master dict to hold the returned information from primers
     master_primer_hits = {}
     master_annotation_hits = {}
@@ -206,7 +214,8 @@ def main():
     with concurrent.futures.ThreadPoolExecutor(max_workers=cmd_args.cpu) as executor:
         results = [executor.submit(screen_genome_for_primers, genomes[i], primer_pairs, cmd_args.seeds,
                                    tmp_folder, cmd_args.include_seeds, file_type, annotations[i],
-                                   cmd_args.out_path, cmd_args.max_seed_dist, file_logger, is_input_gzipped) for i, genome in enumerate(genomes)]
+                                   cmd_args.out_path, cmd_args.max_seed_dist, file_logger, is_input_gzipped, print_seq_out)
+                   for i, genome in enumerate(genomes)]
 
         for f in concurrent.futures.as_completed(results):
             genomes_processed += 1

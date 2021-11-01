@@ -51,6 +51,25 @@ def get_commandline_arguments(args, version):
                         metavar='int',
                         dest='max_seed_dist')
 
+    output_amount = parser.add_mutually_exclusive_group()
+    output_amount.add_argument('-b',
+                               '--print_breaks',
+                               help='Argument to print outputs when seeds are next to contig breaks'
+                                    ' [default: sequences are not printed]',
+                               dest='print_breaks',
+                               required=False,
+                               action='store_true',
+                               default=False)
+
+    output_amount.add_argument('-n',
+                               '--no_sequences',
+                               help='Argument to not print outputs related to annotations or sequences found between seeds'
+                                    ' [default: sequences are printed]',
+                               dest='no_seqs',
+                               required=False,
+                               action='store_false',
+                               default=True)
+
     # Add the flag for the output folder
     parser.add_argument('-o',
                         '--output_folder',
@@ -70,19 +89,20 @@ def get_commandline_arguments(args, version):
                         type=int,
                         dest='cpu')
 
-    parser.add_argument('-l',
-                        '--log',
-                        help='Record program progress in for debugging purpose',
-                        action='store_true',
-                        default=False,
-                        required=False)
+    logger_level = parser.add_mutually_exclusive_group()
+    logger_level.add_argument('-l',
+                              '--log',
+                              help='Record program progress in for debugging purpose',
+                              action='store_true',
+                              default=False,
+                              required=False)
 
-    parser.add_argument('-q',
-                        '--quiet',
-                        help='Only print warnings',
-                        action='store_true',
-                        default=False,
-                        required=False)
+    logger_level.add_argument('-q',
+                              '--quiet',
+                              help='Only print warnings',
+                              action='store_true',
+                              default=False,
+                              required=False)
 
     parser.add_argument('-v',
                         '--version',

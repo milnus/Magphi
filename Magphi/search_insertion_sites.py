@@ -537,7 +537,8 @@ def bed_merge_handling(blast_hit_beds, include_primers, exclude_primer_list, max
 
 
 def extract_seqs_n_annots(merged_bed_files, file_type, genome_file, annotation_file, tmp_folder, out_path, primer_pairs,
-                          primer_evidence):
+                          primer_evidence, print_seq_out):
+    """"""
     # Initiate dict to hold number of annotations per interval
     annots_per_interval = dict.fromkeys(primer_pairs)
     # Initiate dict to hold primers that may neighbour a sequence break
@@ -593,10 +594,11 @@ def extract_seqs_n_annots(merged_bed_files, file_type, genome_file, annotation_f
             inter_primer_dist[primer_pair_name] = len(interval[0])
 
             # Extract the fasta sequence and save it in output folder
-            try:
-                interval.sequence(fi=genome_file, fo=output_genome, nameOnly=True)
-            except bedtools.helpers.BEDToolsError:
-                interval.sequence(fi=genome_file, fo=output_genome, name=True)
+            if print_seq_out == 'All' or '_break' not in primer_pair_name and print_seq_out == 'output':
+                try:
+                    interval.sequence(fi=genome_file, fo=output_genome, nameOnly=True)
+                except bedtools.helpers.BEDToolsError:
+                    interval.sequence(fi=genome_file, fo=output_genome, name=True)
 
             # extract annotations if gff is provided as input
             if file_type == 'gff':
@@ -638,32 +640,34 @@ def extract_seqs_n_annots(merged_bed_files, file_type, genome_file, annotation_f
                     # Find start coordinate for current merged interval
                     start_coordinate = int(interval[0][1])+1
 
-                    # Open output file
-                    gff_output_file = open(output_gff, 'w')
-                    gff_writer = csv.writer(gff_output_file, delimiter='\t')
+                    # Write GFF output, if allowed or break
+                    if print_seq_out == 'All' or '_break' not in primer_pair_name and print_seq_out == 'output':
+                        # Open output file
+                        gff_output_file = open(output_gff, 'w')
+                        gff_writer = csv.writer(gff_output_file, delimiter='\t')
 
-                    # Insert the required '##gff-version 3' line
-                    gff_output_file.write('##gff-version 3\n')
-                    # Write line recording the length of the extracted region
-                    gff_output_file.write(f'##sequence-region {fasta_header} 1 {len(interval[0])}\n')
+                        # Insert the required '##gff-version 3' line
+                        gff_output_file.write('##gff-version 3\n')
+                        # Write line recording the length of the extracted region
+                        gff_output_file.write(f'##sequence-region {fasta_header} 1 {len(interval[0])}\n')
 
-                    # Go through each line adjust the coordinates, the contig name and write the gff
-                    for i, line in enumerate(annot):
-                        line[0] = fasta_header
-                        line[3] = int(line[3]) - start_coordinate
-                        line[4] = int(line[4]) - start_coordinate + 1
-                        gff_writer.writerow(line)
+                        # Go through each line adjust the coordinates, the contig name and write the gff
+                        for i, line in enumerate(annot):
+                            line[0] = fasta_header
+                            line[3] = int(line[3]) - start_coordinate
+                            line[4] = int(line[4]) - start_coordinate + 1
+                            gff_writer.writerow(line)
 
-                    # Add in the tag for the Fasta
-                    gff_output_file.write('##FASTA\n')
-                    # Open the fasta sequence for copying
-                    fasta_file = open(output_genome, 'r')
-                    # Append the fasta sequence for the extracted interval
-                    copyfileobj(fasta_file, gff_output_file)
+                        # Add in the tag for the Fasta
+                        gff_output_file.write('##FASTA\n')
+                        # Open the fasta sequence for copying
+                        fasta_file = open(output_genome, 'r')
+                        # Append the fasta sequence for the extracted interval
+                        copyfileobj(fasta_file, gff_output_file)
 
-                    # Close output files
-                    gff_output_file.close()
-                    fasta_file.close()
+                        # Close output files
+                        gff_output_file.close()
+                        fasta_file.close()
 
                 # Delete the file containing the current merged bed interval
                 os.remove(interval_save)
@@ -671,17 +675,24 @@ def extract_seqs_n_annots(merged_bed_files, file_type, genome_file, annotation_f
     # Remove the temporary genome and the index file (.fai), or the temporary fasta and annotation file for gff input
     if file_type == 'fasta':
         os.remove(genome_file)
-        os.remove(f'{genome_file}.fai')
+        try:
+            os.remove(f'{genome_file}.fai')
+        except FileNotFoundError:
+            pass
     else:
+        try:
+            os.remove(f'{genome_file}.fai')
+        except FileNotFoundError:
+            pass
         os.remove(genome_file)
-        os.remove(f'{genome_file}.fai')
         os.remove(annotation_file)
 
     return annots_per_interval, break_primers, primer_evidence, inter_primer_dist
 
 
 def screen_genome_for_primers(genome_file, primer_pairs, primer_path, tmp_folder,
-                              include_primers, file_type, annotation_file, out_path, max_primer_dist, file_logger, is_input_gzipped):
+                              include_primers, file_type, annotation_file, out_path, max_primer_dist, file_logger,
+                              is_input_gzipped, print_seq_out):
     """
     Function that summarise the search of seeds sequences, determination of position and extraction.
     :param genome_file: Path to genome to be searched for seed sequences
@@ -695,6 +706,7 @@ def screen_genome_for_primers(genome_file, primer_pairs, primer_path, tmp_folder
     :param max_primer_dist: Integer indicating the maximum distance allowed between two seed sequences
     :param file_logger: File to with debug log statements should be written.
     :param is_input_gzipped: Bool to tell if the input file is gzipped
+    :param print_seq_out: Bool to indicate if outputs related to fasta and gff sequences should be given
     :return: Number of times a seed sequence pairs hit the genome,
     number of annotations in the interval found between seed sequences,
     name of the genome extracted from,
@@ -760,7 +772,8 @@ def screen_genome_for_primers(genome_file, primer_pairs, primer_path, tmp_folder
                                                                                                    tmp_folder,
                                                                                                    out_path,
                                                                                                    primer_pairs,
-                                                                                                   primer_evidence)
+                                                                                                   primer_evidence,
+                                                                                                   print_seq_out)
 
     # clean up by removing blast xml output, and merged and primer hit beds from tmp folder:
     os.remove(blast_xml_output)

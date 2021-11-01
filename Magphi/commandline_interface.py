@@ -3,7 +3,6 @@ import sys
 
 EXIT_COMMAND_LINE_ERROR = 2
 
-# TODO - Change all primer mentions to seed seqeunce
 # def get_commandline_arguments(args, version):
 def get_commandline_arguments(args, version):
     ''' Parse command line arguments.
@@ -13,7 +12,7 @@ def get_commandline_arguments(args, version):
     parser = argparse.ArgumentParser(prog='Magphi',
                                      description='Welcome to Magphi!\n '
                                                  'This program will extract sequences and possible annotations within '
-                                                 'a set of insertion sequences or primers given as input.')
+                                                 'a set of seed sequences given as input.')
 
     # Add the flag for the input genomes
     parser.add_argument('-g',
@@ -24,33 +23,33 @@ def get_commandline_arguments(args, version):
                         nargs='+',
                         metavar='.fa/.gff')
 
-    # Add the flag for the multi fasta file containing insertion sequences or primers.
+    # Add the flag for the multi fasta file containing seed sequences
     parser.add_argument('-s',
                         '--input_seeds',
-                        help='Give the multi fasta containing the primers to be used for extracting sequnces',
+                        help='Give the multi fasta containing the seed sequences to be used for extracting sequnces',
                         dest='seeds',
                         required=True,
                         metavar='multi_fasta_file.fa')
 
     parser.add_argument('-ip',
-                        '--include_primers',
-                        help='Argument to include the primers in the sequence/annotations extracted '
-                             '[default: primers are removed]',
-                        dest='include_primers',
+                        '--include_seeds',
+                        help='Argument to include the seeds in the sequence/annotations extracted '
+                             '[default: seeds are removed]',
+                        dest='include_seeds',
                         required=False,
                         action='store_true',
                         default=False)
 
     parser.add_argument('-md',
-                        '--max_primer_distance',
-                        help='The maximum distance with which primers will be merged.\n'
+                        '--max_seed_distance',
+                        help='The maximum distance with which seeds will be merged.\n'
                              'This can often be set a bit higher than an expected size of a region\n'
                              'If no maximum distance is wanted then set to 0 [default: 50,000bp]',
                         default=50000,
                         required=False,
                         type=int,
                         metavar='int',
-                        dest='max_primer_dist')
+                        dest='max_seed_dist')
 
     # Add the flag for the output folder
     parser.add_argument('-o',
@@ -74,6 +73,13 @@ def get_commandline_arguments(args, version):
     parser.add_argument('-l',
                         '--log',
                         help='Record program progress in for debugging purpose',
+                        action='store_true',
+                        default=False,
+                        required=False)
+
+    parser.add_argument('-q',
+                        '--quiet',
+                        help='Only print warnings',
                         action='store_true',
                         default=False,
                         required=False)

@@ -8,24 +8,41 @@ except ModuleNotFoundError:
 EXIT_INPUT_FILE_ERROR = 3
 
 
-def check_number_of_primers(primer_file, file_logger):
+def check_number_n_names_of_seeds(primer_file, file_logger):
     """
     Function to count and report on the number of seed sequences and pairs of primers expected
+    Also record all names of seeds sequences in a list
     :param
     primer_file: File name of multi fasta file containing seed sequences
     file_logger: Logger that outputs files to log
-    :return: Will throw error is number of seed sequences is odd - else returns the number of primers
+    :return: Will throw error is number of seed sequences is odd
+    or if two seeds have an identical name,
+    else returns the number of primers and the names in a list
     """
     file_logger.debug("Initiating count of seed sequences")
     # Initiate primer counter
     num_primers = 0
+    seed_list = []
 
     # Go through multi fasta file of seed sequences
     with open(primer_file, 'r') as primers:
         for line in primers.readlines():
-            # Check if a new seed sequence has been reached, if then increment seed seqeunce count
+            # Check if a new seed sequence has been reached, if then increment seed sequence count
+            # and add the name to the list of seeds
             if ">" in line:
                 num_primers += 1
+
+                line = line.strip('\n')
+                primer_name = line[1:]
+
+                if primer_name in seed_list:
+                    file_logger.exception(
+                        "Duplicate seed sequence names were identified! This is not allowed and should be changed")
+                    exit_with_error(
+                        message="Duplicate seed sequence names were identified! This is not allowed and should be changed",
+                        exit_status=EXIT_INPUT_FILE_ERROR)
+
+                seed_list.append(primer_name)
 
     if num_primers % 2 != 0:
         file_logger.exception("The number of seed sequences given is not even! This means that not all seed sequences can be given a mate\n"
@@ -35,38 +52,7 @@ def check_number_of_primers(primer_file, file_logger):
                                         exit_status=EXIT_INPUT_FILE_ERROR)
     else:
         file_logger.debug("Number of seed sequences given is equal")
-        return num_primers
-
-
-def extract_primer_info(primer_file, file_logger):
-    """
-    Function to go through fasta file of primers and index them into dict with their name as key
-    returns the dict with key as name and value as sequence
-    :param primer_file: File name of multi fasta file containing seed sequences
-    :param file_logger: Logger that outputs files to log
-    :return: dict with key as name of seed sequence and value as sequence
-    """
-    file_logger.debug("Start extraction of seed sequence names")
-    # Initiate dict to hold primers with their name as the key and sequence as the value.
-    primer_list = []
-
-    # Go through primer file
-    with open(primer_file, 'r') as primers:
-        for line in primers.readlines():
-            # Remove new lines from line
-            line = line.strip('\n')
-            # Check if a new primer has been reached, if not then add line of sequence to current primer
-            if ">" in line:
-                primer_name = line[1:]
-
-                if primer_name in primer_list:
-                    file_logger.exception("Duplicate seed sequence names were identified! This is not allowed and should be changed")
-                    exit_with_error(message="Duplicate seed sequence names were identified! This is not allowed and should be changed",
-                                                    exit_status=EXIT_INPUT_FILE_ERROR)
-
-                primer_list.append(primer_name)
-
-    return primer_list
+        return num_primers, seed_list
 
 
 def construct_pair_primers(primer_names, file_logger):
@@ -138,11 +124,9 @@ def handle_primers(primer_file, file_logger):
     :return: pairs of seed sequences
     """
 
-    num_primers = check_number_of_primers(primer_file, file_logger)
+    num_primers, seed_list = check_number_n_names_of_seeds(primer_file, file_logger)
 
-    primer_list = extract_primer_info(primer_file, file_logger) # TODO - Collapse the above and this funtion to both check number and name of seed sequences at once.
-
-    primer_pairs = construct_pair_primers(primer_list, file_logger)
+    primer_pairs = construct_pair_primers(seed_list, file_logger)
 
     file_logger.debug(f'{num_primers} primers found in primer file. - '
                       f'This leads to {len(primer_pairs)} pairs of primers.')

@@ -70,14 +70,11 @@ from math import floor
 import sys
 from Bio import SeqIO
 
-# TODO - Go through this list and redefine/remove error messeages, and header of program. Remove the default verbose, as it is set in the argparser.
 EXIT_FILE_IO_ERROR = 1
 EXIT_COMMAND_LINE_ERROR = 2
 EXIT_INPUT_FILE_ERROR = 3
 EXIT_DEPENDENCY_ERROR = 4
-DEFAULT_MIN_LEN = 0
 DEFAULT_VERBOSE = False
-HEADER = 'FILENAME\tNUMSEQ\tTOTAL\tMIN\tAVG\tMAX'
 PROGRAM_NAME = "Magphi"
 
 
@@ -87,7 +84,7 @@ except pkg_resources.DistributionNotFound:
     PROGRAM_VERSION = "undefined_version"
 
 
-def init_logging(debug_log, out_path):
+def init_logging(debug_log, quiet, out_path):
     '''If the log_filename is defined, then
     initialise the logging facility, and write log statement
     indicating the program has started, and also write out the
@@ -101,7 +98,9 @@ def init_logging(debug_log, out_path):
     '''
     if debug_log:
         level = logging.DEBUG
-    else: #TODO - make verboses controlled. increase logging level
+    elif quiet:
+        level = logging.WARNING
+    else:
         level = logging.INFO
 
     # Construct logger logging to file
@@ -151,7 +150,7 @@ def main():
         pass
 
     "Orchestrate the execution of the program"
-    file_logger = init_logging(cmd_args.log, cmd_args.out_path)
+    file_logger = init_logging(cmd_args.log, cmd_args.quiet, cmd_args.out_path)
 
     # Check dependencies for Magphi and logging of versions to file
     dependencies_return = check_dependencies_for_main(verbose=False)
@@ -181,7 +180,6 @@ def main():
 
     # If input is GFF3 split genome from annotations and assign to be handed over to blast,
     # If files are not gff then assign the Fastas from the input and no annotations.
-    # TODO - make verbose controlled - add logging
     # TODO - should this splitting be done when each genome is being searched for primers? This will decrease the load of memory used
     if file_type == 'gff':
         file_logger.debug("Splitting GFF files into annotations and genomes")
@@ -193,7 +191,7 @@ def main():
 
     # Read in and combine primers into pairs
     file_logger.debug("Start handling of input seed sequences")
-    primer_pairs = handle_primers(cmd_args.seeds, file_logger) # TODO - Can we remove primer dict?
+    primer_pairs = handle_primers(cmd_args.seeds, file_logger)
 
     # Construct master dict to hold the returned information from primers
     master_primer_hits = {}

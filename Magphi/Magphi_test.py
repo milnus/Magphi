@@ -244,7 +244,19 @@ class TestPrimerFunctions(unittest.TestCase):
     def test_uneven_primer_number(self):
         ''' test that program exits if an uneven number of primers is given, as this can not be made into a number of sets '''
         with self.assertRaises(SystemExit):
-            primer_handling.check_number_of_primers('TestPrimerFunctions/Uneven_number_primers.txt', self.logger)
+            primer_handling.check_number_n_names_of_seeds('TestPrimerFunctions/Uneven_number_primers.txt', self.logger)
+
+    def test_identical_primer_names(self):
+        ''' Test that giving primers with the exact same name will result in an exit of the program '''
+        with self.assertRaises(SystemExit):
+            primer_handling.check_number_n_names_of_seeds('TestPrimerFunctions/Same_name_primers.txt', self.logger)
+
+    def test_extracting_seed_info(self):
+        ''' Test that giving primers with the exact same name will result in an exit of the program '''
+        num, names = primer_handling.check_number_n_names_of_seeds('TestPrimerFunctions/Good_seed_file.txt', self.logger)
+
+        self.assertEqual(4, num)
+        self.assertEqual(['primer_1_1', 'primer_1_2', 'primer_2_1', 'primer_2_2'], names)
 
     def test_correct_primer_pairing(self):
         ''' test that a file with correctly named primers can be paired as expected '''
@@ -265,10 +277,6 @@ class TestPrimerFunctions(unittest.TestCase):
         with self.assertRaises(SystemExit):
             primer_handling.construct_pair_primers(primer_names, self.logger)
 
-    def test_identical_primer_names(self):
-        ''' Test that giving primers with the exact same name will result in an exit of the program '''
-        with self.assertRaises(SystemExit):
-            primer_handling.extract_primer_info('TestPrimerFunctions/Same_name_primers.txt', self.logger)
 
 
 # TODO - test blast function?

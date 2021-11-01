@@ -270,7 +270,7 @@ def examine_flanking_regions(primer_contig_hits, max_primer_dist, genome_file, b
 
         # Check if one primer has reached one or both ends, while the other has reached no ends.
         elif (end_reaches[0] == 1 and end_reaches[1] == 0) or (end_reaches[0] == 0 and end_reaches[1] == 1):
-            return 3 # TODO - POSSIBLY WRONG??
+            return 3
 
         # Check if
         # two or more primers hit both ends of their contig (end_reaches[0] > 1) or
@@ -324,7 +324,6 @@ def examine_flanking_regions(primer_contig_hits, max_primer_dist, genome_file, b
             return '4B'
 
         else:
-            # TODO - add what the tmp folder ends up being named.
             warnings.warn(f'Some unaccounted for constalation of primers hits '
                           f'was found to reach the end of contigs.\n'
                           f'Genome .fai file examined: {genome_file}.\n'

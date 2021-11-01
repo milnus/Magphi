@@ -1,8 +1,8 @@
 usage: Magphi [-h] -g .fa/.gff [.fa/.gff ...] -s multi_fasta_file.fa [-ip]
-              [-md int] [-o path/to/output] [-c int] [-l] [-v]
+              [-md int] [-o path/to/output] [-c int] [-l] [-q] [-v]
 
 Welcome to Magphi! This program will extract sequences and possible
-annotations within a set of insertion sequences or primers given as input.
+annotations within a set of seed sequences given as input.
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -10,19 +10,19 @@ optional arguments:
                         Give the fasta or gff3 files. (gff3 files should
                         contain the genome fasta sequence)
   -s multi_fasta_file.fa, --input_seeds multi_fasta_file.fa
-                        Give the multi fasta containing the primers to be used
-                        for extracting sequnces
-  -ip, --include_primers
-                        Argument to include the primers in the
-                        sequence/annotations extracted [default: primers are
+                        Give the multi fasta containing the seed sequences to
+                        be used for extracting sequnces
+  -ip, --include_seeds  Argument to include the seeds in the
+                        sequence/annotations extracted [default: seeds are
                         removed]
-  -md int, --max_primer_distance int
-                        The maximum distance with which primers will be
-                        merged. This can often be set a bit higher than an
-                        expected size of a region If no maximum distance is
-                        wanted then set to 0 [default: 50,000bp]
+  -md int, --max_seed_distance int
+                        The maximum distance with which seeds will be merged.
+                        This can often be set a bit higher than an expected
+                        size of a region If no maximum distance is wanted then
+                        set to 0 [default: 50,000bp]
   -o path/to/output, --output_folder path/to/output
                         Give path to output folder [default: current folder]
   -c int, --cpu int     Give max number of CPUs [default: 1]
   -l, --log             Record program progress in for debugging purpose
+  -q, --quiet           Only print warnings
   -v, --version         show program's version number and exit

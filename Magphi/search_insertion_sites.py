@@ -431,9 +431,11 @@ def check_primers_placement(bed_files, primer_pairs, primer_hits, max_primer_dis
                                                             max_primer_dist,
                                                             f'{genome_file}.fai',
                                                             file)
-
                     if return_value == 1 and primer_hits[primer_name] == 2 and uniq_primers == 2:
                         primer_hit_support_dict[primer_name] = '4A'
+                    elif return_value == 2:
+                        primer_hit_support_dict[primer_name] = return_value
+                        bed_files.remove(file)
                     else:
                         primer_hit_support_dict[primer_name] = return_value
 

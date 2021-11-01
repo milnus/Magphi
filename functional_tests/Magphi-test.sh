@@ -345,11 +345,12 @@ rm -r test_out_folder
 # Chaws problem.
 call_new_test "Test larger mock up of problem reported in emm4"
 Magphi -g \
-larger_Magphi_test/ERR033882.gff \
-larger_Magphi_test/ERR111968.gff \
-larger_Magphi_test/ERR449328.gff \
-larger_Magphi_test/ERR1734483.gff \
--s larger_test_primers.fa -o test_out_folder -md 15000 -is
+gff3_files_larger_test/*.gff -s larger_test_primers.fa -o test_out_folder -md 15000 -is
+#gff3_files_larger_test/ERR033882.gff \
+#gff3_files_larger_test/ERR111968.gff \
+#gff3_files_larger_test/ERR449328.gff \
+#gff3_files_larger_test/ERR1734483.gff \
+
 test_output_file test_out_folder/annotation_num_matrix.csv larger_Magphi_test/annotation_num_matrix.csv
 test_output_file test_out_folder/inter_primer_distance.csv larger_Magphi_test/inter_primer_distance.csv
 test_output_file test_out_folder/contig_hit_matrix.csv larger_Magphi_test/contig_hit_matrix.csv

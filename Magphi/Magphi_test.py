@@ -82,6 +82,20 @@ class TestFileRecognition(unittest.TestCase):
 
         self.assertEqual(None, file_type)
 
+    def test_file_with_single_greater_than(self):
+        ''' test that input files woth just a single '>' are not recognised as valid '''
+        files = ['TestFileRecognition/single_greater_than.fasta']
+
+        with self.assertRaises(SystemExit):
+            check_inputs.check_if_fasta(files, self.logger, False)
+
+    def test_file_with_new_line_in_sequence(self):
+        ''' test that input files woth just a single '>' are not recognised as valid '''
+        files = ['TestFileRecognition/new_line_in_seqeunce.fasta']
+
+        with self.assertRaises(SystemExit):
+            check_inputs.check_if_fasta(files, self.logger, False)
+
     def test_mixed_gff_and_fasta_recognition(self):
         ''' test that a mix of fasta and gff files results in exiting Magphi with an error '''
         path = 'TestFileRecognition/Mixed_gff_and_fasta'

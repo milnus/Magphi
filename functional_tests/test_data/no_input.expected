@@ -1,4 +1,4 @@
-usage: Magphi [-h] -g .fa/.gff [.fa/.gff ...] -s multi_fasta_file.fa [-ip]
+usage: Magphi [-h] -g .fa/.gff [.fa/.gff ...] -s multi_fasta_file.fa [-is]
               [-md int] [-o path/to/output] [-c int] [-l] [-q] [-v]
 
 Welcome to Magphi! This program will extract sequences and possible
@@ -12,7 +12,7 @@ optional arguments:
   -s multi_fasta_file.fa, --input_seeds multi_fasta_file.fa
                         Give the multi fasta containing the seed sequences to
                         be used for extracting sequnces
-  -ip, --include_seeds  Argument to include the seeds in the
+  -is, --include_seeds  Argument to include the seeds in the
                         sequence/annotations extracted [default: seeds are
                         removed]
   -md int, --max_seed_distance int

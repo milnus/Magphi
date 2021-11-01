@@ -1,0 +1,9 @@
+**/.DS_Store
+**.pptx
+.idea*
+Beta_versions/
+__pycache__/
+code_to_transfer/
+extractor.yml
+functional_tests/test_data/test_folder/
+venv/

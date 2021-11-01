@@ -1,0 +1,8 @@
+>primer_1_1
+CAT
+>primer_1_2
+TAG
+>primer_2_1
+AAA
+>primer_2_2
+CATCATCAT

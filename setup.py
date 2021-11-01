@@ -22,8 +22,8 @@ setup(
         'console_scripts': ['Magphi = Magphi.__main__:main']
     },
     url='https://github.com/GITHUB_USERNAME/Magphi',
-    license='LICENSE',
-    description=('A prototypical bioinformatics command line tool'),
+    license='MIT license',
+    description=('A prototypical bioinformatics command line tool'), # TODO - change
     long_description=(LONG_DESCRIPTION),
-    install_requires=["biopython"],
+    install_requires=["biopython"], #TODO -  Change
 )

@@ -1,0 +1,5 @@
+# Dependencies, with versions explicitly declared for development and testing
+biopython==1.79
+pybedtools==0.8.2
+# Packages that are not dependencies but used for building or testing
+pylint

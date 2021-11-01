@@ -1,4 +1,4 @@
-FROM python:3.7.3-stretch
+FROM python:3.9.7-buster
 WORKDIR /Magphi
 COPY . .
 # TODO - Change the python up top
@@ -11,8 +11,8 @@ RUN pip3 install -r requirements-dev.txt
 RUN apt-get update && apt-get install -y \
   bedtools \
   samtools \
-  python3.9 \
+  ncbi-blast+ \
   && rm -rf /var/lib/apt/lists/*
-#bedtools==2.29.2
- # TODO - add docker container with bedtools - biocontainers?
-#samtools==1.9
+  # TODO - install BLAST+!
+
+

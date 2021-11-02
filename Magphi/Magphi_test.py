@@ -1571,10 +1571,10 @@ class TestWritingOutputFiles(unittest.TestCase):
         wrangle_outputs.write_paired_seeds(seed_pairs, 'TestWritingOutputFiles')
 
         with open('TestWritingOutputFiles/primer_pairing.expected', 'r') as expected:
-            with open('TestWritingOutputFiles/primer_pairing.tsv') as result:
+            with open('TestWritingOutputFiles/seed_pairing.tsv') as result:
                 self.assertEqual(expected.readlines(), result.readlines())
 
-        os.remove('TestWritingOutputFiles/primer_pairing.tsv')
+        os.remove('TestWritingOutputFiles/seed_pairing.tsv')
 
     def test_writing_write_seed_hit_matrix(self):
         ''' Test the function for writing output for the number of hits by each seed sequence in the genome '''
@@ -1631,10 +1631,10 @@ class TestWritingOutputFiles(unittest.TestCase):
         write_output_csv.write_seed_hit_evidence(master_seed_evidence, seed_pairs, out_path)
 
         with open('TestWritingOutputFiles/contig_hit_matrix.expected', 'r') as expected:
-            with open('TestWritingOutputFiles/master_primer_evidence.csv') as result:
+            with open('TestWritingOutputFiles/master_seed_evidence.csv') as result:
                 self.assertEqual(expected.readlines(), result.readlines())
 
-        os.remove('TestWritingOutputFiles/master_primer_evidence.csv')
+        os.remove('TestWritingOutputFiles/master_seed_evidence.csv')
 
     def test_writing_inter_seed_distance(self):
         ''' Test the function for writing output for the distance between connected seed sequences '''
@@ -1651,10 +1651,10 @@ class TestWritingOutputFiles(unittest.TestCase):
         write_output_csv.write_inter_seed_dist(master_inter_seed_dist, seed_pairs, out_path)
 
         with open('TestWritingOutputFiles/contig_hit_matrix.expected', 'r') as expected:
-            with open('TestWritingOutputFiles/inter_primer_distance.csv') as result:
+            with open('TestWritingOutputFiles/inter_seed_distance.csv') as result:
                 self.assertEqual(expected.readlines(), result.readlines())
 
-        os.remove('TestWritingOutputFiles/inter_primer_distance.csv')
+        os.remove('TestWritingOutputFiles/inter_seed_distance.csv')
 
 
 if __name__ == '__main__':

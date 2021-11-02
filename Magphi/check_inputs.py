@@ -82,7 +82,8 @@ def check_if_fasta(input_files, file_logger, is_input_gzipped):
                 in_file.close()
                 exit_with_error(f'Fasta file contains new line in middle of file. This is not allowed please have a look at file: {file}',
                                 EXIT_INPUT_FILE_ERROR)
-            if '\n' in line:
+            # Check for empty line
+            if not line.strip():
                 new_line_in_middle = True
         in_file.close()
 

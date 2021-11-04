@@ -125,7 +125,7 @@ function test_output_file {
     expected_output_file=$2
     verbose_message "Testing output file: $1"
     verbose_message "Expected file path: $2"
-    difference=$(diff $output $expected_output_file)
+    difference=$(diff $output $expected_output_file) || let num_errors+=1
     if [ -n "$difference" ]; then
         let num_errors+=1
         echo "Test output failed: $1"

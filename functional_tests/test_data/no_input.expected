@@ -1,5 +1,6 @@
 usage: Magphi [-h] -g .fa/.gff [.fa/.gff ...] -s multi_fasta_file.fa [-is]
-              [-md int] [-b | -n] [-o path/to/output] [-c int] [-l | -q] [-v]
+              [-md int] [-b | -n] [-o path/to/output] [-c int] [-l | -q]
+              [--check] [-v]
 
 Welcome to Magphi! This program will extract sequences and possible
 annotations within a set of seed sequences given as input.
@@ -30,4 +31,5 @@ optional arguments:
   -c int, --cpu int     Give max number of CPUs [default: 1]
   -l, --log             Record program progress in for debugging purpose
   -q, --quiet           Only print warnings
+  --check               Check dependencies for Magphi and exit
   -v, --version         show program's version number and exit

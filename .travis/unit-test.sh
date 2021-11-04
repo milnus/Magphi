@@ -4,7 +4,7 @@ set -e
 errors=0
 
 # Run unit tests
-python Magphi/Magphi_test.py || {
+python unit_tests/Magphi_test.py || {
     echo "'python python/Magphi/Magphi_test.py' failed"
     let errors+=1
 }

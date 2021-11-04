@@ -188,7 +188,7 @@ def check_dependencies_for_main(verbose=False):
         return False
 
 
-if __name__ == '__main__':
+def check_dependencies_only():
     print('\n------ Checking dependencies for Magphi ------')
     biopython_presence = check_for_biopython(verbose=True)
 
@@ -203,6 +203,11 @@ if __name__ == '__main__':
     print('\n------ Summary of dependency check ------')
 
     if all([biopython_presence, pybedtools_presence, bedtools_presence, samtools_presence]):
-        print("All dependencies were found to be okay! We are ready to go!")
+        print("All dependencies were found to be okay! We are ready to go! \n")
     else:
-        print("!!! Some dependency does not seem be the correct version, please check the warnings above !!!")
+        print("!!! Some dependency does not seem be the correct version, please check the warnings above !!! \n")
+
+    sys.exit(0)
+
+if __name__ == '__main__':
+    pass

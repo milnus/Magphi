@@ -3,8 +3,11 @@
 from setuptools import setup
 
 LONG_DESCRIPTION = \
-'''The program extracts regions of interest from Fasta or Genome Feature Format (GFF) files, given a set of seed sequences given as nucleotide strings in a multi-line fasta file.  
-The program can output fasta and GFF outputs or regions, and will giv multiple outputs around regions and their evidence.'''
+'''The program extracts regions of interest from Fasta or Genome Feature Format (GFF) genomes.
+This is done given a set of seed sequences given as nucleotide strings in a multi-line fasta file.  
+The program can output fasta and GFF outputs or regions, and will giv multiple outputs around regions and their evidence.
+
+The program takes in multiple fasta or GFF files at a single time and can also take multiple seed sequence pairs.'''
 
 
 setup(
@@ -25,7 +28,7 @@ setup(
                       'pybedtools'],
     keywords=['Genomic', 'extraction', 'bacteria', 'prokaryotes', 'bioinformatics'],
     classifiers=[
-        'Programming language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.9',
         'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent',
         'Intended Audience :: Science/Research',

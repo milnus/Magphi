@@ -11,6 +11,11 @@ from Bio.Blast.Applications import NcbiblastnCommandline
 from Bio.Sequencing.Applications import SamtoolsFaidxCommandline
 from Bio import SearchIO
 import pybedtools as bedtools
+
+try:
+    from Magphi.split_gff_file import split_single_gff
+except ModuleNotFoundError:
+    from split_gff_file import split_single_gff
 # pylint: disable=E1123
 
 
@@ -691,7 +696,7 @@ def extract_seqs_n_annots(merged_bed_files, file_type, genome_file, annotation_f
 
 
 def screen_genome_for_seeds(genome_file, seed_pairs, seed_path, tmp_folder,
-                              include_seeds, file_type, annotation_file, out_path, max_seed_dist, file_logger,
+                              include_seeds, file_type, out_path, max_seed_dist, file_logger,
                               is_input_gzipped, print_seq_out):
     """
     Function that summarise the search of seeds sequences, determination of position and extraction.
@@ -714,11 +719,17 @@ def screen_genome_for_seeds(genome_file, seed_pairs, seed_path, tmp_folder,
     Any seed sequences that were next to a sequences break
     distance between seed sequences that could be connected.
     """
-
+    # TODO - possibly contruct a tmp folder inside the tmp_folder for the analysis.
     file_logger.debug(f"Start search of sequences is {genome_file}")
 
+    genome_name = os.path.basename(genome_file)
+    genome_name = genome_name.rsplit('.', 1)[0]
+
+    tmp_genome_folder = os.path.join(tmp_folder, genome_name)
+    os.mkdir(tmp_genome_folder)
+
     if file_type == 'fasta':
-        tmp_genome = os.path.join(tmp_folder, genome_file.rsplit('/')[-1])
+        tmp_genome = os.path.join(tmp_genome_folder, genome_file.rsplit('/')[-1])
 
         if is_input_gzipped:
             file_logger.debug("\tCopying gzipped fasta file into tmp dir")
@@ -732,15 +743,25 @@ def screen_genome_for_seeds(genome_file, seed_pairs, seed_path, tmp_folder,
             copyfile(genome_file, tmp_genome)
 
         genome_file = tmp_genome
+        annotation_file = None
+
+    # TODO check if gff and split
+    if file_type == 'gff':
+        genome_file, annotation_file = split_single_gff(genome_file, tmp_genome_folder, is_input_gzipped)
 
     # Clean the genome name for path, .gff and possible _tmp if gff is given
-    # genome_name = genome_file.rsplit('/', 1)[1]
-    genome_name = os.path.basename(genome_file)
-    genome_name = genome_name.rsplit('.', 1)[0]
-    genome_name = genome_name.rsplit('_tmp', 1)[0]
+    # genome_name = os.path.basename(genome_file)
+    # genome_name = genome_name.rsplit('.', 1)[0]
+    # genome_name = genome_name.rsplit('_tmp', 1)[0]
+
+    # tmp_genome_folder = os.path.join(tmp_folder, genome_name)
+    # os.mkdir(tmp_genome_folder)
+    # os.rename(os.path.join(tmp_folder, genome_name),
+    #           os.path.join(tmp_genome_folder, genome_name))
 
     # Concatenate the genome name and the path to the temporary folder
-    genome_name = os.path.join(tmp_folder, genome_name)
+    # genome_name = os.path.join(tmp_folder, genome_name)
+    genome_name = os.path.join(tmp_genome_folder, genome_name)
 
     # Run blast with genome and insertion site sequences
     file_logger.debug(f"\tBLASTing: {genome_file}")
@@ -777,9 +798,17 @@ def screen_genome_for_seeds(genome_file, seed_pairs, seed_path, tmp_folder,
 
     # clean up by removing blast xml output, and merged and seed hit beds from tmp folder:
     os.remove(blast_xml_output)
-    tmp_folder_files = os.listdir(tmp_folder)
+    tmp_folder_files = os.listdir(tmp_genome_folder)
     for file in tmp_folder_files:
-        if '.bed' in file:
-            os.remove(os.path.join(tmp_folder, file))
+        if str(genome_name).rsplit('/', 1)[1] in file:
+            try:
+                os.remove(os.path.join(tmp_genome_folder, file))
+            except FileNotFoundError:
+                pass
+    os.rmdir(tmp_genome_folder)
+    # tmp_folder_files = os.listdir(tmp_folder)
+    # for file in tmp_folder_files:
+    #     if '.bed' in file and str(genome_name).rsplit('/')[1] in file:
+    #         os.remove(os.path.join(tmp_folder, file))
 
     return seed_hits, annots_per_interval, genome_name, seed_evidence, break_seeds, inter_seed_dist

@@ -179,7 +179,6 @@ def main():
 
     # If input is GFF3 split genome from annotations and assign to be handed over to blast,
     # If files are not gff then assign the Fastas from the input and no annotations.
-    # TODO - should this splitting be done when each genome is being searched for seeds? This will decrease the load of memory used
     # if file_type == 'gff':
     #     file_logger.debug("Splitting GFF files into annotations and genomes")
     #     genomes, annotations = split_gff_files(cmd_args.genomes, tmp_folder, is_input_gzipped)

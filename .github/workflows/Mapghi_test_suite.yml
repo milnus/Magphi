@@ -10,7 +10,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2.4.0
       - name: 'Build Docker image'
-        run: docker build  -t magphi .
+        run: docker build ./Magphi -t magphi .
       - name: 'Run unit tests'
         run: docker run --entrypoint /Magphi/.travis/unit-test.sh magphi
       - name: 'Run functional tests'

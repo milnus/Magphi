@@ -7,8 +7,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2.4.0
+      - uses: actions/checkout@v2
       - name: 'Build Docker image'
         run: docker build ./Magphi -t magphi .
       - name: 'Run unit tests'

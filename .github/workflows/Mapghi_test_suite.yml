@@ -3,11 +3,11 @@ on:
   push:
     branches:
       - dev
-
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
       - name: 'Build Docker image'
         run: docker build -t magphi .
       - name: 'Run unit tests'

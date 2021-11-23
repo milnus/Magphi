@@ -1,0 +1,19 @@
+name: 'Magphi_test_n_deploy'
+on:
+  push:
+    branches:
+      - main
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: 'Build Docker image'
+        run: docker build -t magphi .
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Run unit tests'
+        run: docker run --entrypoint /Magphi/.travis/unit-test.sh magphi
+      - name: 'Run functional tests'
+        run: docker run --entrypoint /Magphi/functional_tests/Magphi-test.sh magphi -p Magphi -d /Magphi/functional_tests/test_data -v

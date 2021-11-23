@@ -3,9 +3,8 @@
 from setuptools import setup
 
 LONG_DESCRIPTION = \
-'''The program extracts regions of interest from Fasta or Genome Feature Format (GFF) files, 
-given a set of seed sequences given as nucleotide strings in a multi-line fasta file.
- The program can output fasta and GFF outputs or regions, and will giv multiple outputs around regions and their evidence.'''
+'''The program extracts regions of interest from Fasta or Genome Feature Format (GFF) files, given a set of seed sequences given as nucleotide strings in a multi-line fasta file.  
+The program can output fasta and GFF outputs or regions, and will giv multiple outputs around regions and their evidence.'''
 
 
 setup(

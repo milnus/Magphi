@@ -719,7 +719,6 @@ def screen_genome_for_seeds(genome_file, seed_pairs, seed_path, tmp_folder,
     Any seed sequences that were next to a sequences break
     distance between seed sequences that could be connected.
     """
-    # TODO - possibly contruct a tmp folder inside the tmp_folder for the analysis.
     file_logger.debug(f"Start search of sequences is {genome_file}")
 
     genome_name = os.path.basename(genome_file)
@@ -745,19 +744,8 @@ def screen_genome_for_seeds(genome_file, seed_pairs, seed_path, tmp_folder,
         genome_file = tmp_genome
         annotation_file = None
 
-    # TODO check if gff and split
     if file_type == 'gff':
         genome_file, annotation_file = split_single_gff(genome_file, tmp_genome_folder, is_input_gzipped)
-
-    # Clean the genome name for path, .gff and possible _tmp if gff is given
-    # genome_name = os.path.basename(genome_file)
-    # genome_name = genome_name.rsplit('.', 1)[0]
-    # genome_name = genome_name.rsplit('_tmp', 1)[0]
-
-    # tmp_genome_folder = os.path.join(tmp_folder, genome_name)
-    # os.mkdir(tmp_genome_folder)
-    # os.rename(os.path.join(tmp_folder, genome_name),
-    #           os.path.join(tmp_genome_folder, genome_name))
 
     # Concatenate the genome name and the path to the temporary folder
     # genome_name = os.path.join(tmp_folder, genome_name)

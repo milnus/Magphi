@@ -145,7 +145,6 @@ def main():
         os.mkdir(cmd_args.out_path)
     except FileExistsError:
         warnings.warn("Output folder already exists")
-        # TODO - Terminate? to not overwrite?
         pass
 
     "Orchestrate the execution of the program"
@@ -177,27 +176,13 @@ def main():
         file_logger.warning("A temporary folder already exists at the given output location. "
                                      "Most likely from an incomplete analysis")
 
-    # If input is GFF3 split genome from annotations and assign to be handed over to blast,
-    # If files are not gff then assign the Fastas from the input and no annotations.
-    # if file_type == 'gff':
-    #     file_logger.debug("Splitting GFF files into annotations and genomes")
-    #     genomes, annotations = split_gff_files(cmd_args.genomes, tmp_folder, is_input_gzipped)
-    # else:
-    #     file_logger.debug("Setting fasta files as genomes and annotation to list of None")
-    #     genomes = cmd_args.genomes
-    #     annotations = [None] * len(cmd_args.genomes)
-
     # Read in and combine seeds into pairs
     file_logger.debug("Start handling of input seed sequences")
     seed_pairs = handle_seeds(cmd_args.seeds, file_logger)
 
-    # Evaluate if fasta and gff files should be given as output.
-    #   if no sequences should be outputted, then do not evaluate breaks
-    #   if sequences should be outputted, then evaluate if breaks should be printed
     print_seq_out = 'output' if cmd_args.no_seqs else 'None'
     if print_seq_out == 'output':
         print_seq_out = 'All' if cmd_args.print_breaks else print_seq_out
-
 
     # Construct master dict to hold the returned information from seeds
     master_seed_hits = {}
@@ -215,11 +200,6 @@ def main():
 
     file_logger.info(f'{num_genomes} input files to be processed, starting now!')
     genomes_processed = 0
-    # with concurrent.futures.ThreadPoolExecutor(max_workers=cmd_args.cpu) as executor:
-    #     results = [executor.submit(screen_genome_for_seeds, genomes[i], seed_pairs, cmd_args.seeds,
-    #                                tmp_folder, cmd_args.include_seeds, file_type, annotations[i],
-    #                                cmd_args.out_path, cmd_args.max_seed_dist, file_logger, is_input_gzipped, print_seq_out)
-    #                for i, genome in enumerate(genomes)]
     with concurrent.futures.ThreadPoolExecutor(max_workers=cmd_args.cpu) as executor:
         results = [executor.submit(screen_genome_for_seeds, cmd_args.genomes[i], seed_pairs, cmd_args.seeds,
                                    tmp_folder, cmd_args.include_seeds, file_type,
@@ -285,4 +265,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-## TODO - Github action test

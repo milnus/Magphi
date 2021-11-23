@@ -3,12 +3,9 @@
 from setuptools import setup
 
 LONG_DESCRIPTION = \
-'''The program reads one or more input FASTA files.
-For each file it computes a variety of statistics, and then
-prints a summary of the statistics as output.
-
-The goal is to provide a solid foundation for new bioinformatics command line tools,
-and is an ideal starting place for new projects.'''
+'''The program extracts regions of interest from Fasta or Genome Feature Format (GFF) files, 
+given a set of seed sequences given as nucleotide strings in a multi-line fasta file.
+ The program can output fasta and GFF outputs or regions, and will giv multiple outputs around regions and their evidence.'''
 
 
 setup(

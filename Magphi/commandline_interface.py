@@ -108,7 +108,6 @@ def get_commandline_arguments(args, version):
                               default=False,
                               required=False)
 
-    # TODO - Add in command to check dependencies.
     parser.add_argument('--check',
                               help='Check dependencies for Magphi and exit',
                               dest='dependency_check',

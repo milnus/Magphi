@@ -234,8 +234,10 @@ def main():
 
             seed_hits, annots_per_interval, genome_name, seed_evidence, break_seeds, inter_seed_dist = f.result()
 
-            # Polish the genome name for the output dict:
+            # Polish the genome name for the output dict, and possible .fasta and .gff file extensions:
             genome_name = genome_name.rsplit('/', 1)[-1]
+            genome_name = genome_name.rsplit('.gff', 1)[0]
+            genome_name = genome_name.rsplit('.fasta', 1)[0]
             file_logger.debug(f'\t\tCurrently handling results from: {genome_name}')
 
             # Update the master dicts with information from current run.

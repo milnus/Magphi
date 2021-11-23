@@ -4,15 +4,12 @@ on:
     branches:
       - main
 jobs:
-  build:
+  build_n_test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - name: 'Build Docker image'
         run: docker build -t magphi .
-  test:
-    runs-on: ubuntu-latest
-    steps:
       - name: 'Run unit tests'
         run: docker run --entrypoint /Magphi/.travis/unit-test.sh magphi
       - name: 'Run functional tests'

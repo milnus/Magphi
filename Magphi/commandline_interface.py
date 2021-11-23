@@ -1,5 +1,9 @@
 import argparse
 import sys
+try:
+    from Magphi.check_depencies import check_dependencies_only
+except ModuleNotFoundError:
+    from check_depencies import check_dependencies_only
 
 EXIT_COMMAND_LINE_ERROR = 2
 
@@ -104,6 +108,13 @@ def get_commandline_arguments(args, version):
                               default=False,
                               required=False)
 
+    parser.add_argument('--check',
+                              help='Check dependencies for Magphi and exit',
+                              dest='dependency_check',
+                              action='store_true',
+                              default=False,
+                              required=False)
+
     parser.add_argument('-v',
                         '--version',
                         action='version',
@@ -116,6 +127,8 @@ def get_commandline_arguments(args, version):
     elif '-help' in args:
         parser.print_help()
         sys.exit(0)
+    if '--check' in args:
+        check_dependencies_only()
 
     args = parser.parse_args(args)
 

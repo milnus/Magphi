@@ -137,8 +137,7 @@ def main():
     start_time = time.time()
 
     # Retrieve the flags given by the user in the commandline
-    # TODO - add in argument to not print sequences with breaks - default: Do not print
-    # TODO - add in argument to not output sequences and gffs but only overview tables.
+    # TODO - add in argument to change tmp directory to user defined place (scratch which is faster?)
     cmd_args = get_commandline_arguments(argv[1:], PROGRAM_VERSION)
 
     # Try to construct the output folder and except if it does exist
@@ -146,7 +145,6 @@ def main():
         os.mkdir(cmd_args.out_path)
     except FileExistsError:
         warnings.warn("Output folder already exists")
-        # TODO - Terminate? to not overwrite?
         pass
 
     "Orchestrate the execution of the program"
@@ -178,28 +176,13 @@ def main():
         file_logger.warning("A temporary folder already exists at the given output location. "
                                      "Most likely from an incomplete analysis")
 
-    # If input is GFF3 split genome from annotations and assign to be handed over to blast,
-    # If files are not gff then assign the Fastas from the input and no annotations.
-    # TODO - should this splitting be done when each genome is being searched for seeds? This will decrease the load of memory used
-    if file_type == 'gff':
-        file_logger.debug("Splitting GFF files into annotations and genomes")
-        genomes, annotations = split_gff_files(cmd_args.genomes, tmp_folder, is_input_gzipped)
-    else:
-        file_logger.debug("Setting fasta files as genomes and annotation to list of None")
-        genomes = cmd_args.genomes
-        annotations = [None] * len(cmd_args.genomes)
-
     # Read in and combine seeds into pairs
     file_logger.debug("Start handling of input seed sequences")
     seed_pairs = handle_seeds(cmd_args.seeds, file_logger)
 
-    # Evaluate if fasta and gff files should be given as output.
-    #   if no sequences should be outputted, then do not evaluate breaks
-    #   if sequences should be outputted, then evaluate if breaks should be printed
     print_seq_out = 'output' if cmd_args.no_seqs else 'None'
     if print_seq_out == 'output':
         print_seq_out = 'All' if cmd_args.print_breaks else print_seq_out
-
 
     # Construct master dict to hold the returned information from seeds
     master_seed_hits = {}
@@ -208,29 +191,33 @@ def main():
     seeds_w_breaks = seed_pairs.copy()
     master_inter_seed_dist = {}
 
-    num_genomes = len(genomes)
+    # num_genomes = len(genomes)
+    num_genomes = len(cmd_args.genomes)
+    # Calculate when to log progress:
+    progress_num = num_genomes / 10
+    progress_num = progress_num if progress_num > 1 else 1
+    progress_num = ceil(progress_num)
+
     file_logger.info(f'{num_genomes} input files to be processed, starting now!')
     genomes_processed = 0
     with concurrent.futures.ThreadPoolExecutor(max_workers=cmd_args.cpu) as executor:
-        results = [executor.submit(screen_genome_for_seeds, genomes[i], seed_pairs, cmd_args.seeds,
-                                   tmp_folder, cmd_args.include_seeds, file_type, annotations[i],
+        results = [executor.submit(screen_genome_for_seeds, cmd_args.genomes[i], seed_pairs, cmd_args.seeds,
+                                   tmp_folder, cmd_args.include_seeds, file_type,
                                    cmd_args.out_path, cmd_args.max_seed_dist, file_logger, is_input_gzipped, print_seq_out)
-                   for i, genome in enumerate(genomes)]
+                   for i, genome in enumerate(cmd_args.genomes)]
 
         for f in concurrent.futures.as_completed(results):
             genomes_processed += 1
-
-            progress_num = num_genomes/10
-            progress_num = progress_num if progress_num > 1 else 1
-            progress_num = ceil(progress_num)
 
             if genomes_processed % progress_num == 0 or genomes_processed == 1:
                 file_logger.info(f'\tFile number {genomes_processed} has been processed')
 
             seed_hits, annots_per_interval, genome_name, seed_evidence, break_seeds, inter_seed_dist = f.result()
 
-            # Polish the genome name for the output dict:
+            # Polish the genome name for the output dict, and possible .fasta and .gff file extensions:
             genome_name = genome_name.rsplit('/', 1)[-1]
+            genome_name = genome_name.rsplit('.gff', 1)[0]
+            genome_name = genome_name.rsplit('.fasta', 1)[0]
             file_logger.debug(f'\t\tCurrently handling results from: {genome_name}')
 
             # Update the master dicts with information from current run.

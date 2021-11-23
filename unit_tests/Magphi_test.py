@@ -24,7 +24,7 @@ from io import StringIO
 
 # Move to folder with mock input files. First try Github structure, then try pulled repository structure
 try:
-    os.chdir('/Magphi/unit_test_data/')
+    os.chdir('/Magphi/unit_tests/unit_test_data/')
 except FileNotFoundError:
     os.chdir('../unit_test_data/')
 

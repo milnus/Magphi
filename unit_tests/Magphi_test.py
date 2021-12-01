@@ -294,7 +294,19 @@ class TestseedFunctions(unittest.TestCase):
 
 
 # TODO - test blast function?
-
+#class TestBlastFunction(unittest.TestCase):
+#        
+#        def test_Blast_function(self):
+#        '''test that the blast xml is correctly being created'''
+#        seeds = ['TestBlastOutToSortedBed/seeds.fa']
+#        genome_file = ['TestBlastOutToSortedBed/Mock_fasta.fa']
+##        tmp_name  = 'Mock_fasta'
+ #       blast_xml = 'TestBlastOutToSortedBed/Mock_blast_out.xml'
+ #       result = search_insertion_sites.blast_out_to_sorted_bed(blast_xml_output = blast_xml,
+ #                                                               include_seeds = True,
+ #                                                               genome_name = genome_name,
+ #                                                               seed_pairs = seed_pairs)
+ #           self.assertEqual(result,blast_xml)'''
 
 # TODO - test blast_out_to_sorted_bed function - use an input file of blast xml output - use two sets of seeds
 #  Test both inclusion and exclution of seeds. - Andrew's responsitibily.
@@ -307,6 +319,32 @@ class TestseedFunctions(unittest.TestCase):
 #   6. Convert expected bed file format into .json or staight python code to be used for assertion.
 #   7. write test.
 #   8. Run
+
+class TestBlastOutToSortedBed(unittest.TestCase):
+        
+        def test_make_bed_list(self):
+            ''' test that the blast xml is correctly being converted to a bed file '''
+            blast_xml = 'TestBlastOutToSortedBed/Mock_blast_out.xml'
+            bed_file = 'TestBlastOutToSortedBed/Mock_fasta~~seed.bed'
+            bed_list=open(bed_file,'r')
+            genome_name = 'Mock_fasta'
+            seed_pairs = {'seed': ['seed_1', 'seed_2']}
+            blast_hit_beds_file, exclusion_list, seed_hits = search_insertion_sites.blast_out_to_sorted_bed(blast_xml_output = blast_xml,
+                                                                                                        include_seeds = True,
+                                                                                                        genome_name = genome_name,
+                                                                                                        seed_pairs = seed_pairs)
+            blast_hit_beds = open(blast_hit_beds_file[0],'r')
+            blast_hits_list = blast_hit_beds.readlines()
+            expected_seed_hits = {'seed': 2}
+            expected_exclusions = []
+            expected_blast_hit_beds = bed_list.readlines()
+            self.assertEqual(expected_seed_hits, seed_hits)
+            self.assertEqual(expected_exclusions, exclusion_list)
+            self.assertEqual(expected_blast_hit_beds, blast_hits_list)
+
+            # close the files
+            bed_list.close()
+            blast_hit_beds.close()
 
 
 class TestseedsPlacement(unittest.TestCase):

@@ -1,8 +1,6 @@
 name: 'Magphi_test_n_deploy'
 on:
   push:
-    branches:
-      - main
   pull_request:
     branches:
       - main

@@ -111,7 +111,7 @@ def check_for_samtools(verbose):
             version = cmd_return.stdout.decode().split(' ', 1)[-1]
             version = version.split('\n', 1)[0]
 
-            if version >= '1.19' or version == '1.12':
+            if version >= '1.11':
                 if verbose:
                     print("Samtools version is valid")
                 return version

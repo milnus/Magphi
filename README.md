@@ -4,7 +4,12 @@
 Tool intended to pull out sequences and annotations between seed sequences specified by the user.
 
 ## When to use
-# TODO!
+if you have moderately large (100+) sequences such as genes that you know flank a particular region of your genome
+such as phage attachment sites and wish to extract the region in one or more genomes. Particularly useful if there is
+some level of acceptable variation in the site that will allow a hit with blast but not a direct pattern match.
+​
+If you have small (<100 bp) motifs with confidence as to the number of ambiguities and direction of primer this tool
+may not be ideal due to the inability for BLAST to deal with short sequences. consider trying seqkit instead.
 
 ## Installation
 ### Conda installation

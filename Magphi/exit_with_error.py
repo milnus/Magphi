@@ -2,6 +2,7 @@ import sys
 import logging
 import os
 
+
 def exit_with_error(message, exit_status, tmp_folder=None):
     '''Print an error message to stderr, prefixed by the program name and 'ERROR'.
     Then exit program with supplied exit status.

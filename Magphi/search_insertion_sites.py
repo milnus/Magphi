@@ -9,8 +9,14 @@ from shutil import copyfile, copyfileobj
 from Bio.Blast.Applications import NcbimakeblastdbCommandline
 from Bio.Blast.Applications import NcbiblastnCommandline
 from Bio.Sequencing.Applications import SamtoolsFaidxCommandline
+from Bio.Application import ApplicationError
 from Bio import SearchIO
 import pybedtools as bedtools
+try:
+    from Magphi.exit_with_error import exit_with_error
+except ModuleNotFoundError:
+    from exit_with_error import exit_with_error
+EXIT_INPUT_FILE_ERROR = 1
 
 try:
     from Magphi.split_gff_file import split_single_gff
@@ -48,6 +54,14 @@ def blast_insertion_site(seeds, genome_file, tmp_name):
 
 
 def blast_out_to_sorted_bed(blast_xml_output, include_seeds, genome_name, seed_pairs):
+    """
+
+    :param blast_xml_output: File from blast in xml format for one genome queried for all seed sequence.
+    :param include_seeds:
+    :param genome_name:
+    :param seed_pairs:
+    :return:
+    """
     # Read in the blast output into a generator object
     blast_output = SearchIO.parse(blast_xml_output, format='blast-xml')
 
@@ -340,10 +354,14 @@ def examine_flanking_regions(seed_contig_hits, max_seed_dist, genome_file, bed_f
 
 def check_seeds_placement(bed_files, seed_pairs, seed_hits, max_seed_dist, genome_file, file_type, tmp_folder):
     ''' Function to determine the placement of seeds and how to search for connections between them
-    Returns a genome file in the temporary directory and an evidence score for each bed file and its seed connections'''
+    Returns a genome file in the temporary directory and an evidence score for each bed file and its seed connections '''
     # Produce genome index file using samtools
     samtools_faidx_cmd = SamtoolsFaidxCommandline(ref=genome_file)
-    samtools_faidx_cmd()
+    try:
+        samtools_faidx_cmd()
+    except ApplicationError:
+        exit_with_error(f"Samtools failed when running the command 'samtools faidx {genome_file}'", EXIT_INPUT_FILE_ERROR)
+
 
     # Initialise the dict to hold the support for a seed hit
     seed_hit_support_dict = dict.fromkeys(seed_pairs)
@@ -398,7 +416,10 @@ def check_seeds_placement(bed_files, seed_pairs, seed_hits, max_seed_dist, genom
                         # 1 or 2 means more examination is required
                         if return_value == 2:
                             seed_hit_support_dict[seed_name] = return_value
-                            bed_files.remove(file)
+                            try:
+                                bed_files.remove(file)
+                            except ValueError:
+                                pass
                         elif return_value == 1:
                             # Examine the remaining junctions to see if two seeds can be found to connect across contigs
                             seed_hit_support_dict[seed_name] = examine_flanking_regions(seed_to_contig,

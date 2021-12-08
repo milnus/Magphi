@@ -15,7 +15,7 @@ import os
 import time
 import logging
 from sys import argv
-from math import floor, ceil
+from math import ceil
 import pkg_resources # ??
 import concurrent.futures
 
@@ -70,10 +70,9 @@ from math import floor
 import sys
 from Bio import SeqIO
 
-EXIT_FILE_IO_ERROR = 1
+EXIT_INPUT_FILE_ERROR = 1
 EXIT_COMMAND_LINE_ERROR = 2
-EXIT_INPUT_FILE_ERROR = 3
-EXIT_DEPENDENCY_ERROR = 4
+EXIT_DEPENDENCY_ERROR = 3
 DEFAULT_VERBOSE = False
 PROGRAM_NAME = "Magphi"
 

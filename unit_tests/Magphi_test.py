@@ -309,7 +309,7 @@ class TestseedFunctions(unittest.TestCase):
 #   8. Run
 
 
-class TestseedsPlacement(unittest.TestCase):
+class TestSeedsPlacement(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         # Construct mock logger

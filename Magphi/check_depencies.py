@@ -6,7 +6,7 @@ try:
     from Magphi.exit_with_error import exit_with_error
 except ModuleNotFoundError:
     from exit_with_error import exit_with_error
-EXIT_DEPENDENCY_ERROR = 4
+EXIT_DEPENDENCY_ERROR = 3
 
 
 def check_for_biopython(verbose):
@@ -149,13 +149,13 @@ def check_for_blast_plus(verbose=False):
             version = version.split(' ')[3]
             version = version.rsplit(',', 1)[0]
 
-            if version == '2.6.0':
+            if version == '2.6.0' or version >= '2.11.0':
                 if verbose:
                     print("Blast+ version is valid")
                 return version
 
             else:
-                warnings.warn('Blast+ seems to be an untested version! Make sure it is version = 1.19, 1.12 or above.')
+                warnings.warn('Blast+ seems to be an untested version! Make sure it is version = 2.6.0, 2.11 or above.')
                 return False
         else:
             warnings.warn('The command "makeblastdb -version" does not seem to give return code = 0')

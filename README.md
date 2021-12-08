@@ -1,7 +1,7 @@
 [![Test](https://github.com/milnus/Magphi/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/milnus/Magphi/actions/workflows/test.yml)
 
 # Magphi
-Tool intended to pull out sequences and annotations between seed sequences specified by the user.
+**Tool intended to pull out sequences and annotations from genomes between user provided fasta sequence paris (seed sequences) using BLAST**
 
 ## When to use
 if you have moderately large (100+) sequences such as genes that you know flank a particular region of your genome

@@ -1,0 +1,10 @@
+makeblastdb -in Mock_fasta.fa -dbtype nucl -out Mock_db
+
+
+Building a new DB, current time: 11/29/2021 11:51:25
+New DB name:   /Users/ahhayes/Desktop/GITHUB/Magphi/unit_tests/unit_test_data/TestBlastOutToSortedBed/Mock_db
+New DB title:  Mock_fasta.fa
+Sequence type: Nucleotide
+Keep MBits: T
+Maximum file size: 1000000000B
+Adding sequences from FASTA; added 1 sequences in 0.0127492 seconds.

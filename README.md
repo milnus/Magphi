@@ -1,15 +1,14 @@
-[![Test](https://github.com/milnus/Magphi/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/milnus/Magphi/actions/workflows/test.yml)
+[![Test](https://github.com/milnus/Magphi/actions/workflows/test.yml/badge.svg)](https://github.com/milnus/Magphi/actions/workflows/test.yml)
 
 # Magphi
 **Tool intended to pull out sequences and annotations from genomes between user provided fasta sequence paris (seed sequences) using BLAST**
 
 ## When to use
-if you have moderately large (100+) sequences such as genes that you know flank a particular region of your genome
-such as phage attachment sites and wish to extract the region in one or more genomes. Particularly useful if there is
+if you have moderately large (100+bp) sequences such as genes that you know flank a particular region of your genome
+such as prophage attachment sites and wish to extract the region in one or more genomes. Particularly useful if there is
 some level of acceptable variation in the site that will allow a hit with blast but not a direct pattern match.
-​
 If you have small (<100 bp) motifs with confidence as to the number of ambiguities and direction of primer this tool
-may not be ideal due to the inability for BLAST to deal with short sequences. consider trying seqkit instead.
+may not be ideal due to the inability for BLAST to deal with short sequences. consider trying [Seqkit](https://bioinf.shenwei.me/seqkit/) instead.
 
 ## Installation
 ### Conda installation
@@ -109,4 +108,3 @@ Depending on the evidence level some changes can be made to imporive a Magphi ru
 
 ## For more info
 See Wiki tab for more info on the workings, inputs, and outputs of Magphi
-

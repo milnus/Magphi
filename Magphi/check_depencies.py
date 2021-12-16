@@ -189,6 +189,10 @@ def check_dependencies_for_main(verbose=False):
 
 
 def check_dependencies_only():
+    """
+    Function to check dependencies, when commandline is given '--check' flag
+    :return: Nothing
+    """
     print('\n------ Checking dependencies for Magphi ------')
     biopython_presence = check_for_biopython(verbose=True)
 
@@ -208,6 +212,7 @@ def check_dependencies_only():
         print("!!! Some dependency does not seem be the correct version, please check the warnings above !!! \n")
 
     sys.exit(0)
+
 
 if __name__ == '__main__':
     pass

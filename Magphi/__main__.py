@@ -84,17 +84,15 @@ except pkg_resources.DistributionNotFound:
 
 
 def init_logging(debug_log, quiet, out_path):
-    '''If the log_filename is defined, then
-    initialise the logging facility, and write log statement
+    """
+    initialise the logging file, and write log statement
     indicating the program has started, and also write out the
     command line from sys.argv
-
-    Arguments:
-        debug_log: Boolean if the logger should be a debug of info log
-        out_path: Path to the output folder
-    Result:
-        a stream and a file logger for logging to file and stdout
-    '''
+    :param debug_log: Bool indicating if log is a debug log
+    :param quiet: Bool indicating if logging should be kept minimal
+    :param out_path: Output path for the program, and where log will be placed
+    :return: Logger object
+    """
     if debug_log:
         level = logging.DEBUG
     elif quiet:
@@ -121,6 +119,11 @@ def init_logging(debug_log, quiet, out_path):
 
 
 def stream_logging(file_logger):
+    """
+    Function adding in stream logging following initial logging
+    :param file_logger: Logger object
+    :return: Logger object with added stream logging
+    """
     stream_handler = logging.StreamHandler()
     stream_handler.setLevel(logging.INFO)
 
@@ -132,7 +135,9 @@ def stream_logging(file_logger):
 
 
 def main():
-    ''' This is the main function for running Magphi. Required arguments are genomes and seeds as a multi fasta file'''
+    """
+    This is the main function for running Magphi. Required arguments are genomes and seeds as a multi fasta file
+    """
     start_time = time.time()
 
     # Retrieve the flags given by the user in the commandline

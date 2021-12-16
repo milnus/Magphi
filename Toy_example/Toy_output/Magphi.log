@@ -1,11 +1,11 @@
-[2021-12-08T15:44:45+1100] INFO - __main__ - command line: Magphi/__main__.py -s Toy_example/Input_data/Seed_seqeunces -g Toy_example/Input_data/H293_genome.fna Toy_example/Input_data/5448_genome.fna -md 40000 -o Toy_example/Toy_output/
-[2021-12-08T15:44:45+1100] INFO - __main__ - Dependency versions:
-[2021-12-08T15:44:45+1100] INFO - __main__ - Biopython v.1.78
-[2021-12-08T15:44:45+1100] INFO - __main__ - Pybedtools v.0.8.2
-[2021-12-08T15:44:45+1100] INFO - __main__ - Bedtools v.2.30.0
-[2021-12-08T15:44:45+1100] INFO - __main__ - Samtools v.1.11
-[2021-12-08T15:44:45+1100] INFO - __main__ - Processing started
-[2021-12-08T15:44:45+1100] INFO - __main__ - 2 input files to be processed, starting now!
-[2021-12-08T15:44:50+1100] INFO - __main__ - 	File number 1 has been processed
-[2021-12-08T15:44:54+1100] INFO - __main__ - 	File number 2 has been processed
-[2021-12-08T15:44:54+1100] INFO - __main__ - Magphi completed in: 0 minutes 9 Seconds
+[2021-12-16T15:00:46+1100] INFO - __main__ - command line: /Users/mjespersen/opt/anaconda3/envs/Magphi-test/bin/Magphi -g Toy_example/Input_data/5448_genome.gff Toy_example/Input_data/H293_genome.gff -s Toy_example/Input_data/Seed_seqeunces.fasta -o Toy_example/Toy_output/ -md 40000
+[2021-12-16T15:00:46+1100] INFO - __main__ - Dependency versions:
+[2021-12-16T15:00:46+1100] INFO - __main__ - Biopython v.1.79
+[2021-12-16T15:00:46+1100] INFO - __main__ - Pybedtools v.0.8.2
+[2021-12-16T15:00:46+1100] INFO - __main__ - Bedtools v.2.30.0
+[2021-12-16T15:00:46+1100] INFO - __main__ - Samtools v.1.14
+[2021-12-16T15:00:46+1100] INFO - __main__ - Processing started
+[2021-12-16T15:00:46+1100] INFO - __main__ - 2 input files to be processed, starting now!
+[2021-12-16T15:00:50+1100] INFO - __main__ - 	File number 1 has been processed
+[2021-12-16T15:00:54+1100] INFO - __main__ - 	File number 2 has been processed
+[2021-12-16T15:00:54+1100] INFO - __main__ - Magphi completed in: 0 minutes 8 Seconds

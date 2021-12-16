@@ -33,6 +33,6 @@ Magphi is a command-line tool written in Python 3. It uses the Basic Local Align
 Magphi is scalable and can take multiple genomes and pairs of seed sequences. Outputs are divided by the input seed sequences for easier file management
 
 # Acknowledgements
-MGJ is supported by The Melbourne Research Scholarship from The University of Melbourne.
+MGJ is supported by The Melbourne Research Scholarship from The University of Melbourne. MRD is supported by a University of Melbourne CR Roper Fellowship.
 
 # References

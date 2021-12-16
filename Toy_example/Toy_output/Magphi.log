@@ -1,11 +1,12 @@
-[2021-12-16T15:00:46+1100] INFO - __main__ - command line: /Users/mjespersen/opt/anaconda3/envs/Magphi-test/bin/Magphi -g Toy_example/Input_data/5448_genome.gff Toy_example/Input_data/H293_genome.gff -s Toy_example/Input_data/Seed_seqeunces.fasta -o Toy_example/Toy_output/ -md 40000
-[2021-12-16T15:00:46+1100] INFO - __main__ - Dependency versions:
-[2021-12-16T15:00:46+1100] INFO - __main__ - Biopython v.1.79
-[2021-12-16T15:00:46+1100] INFO - __main__ - Pybedtools v.0.8.2
-[2021-12-16T15:00:46+1100] INFO - __main__ - Bedtools v.2.30.0
-[2021-12-16T15:00:46+1100] INFO - __main__ - Samtools v.1.14
-[2021-12-16T15:00:46+1100] INFO - __main__ - Processing started
-[2021-12-16T15:00:46+1100] INFO - __main__ - 2 input files to be processed, starting now!
-[2021-12-16T15:00:50+1100] INFO - __main__ - 	File number 1 has been processed
-[2021-12-16T15:00:54+1100] INFO - __main__ - 	File number 2 has been processed
-[2021-12-16T15:00:54+1100] INFO - __main__ - Magphi completed in: 0 minutes 8 Seconds
+[2021-12-17T10:09:18+1100] INFO - __main__ - command line: /Users/mjespersen/opt/anaconda3/envs/Magphi-test/bin/Magphi -g Toy_example/Input_data/5448_genome.gff Toy_example/Input_data/H293_genome.gff Toy_example/Input_data/draft_genome.gff -s Toy_example/Input_data/Seed_seqeunces.fasta -o Toy_example/Toy_output/ -md 40000
+[2021-12-17T10:09:18+1100] INFO - __main__ - Dependency versions:
+[2021-12-17T10:09:18+1100] INFO - __main__ - Biopython v.1.79
+[2021-12-17T10:09:18+1100] INFO - __main__ - Pybedtools v.0.8.2
+[2021-12-17T10:09:18+1100] INFO - __main__ - Bedtools v.2.30.0
+[2021-12-17T10:09:18+1100] INFO - __main__ - Samtools v.1.14
+[2021-12-17T10:09:18+1100] INFO - __main__ - Processing started
+[2021-12-17T10:09:18+1100] INFO - __main__ - 3 input files to be processed, starting now!
+[2021-12-17T10:09:22+1100] INFO - __main__ - 	File number 1 has been processed
+[2021-12-17T10:09:27+1100] INFO - __main__ - 	File number 2 has been processed
+[2021-12-17T10:09:31+1100] INFO - __main__ - 	File number 3 has been processed
+[2021-12-17T10:09:31+1100] INFO - __main__ - Magphi completed in: 0 minutes 13 Seconds

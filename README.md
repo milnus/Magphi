@@ -1,4 +1,5 @@
 [![Test](https://github.com/milnus/Magphi/actions/workflows/test.yml/badge.svg)](https://github.com/milnus/Magphi/actions/workflows/test.yml)
+<a href="https://conda.anaconda.org/bioconda"> <img src="https://anaconda.org/bioconda/magphi/badges/installer/conda.svg" /> </a>
 
 # Magphi
 **Tool intended to pull out sequences and annotations from genomes between user provided fasta sequence paris (seed sequences) using BLAST**
@@ -18,7 +19,7 @@ may not be ideal due to the inability for BLAST to deal with short sequences. co
 * Samtools
 * pybedtools
 ### Conda installation
-``` # Coming soon ```
+``` conda install -c bioconda magphi ```
 
 ### Pip install
 Make sure you have the right versions of Samtools and Bedtools installed

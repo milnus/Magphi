@@ -1,4 +1,6 @@
 [![Test](https://github.com/milnus/Magphi/actions/workflows/test.yml/badge.svg)](https://github.com/milnus/Magphi/actions/workflows/test.yml)
+<a href="https://conda.anaconda.org/bioconda"> <img src="https://anaconda.org/bioconda/magphi/badges/installer/conda.svg" /> </a>
+
 
 # Magphi
 **Tool intended to pull out sequences and annotations from genomes between user provided fasta sequence paris (seed sequences) using BLAST**
@@ -12,20 +14,18 @@ may not be ideal due to the inability for BLAST to deal with short sequences. co
 
 ## Installation
 ### Conda installation
-``` # Coming soon ```
+``` conda install -c bioconda magphi ```
+
+#### Dependencies
+* Python >= 3.9
+* Blast
+* Bedtools
+* Samtools
+* pybedtools
 
 ### Pip install
 Make sure you have the right versions of Samtools and Bedtools installed
-
 ``` pip install Magphi```
-
-### Setting up conda environment using Conda 
-Solution until conda recipe has been created  
-```$ conda create -n Magphi -c bioconda samtools=1.13 blast bedtools python=3.9```  
-```$ conda activate Magphi```  
-```$ pip install Magphi```  
-To test the installation of dependencies run:  
-```$ Magphi --check```
 
 ## Help command
 ```
@@ -131,6 +131,17 @@ Depending on the evidence level some changes can be made to improve a Magphi run
 * Evidence level = 4 can give output if ```-b``` is given as an argument to Mapghi.
 * Dividing seed sequence pairs with similar max distance into separate runs is a good trick to maximise likelihood of good extractions.
 * For large datasets consider using ```-n``` to save memory, if your analysis is not interested in the sequence itself.
+
+
+## Community contributions via Github
+All questions via the [Issues tab](https://github.com/milnus/Magphi/issues) are answered as quickly as possible!
+ - The more information you can give about problems and/or enquiries the easier it is to help you quickly. Aim to narrow down the problem and give a way to reproduce the problem, if any.    
+
+Any suggestions to improvements are welcome!
+ - Feel free to suggest new features or ways of doing things better. Things will be implemented as good as possible
+
+Any contributions are appreciated! 
+ - If you have the time and will feel free to send a pull request. Unit- and functional tests are not required. Try to comment the code in a way that allows for easier understanding. Use doc-stings for each function to explain their in- and output.
 
 ## For more info
 See Wiki tab for more info on the workings, inputs, and outputs of Magphi

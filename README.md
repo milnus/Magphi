@@ -26,14 +26,6 @@ Make sure you have the right versions of Samtools and Bedtools installed
 
 ``` pip install Magphi```
 
-### Setting up conda environment using Conda 
-Solution until conda recipe has been created  
-```$ conda create -n Magphi -c bioconda samtools=1.13 blast bedtools python=3.9```  
-```$ conda activate Magphi```  
-```$ pip install Magphi```  
-To test the installation of dependencies run:  
-```$ Magphi --check```
-
 ## Help command
 ```
 usage: Magphi [-h] -g .fa/.gff [.fa/.gff ...] -s multi_fasta_file.fa [-is] [-md int] [-b | -n] [-o path/to/output] [-c int] [-l | -q] [--check] [-v]

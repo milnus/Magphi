@@ -17,7 +17,7 @@ may not be ideal due to the inability for BLAST to deal with short sequences. co
 ``` conda install -c bioconda magphi ```
 
 ### Pip install
-Make sure you have the right versions of Samtools and Bedtools installed
+Make sure you have the right versions of Samtools and Bedtools installed  
 ``` pip install Magphi```
 
 #### Dependencies

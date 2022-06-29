@@ -1,6 +1,7 @@
-name: 'Magphi_test_n_deploy'
+name: 'Test'
 on:
   push:
+  pull_request:
     branches:
       - main
 jobs:

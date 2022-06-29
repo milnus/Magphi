@@ -8,7 +8,7 @@ def partition_outputs(seed_pairs, out_path, file_logger):
     :param seed_pairs: Name of seed sequence pairs in a list
     :param out_path: Path to the output folder
     :param file_logger: Logger that outputs files to log
-    :return:
+    :return: None
     """
     file_logger.debug('Partitioning output files into seed folders')
     # Go through each seed sequence pair, construct sub output folder and populate with output files.
@@ -62,6 +62,12 @@ def partition_outputs(seed_pairs, out_path, file_logger):
 
 
 def write_paired_seeds(seed_pairs, out_path):
+    """
+    Function to write a tab delimited file giving the pairing for seed seqeunces
+    :param seed_pairs: Dict of seed sequences that are matched into pairs
+    :param out_path: Filepath to the output folder
+    :return: None
+    """
     with open(os.path.join(out_path, 'seed_pairing.tsv'), 'w') as seed_file:
         for seed_key in seed_pairs.keys():
             # Fetch the seeds

@@ -12,7 +12,7 @@ The program takes in multiple fasta or GFF files at a single time and can also t
 
 setup(
     name='Magphi',
-    version='0.1.3',
+    version='0.1.6',
     author='Magnus Ganer Jespersen',
     author_email='magnus.ganer.j@gmail.com',
     packages=['Magphi'],

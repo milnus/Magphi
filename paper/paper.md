@@ -1,43 +1,38 @@
 ---
-title: 'Magphi: Automated sequence and feature extraction from genomes using seed sequences'
+title: 'Magphi: Sequence extraction tool from FASTA and GFF3 files using seed pairs'
 tags:  
-- Python
-- microbiology
-- genomics
-- genome
-- sequence extraction
+  - Python
+  - microbiology
+  - genomics
+  - genome
 authors:
-- name: Magnus G. Jespersen 
-  orcid: 0000-0001-9751-9877
-  affiliation: 1
- - name: Chaw 
-  affiliation: 1
-- name: Andrew Hayes
-  orcid: 0000-0001-8038-1656
-  affiliation: 1
- - name: Steven Tong?? 
-  affiliation: 1
-- name: Mark R. Davies
-  orcid: 0000-0001-6141-5179
-  affiliation: 1
+  - name: Magnus G. Jespersen 
+    orcid: 0000-0001-9751-9877
+    affiliation: 1
+  - name: Andrew Hayes
+    orcid: 0000-0001-8038-1656
+    affiliation: 1
+  - name: Mark R. Davies
+    orcid: 0000-0001-6141-5179
+    affiliation: 1
 affiliations:
-- name: Department of Microbiology and Immunology, University of Melbourne at the Peter Doherty Institute for Infection and Immunity, Melbourne, VIC, Australia
-  index: 1
-date: 13 October 2021  
+  - name: Department of Microbiology and Immunology, University of Melbourne at the Peter Doherty Institute for Infection and Immunity, Melbourne, VIC, Australia
+    index: 1
+date: 16 December 2021  
 bibliography: paper.bib
 ---
 
 # Summary
-With the decrease in cost of sequncing genomes from biological organisms the burden of work has been moved from the generation of genome sequences to the analysis. Researchers working with genomes originating from micro organism often work with multiple genomes in a single analysis. The number of genomes in datasets can lead to challenges when it comes to extracting specific regions of interest of genomes from multiple genomes. Manual extraction of regions becomes impractical and timeconsuming when datasets exceed 10-20 genomes. The complexity of this task increases with some regions of genomes not being well assembled when reconstructing a genome from some current technologies (Illumina short reads sequencing). Therefore, automation is required as datasets of microbial genomes routinely consist of tenths or hundreds of genomes, with more and more having thousands of genomes [ref??]. Here we Magphi, a BLAST [@mount:2007] based  contig-aware genome extraction tool utilising seed sequences to identify regions of interest.
+Researchers working with genomes originating from microorganisms often work with multiple genomes in a single analysis. The number of genomes in datasets can pose challenges when it comes to extracting specific regions of interest from multiple genomes. Manual extraction of regions becomes impractical and time consuming when datasets exceed 10-20 genomes. The complexity of this task increases when working within complex regions of genomes that may not assemble into a single contiguous sequence using some existing technologies such as short read-based sequencing technologies. Therefore, automation is required as datasets of microbial genomes routinely consist of tens or hundreds of genomes. Here we present Magphi, a BLAST [@mount:2007] based  contig aware genome extraction tool utilising seed sequences to identify and extract regions of interest.
 
 # Statement of need
-Magphi aims to free researchers time from tedious tasks and allow them to apply domain knowledge and focus on analysing results. New packages within genome research address the same issue, one being Seqkit [@shen:2016]. Seqkit is a manipulation tool aimed at standard file formats in bioinformatics, fasta and fastq. Seqkit allows for the extraction of genome sequences from fasta files, using multiple functions. However, tools for working with Gene Feature Format (GFF) files are required, when researchers handle genomes annotated with genes and other genetic features.  
+Magphi extracts genomic regions of interest from FASTA and Gene Feature Format 3 (GFF3) files, both being common file types in bioinformatics. Packages such as Seqkit [@shen:2016] allow for extraction and manipulation of FASTA and FASTQ files; However, such tools do not work with GFF3, or when regions of interest may span across contigs. Handling of GFF3 files are often necessary when researchers examine annotated genomes, as these are not included in FASTA formatted files.  
 
-Magphi build on the Basic Local Alignment Search Tool (BLAST) [@mount:2007] and implements logic to identify possible connections between given seed-seqeunces to return the optimal solution in terms of genetic sequence and possible annotations between a set of seed-seqeunces. Magphi can handle fasta files or GFF version 3 files with included genomes, as given by the microbial annotations tool Prokka [@seemann:2014]. Magphi is contig-aware, and will return a file containing confidence level for each pair of seed-seqeunces and genomes, providing the researcher with fine grained feed-back on their run. The file conteining confidence levels can be imported into Phandango [@Hadfield:2017], along with a phylogenetic tree of genomes for quick and visual inference of patterns of potential problems.
+Magphi is a command-line tool written in Python 3. It uses the Basic Local Alignment Search Tool (BLAST) [@mount:2007], BEDtools [@Quinlan:2010] and implements logic to identify possible connections between given seed sequences to return the optimal solution in terms of genetic sequence and possible annotations between a set of seed sequences. Magphi can handle FASTA or GFF 3 files with included genomes, as given by the microbial annotation tool Prokka [@seemann:2014]. Magphi is contig aware, and will return a file containing the confidence level for each pair of seed sequences and genomes, providing the researcher with feedback on their run. The file containing confidence levels, distances between seed sequences, and number of annotations can be imported into Phandango [@Hadfield:2017], along with a phylogenetic tree of genomes for quick and visual inference of patterns or potential problems. Magphi also produces an output folder for each seed sequence pair, containing FASTA and GFF3 files when possible.   
 
-Magphi is scalable and can as input take multiple genomes and multiple pairs of seed-seqeunces. Outputs are divided by the input seed-seqeune for easier file management
+Magphi is scalable and can take multiple genomes and pairs of seed sequences. Outputs are divided by the input seed sequences for easier file management
 
 # Acknowledgements
-MGJ is supported by The Melbourne Research Scholarship from The University of Melbourne
+MGJ is supported by The Melbourne Research Scholarship from The University of Melbourne. MRD is supported by a University of Melbourne CR Roper Fellowship.
 
 # References

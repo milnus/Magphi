@@ -9,8 +9,14 @@ from shutil import copyfile, copyfileobj
 from Bio.Blast.Applications import NcbimakeblastdbCommandline
 from Bio.Blast.Applications import NcbiblastnCommandline
 from Bio.Sequencing.Applications import SamtoolsFaidxCommandline
+from Bio.Application import ApplicationError
 from Bio import SearchIO
 import pybedtools as bedtools
+try:
+    from Magphi.exit_with_error import exit_with_error
+except ModuleNotFoundError:
+    from exit_with_error import exit_with_error
+EXIT_INPUT_FILE_ERROR = 1
 
 try:
     from Magphi.split_gff_file import split_single_gff
@@ -20,6 +26,13 @@ except ModuleNotFoundError:
 
 
 def blast_insertion_site(seeds, genome_file, tmp_name):
+    """
+    Function to BLAST seed sequences against a given genome
+    :param seeds: Filepath to seed sequence file
+    :param genome_file: Filepath for the input genome
+    :param tmp_name: The temporary name for the BLAST database constructed from the genome
+    :return: Filepath to the BLAST output file in xml format
+    """
     # Construct genome_db path and name
     genome_db = f'{genome_file}_tmp_db'
     # Make blast database command for given genome
@@ -48,6 +61,14 @@ def blast_insertion_site(seeds, genome_file, tmp_name):
 
 
 def blast_out_to_sorted_bed(blast_xml_output, include_seeds, genome_name, seed_pairs):
+    """
+    Function to pass BLAST output in xml format and construct BED files for each set of seed sequence pairs.
+    :param blast_xml_output: File from blast in xml format for one genome queried for all seed sequence.
+    :param include_seeds:
+    :param genome_name:
+    :param seed_pairs:
+    :return:
+    """
     # Read in the blast output into a generator object
     blast_output = SearchIO.parse(blast_xml_output, format='blast-xml')
 
@@ -107,6 +128,12 @@ def blast_out_to_sorted_bed(blast_xml_output, include_seeds, genome_name, seed_p
 
 
 def write_bed_from_list_of_seeds(list_of_seeds, bed_file_name):
+    """
+    Function to write BED file from location of seed sequences to be used when subtracting seeds from regions of interest
+    :param list_of_seeds: List of seeds and their information on coordinate
+    :param bed_file_name: name of the BED file to be constructed
+    :return: None
+    """
     # Write out new .bed file with only the extended seeds.
     # Join the items in the lists (seeds) into a sting
     list_of_seeds = [' '.join(seed) for seed in list_of_seeds]
@@ -125,6 +152,17 @@ def write_bed_from_list_of_seeds(list_of_seeds, bed_file_name):
 
 
 def seed_reach_contig_end_calc(genome_file, max_seed_dist, seed_contig_hits):
+    """
+    Function to examine a set of seed sequences and their ability to reach the end of contigs on which they are placed.
+    :param genome_file: Filepath to the genome in question
+    :param max_seed_dist: Maximum distance allowed between seed sequences
+    :param seed_contig_hits: dict with each key being a contig and values being a list of seed sequence hit on contigs as lists
+
+    :return end_reaches: List with two indexes of seed sequences that reach either 2 or 1 end of their respective contig
+    :return end_sums: List with two indexes of the number of times seed sequences reach the 5' or 3' end
+    :return end_reached_matrix: Matrix (list of lists) that is NxN (n = number of seed sequences being examined) index is 1 when primers can interact across contig breaks
+    :return intervals: List of the coordinate intervals in which seed sequences are located.
+    """
     # Construct dict to hold the indexing of the fasta file
     fai_dict = {}
     # Read and search the .fai file to get the edge of contigs
@@ -339,11 +377,24 @@ def examine_flanking_regions(seed_contig_hits, max_seed_dist, genome_file, bed_f
 
 
 def check_seeds_placement(bed_files, seed_pairs, seed_hits, max_seed_dist, genome_file, file_type, tmp_folder):
-    ''' Function to determine the placement of seeds and how to search for connections between them
-    Returns a genome file in the temporary directory and an evidence score for each bed file and its seed connections'''
+    """
+    Function to determine the placement of seeds and how to search for connections between them
+    :param bed_files: List of bed files containing the coordinates of seed sequences
+    :param seed_pairs: Dict containing the common names of seed sequence pairs as keys and values being list with both full length seed seqenuce names
+    :param seed_hits: Dict with the key being common name of seed sequence pair and the value being the number of hits in the given genome from the pair
+    :param max_seed_dist: Maximum distance between seeds allowed by the user
+    :param genome_file: Filepath to the genome in question
+    :param file_type: String of either 'gff' or 'fasta' indicating the input file type for genomes
+    :param tmp_folder: Filepath to the temporary folder for Magphi
+    :return: A genome file in the temporary directory and an evidence score for each bed file and its seed connections
+    """
     # Produce genome index file using samtools
     samtools_faidx_cmd = SamtoolsFaidxCommandline(ref=genome_file)
-    samtools_faidx_cmd()
+    try:
+        samtools_faidx_cmd()
+    except ApplicationError:
+        exit_with_error(f"Samtools failed when running the command 'samtools faidx {genome_file}'", EXIT_INPUT_FILE_ERROR)
+
 
     # Initialise the dict to hold the support for a seed hit
     seed_hit_support_dict = dict.fromkeys(seed_pairs)
@@ -398,7 +449,10 @@ def check_seeds_placement(bed_files, seed_pairs, seed_hits, max_seed_dist, genom
                         # 1 or 2 means more examination is required
                         if return_value == 2:
                             seed_hit_support_dict[seed_name] = return_value
-                            bed_files.remove(file)
+                            try:
+                                bed_files.remove(file)
+                            except ValueError:
+                                pass
                         elif return_value == 1:
                             # Examine the remaining junctions to see if two seeds can be found to connect across contigs
                             seed_hit_support_dict[seed_name] = examine_flanking_regions(seed_to_contig,
@@ -482,6 +536,17 @@ def check_seeds_placement(bed_files, seed_pairs, seed_hits, max_seed_dist, genom
 
 
 def bed_merge_handling(blast_hit_beds, include_seeds, exclude_seed_list, max_seed_dist, seed_evidence):
+    """
+    Function to merge lines (seed sequence hits) in a BED file into single lines (coordinate intervals)
+    :param blast_hit_beds: List of BED files to be merged
+    :param include_seeds: Bool indicating if seed sequence coordinates should be included in the merged interval.
+    :param exclude_seed_list: List of paths to BED files with coordinates of the seed sequences
+    :param max_seed_dist: Maximum distance allowed between seed sequences
+    :param seed_evidence: Dict containing keys being the common name of seed sequences and the value being the current evidence level of the seed sequence for the given genome
+
+    :return merged_bed_files: List of BED files that have been merged
+    :return seed_evidence: Dict containing keys being the common name of seed sequences and the value being the new evidence level of the seed sequence for the given genome
+    """
     # initialise list to hold merged bed file names:
     merged_bed_files = []
 
@@ -543,7 +608,23 @@ def bed_merge_handling(blast_hit_beds, include_seeds, exclude_seed_list, max_see
 
 def extract_seqs_n_annots(merged_bed_files, file_type, genome_file, annotation_file, tmp_folder, out_path, seed_pairs,
                           seed_evidence, print_seq_out):
-    """"""
+    """
+    Function to extract the nucleotide sequence and potential genomic features from FASTA and GFF files
+    :param merged_bed_files: List of filepaths to merged BED files
+    :param file_type: String indicating the input genome filetype
+    :param genome_file: Filepath to the genome in question
+    :param annotation_file: Filepath to a file containing annotations (None if input is fasta format)
+    :param tmp_folder: Filepath to the temporary folder constructed by Magphi
+    :param out_path: Filepath to the output folder
+    :param seed_pairs: Dict of seed sequences that are matched into pairs
+    :param seed_evidence: Dict containing keys being the common name of seed sequences and the value being the current evidence level of the seed sequence for the given genome
+    :param print_seq_out: String indicating if regions spanning contig breaks should be outputted or not.
+
+    :return annots_per_interval: Dict with keys being the common seed sequence name and values being the number of annotations between the seeds
+    :return break_seeds: Dict with keys being the common seed sequence name and values being a list containing name of a seed and 'break' indicating it being next to a sequence break
+    :return seed_evidence: Dict containing keys being the common name of seed sequences and the value being the new evidence level of the seed sequence for the given genome
+    :return inter_seed_dist: Dict with keys being the common seed sequence name and values being the number of nucleotides between the seeds
+    """
     # Initiate dict to hold number of annotations per interval
     annots_per_interval = dict.fromkeys(seed_pairs)
     # Initiate dict to hold seeds that may neighbour a sequence break

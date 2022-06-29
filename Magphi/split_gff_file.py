@@ -4,6 +4,15 @@ import gzip
 
 
 def split_single_gff(gff, tmp_folder, is_input_gzipped):
+    """
+    Function that splits an input GFF3 files into two files, one containing the annotations and another the genome
+    :param gff: Filepath to the input GFF file
+    :param tmp_folder: Filepath to the temporary folder constructed by Magphi
+    :param is_input_gzipped: Bool to indicate if the input GFF file is gzipped
+
+    :return tmp_fasta_name: Filepath to the temporary FASTA file containing the genome sequence from the input
+    :return tmp_gff_name: Filepath to the temporary GFF file containing the annotations from the input
+    """
     # Trim the name/path of the input file
     base_name = gff.split('/')[-1]
     base_name = base_name.rsplit('.gz', 1)[0]

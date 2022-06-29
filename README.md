@@ -1,6 +1,7 @@
 [![Test](https://github.com/milnus/Magphi/actions/workflows/test.yml/badge.svg)](https://github.com/milnus/Magphi/actions/workflows/test.yml)
 <a href="https://conda.anaconda.org/bioconda"> <img src="https://anaconda.org/bioconda/magphi/badges/installer/conda.svg" /> </a>
 
+
 # Magphi
 **Tool intended to pull out sequences and annotations from genomes between user provided fasta sequence paris (seed sequences) using BLAST**
 
@@ -12,18 +13,18 @@ If you have small (<100 bp) motifs with confidence as to the number of ambiguiti
 may not be ideal due to the inability for BLAST to deal with short sequences. consider trying [Seqkit](https://bioinf.shenwei.me/seqkit/) instead.
 
 ## Installation
+### Conda installation
+``` conda install -c bioconda magphi ```
+
 #### Dependencies
 * Python >= 3.9
 * Blast
 * Bedtools
 * Samtools
 * pybedtools
-### Conda installation
-``` conda install -c bioconda magphi ```
 
 ### Pip install
 Make sure you have the right versions of Samtools and Bedtools installed
-
 ``` pip install Magphi```
 
 ## Help command
@@ -130,6 +131,7 @@ Depending on the evidence level some changes can be made to improve a Magphi run
 * Evidence level = 4 can give output if ```-b``` is given as an argument to Mapghi.
 * Dividing seed sequence pairs with similar max distance into separate runs is a good trick to maximise likelihood of good extractions.
 * For large datasets consider using ```-n``` to save memory, if your analysis is not interested in the sequence itself.
+
 
 ## Community contributions via Github
 All questions via the [Issues tab](https://github.com/milnus/Magphi/issues) are answered as quickly as possible!

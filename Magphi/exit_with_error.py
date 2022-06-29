@@ -2,15 +2,16 @@ import sys
 import logging
 import os
 
-def exit_with_error(message, exit_status, tmp_folder=None):
-    '''Print an error message to stderr, prefixed by the program name and 'ERROR'.
-    Then exit program with supplied exit status.
 
-    Arguments:
-        message: an error message as a string.
-        exit_status: a positive integer representing the exit status of the
-            program.
-    '''
+def exit_with_error(message, exit_status, tmp_folder=None):
+    """
+    Print an error message to stderr, prefixed by the program name and 'ERROR'.
+    Then exit program with supplied exit status.
+    :param message: Message to give the user upon exit
+    :param exit_status: Status returned as exit status
+    :param tmp_folder: Temporary folder for Magphi to be deleted under some circumstances.
+    :return: None
+    """
 
     # Delete tmp files and folder
     try:

@@ -347,7 +347,7 @@ class TestBlastOutToSortedBed(unittest.TestCase):
             blast_hit_beds.close()
 
 
-class TestseedsPlacement(unittest.TestCase):
+class TestSeedsPlacement(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         # Construct mock logger

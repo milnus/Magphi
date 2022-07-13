@@ -1,4 +1,5 @@
 [![Test](https://github.com/milnus/Magphi/actions/workflows/test.yml/badge.svg)](https://github.com/milnus/Magphi/actions/workflows/test.yml)
+[![DOI](https://joss.theoj.org/papers/10.21105/joss.04369/status.svg)](https://doi.org/10.21105/joss.04369)
 <a href="https://conda.anaconda.org/bioconda"> <img src="https://anaconda.org/bioconda/magphi/badges/installer/conda.svg" /> </a>
 
 

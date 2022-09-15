@@ -7,6 +7,7 @@ import gzip
 from itertools import combinations
 from shutil import copyfile, copyfileobj
 from Bio.Blast.Applications import NcbimakeblastdbCommandline
+from Bio.Blast.Applications import NcbitblastnCommandline
 from Bio.Blast.Applications import NcbiblastnCommandline
 from Bio.Sequencing.Applications import SamtoolsFaidxCommandline
 from Bio.Application import ApplicationError
@@ -24,6 +25,40 @@ except ModuleNotFoundError:
     from split_gff_file import split_single_gff
 # pylint: disable=E1123
 
+
+def tblastn_insertion_site(seeds, genome_file, tmp_name):
+    """
+    Function to BLAST seed sequences against a given genome
+    :param seeds: Filepath to seed sequence file
+    :param genome_file: Filepath for the input genome
+    :param tmp_name: The temporary name for the BLAST database constructed from the genome
+    :return: Filepath to the BLAST output file in xml format
+    """
+    # Construct genome_db path and name
+    genome_db = f'{genome_file}_tmp_db'
+    # Make blast database command for given genome
+    c_line_makedb = NcbimakeblastdbCommandline(dbtype='nucl', input_file=genome_file, out=genome_db)
+
+    # Run makeblastdb in command line
+    c_line_makedb()
+
+    blast_out_xml = f'{tmp_name}.xml'
+    c_line = NcbitblastnCommandline(query=seeds,
+                                   db=genome_db,
+                                   evalue=0.001,
+                                   outfmt=5,
+                                   qcov_hsp_perc=50,
+                                   out=blast_out_xml)
+
+    # Run the blast command in commandline blast
+    c_line()
+
+    # Delete blast database
+    file_list = glob.glob(f'{genome_file}_tmp_db.*')
+    for file in file_list:
+        os.remove(file)
+
+    return blast_out_xml
 
 def blast_insertion_site(seeds, genome_file, tmp_name):
     """
@@ -778,7 +813,7 @@ def extract_seqs_n_annots(merged_bed_files, file_type, genome_file, annotation_f
 
 def screen_genome_for_seeds(genome_file, seed_pairs, seed_path, tmp_folder,
                               include_seeds, file_type, out_path, max_seed_dist, file_logger,
-                              is_input_gzipped, print_seq_out):
+                              is_input_gzipped, print_seq_out, proteins):
     """
     Function that summarise the search of seeds sequences, determination of position and extraction.
     :param genome_file: Path to genome to be searched for seed sequences
@@ -834,8 +869,13 @@ def screen_genome_for_seeds(genome_file, seed_pairs, seed_path, tmp_folder,
 
     # Run blast with genome and insertion site sequences
     file_logger.debug(f"\tBLASTing: {genome_file}")
-    blast_xml_output = blast_insertion_site(seed_path, genome_file, f'{genome_name}_blast')
-
+    
+    # run blastn or tblastn depending on --protein flag present
+    if proteins:
+        blast_xml_output = tblastn_insertion_site(seed_path, genome_file, f'{genome_name}_blast')
+    else:
+        blast_xml_output = blast_insertion_site(seed_path, genome_file, f'{genome_name}_blast')  
+    
     # Construct a bedfile from blast output
     file_logger.debug(f"\tConstructing bed file: {genome_file}")
     blast_hit_beds, exclude_seed_list, seed_hits = blast_out_to_sorted_bed(blast_xml_output,

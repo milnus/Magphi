@@ -151,6 +151,9 @@ def main():
         warnings.warn("Output folder already exists")
         pass
 
+    # add in proteins flag
+    proteins = cmd_args.protein_seed
+    
     "Orchestrate the execution of the program"
     file_logger = init_logging(cmd_args.log, cmd_args.quiet, cmd_args.out_path)
 
@@ -207,7 +210,7 @@ def main():
     with concurrent.futures.ThreadPoolExecutor(max_workers=cmd_args.cpu) as executor:
         results = [executor.submit(screen_genome_for_seeds, cmd_args.genomes[i], seed_pairs, cmd_args.seeds,
                                    tmp_folder, cmd_args.include_seeds, file_type,
-                                   cmd_args.out_path, cmd_args.max_seed_dist, file_logger, is_input_gzipped, print_seq_out)
+                                   cmd_args.out_path, cmd_args.max_seed_dist, file_logger, is_input_gzipped, print_seq_out, proteins)
                    for i, genome in enumerate(cmd_args.genomes)]
 
         for f in concurrent.futures.as_completed(results):

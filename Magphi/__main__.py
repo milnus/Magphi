@@ -18,6 +18,7 @@ from sys import argv
 from math import ceil
 import pkg_resources
 import concurrent.futures
+from tempfile import TemporaryDirectory
 
 try:
     from Magphi.commandline_interface import get_commandline_arguments
@@ -177,14 +178,15 @@ def main():
 
     # construct a temporary folder to hold files
     # TODO - Use the standard pythonic way of constructing temporary dicts! - See Corekaburra
-    file_logger.debug("Try to construct output folder")
-    tmp_folder = os.path.join(cmd_args.out_path, "Magphi_tmp_folder")
-    try:
-        os.mkdir(tmp_folder)
-        file_logger.debug("Output folder construction successful")
-    except FileExistsError:
-        file_logger.warning("A temporary folder already exists at the given output location. "
-                                     "Most likely from an incomplete analysis")
+    file_logger.debug("Construct temporary folder")
+    tmp_folder = TemporaryDirectory()
+    # tmp_folder = os.path.join(cmd_args.out_path, "Magphi_tmp_folder")
+    # try:
+        # os.mkdir(tmp_folder)
+        # file_logger.debug("Output folder construction successful")
+    # except FileExistsError:
+    #     file_logger.warning("A temporary folder already exists at the given output location. "
+    #                                  "Most likely from an incomplete analysis")
 
     # Read in and combine seeds into pairs
     file_logger.debug("Start handling of input seed sequences")
@@ -212,7 +214,7 @@ def main():
     genomes_processed = 0
     with concurrent.futures.ThreadPoolExecutor(max_workers=cmd_args.cpu) as executor:
         results = [executor.submit(screen_genome_for_seeds, cmd_args.genomes[i], seed_pairs, cmd_args.seeds,
-                                   tmp_folder, cmd_args.include_seeds, file_type,
+                                   tmp_folder.name, cmd_args.include_seeds, file_type,
                                    cmd_args.out_path, cmd_args.max_seed_dist, file_logger, is_input_gzipped, print_seq_out, cmd_args.protein_seed)
                    for i, genome in enumerate(cmd_args.genomes)]
 
@@ -266,7 +268,7 @@ def main():
 
     # log quick stats for the evidence levels
     file_logger.debug("Remove temporary folder")
-    os.rmdir(tmp_folder)
+    tmp_folder.cleanup()
 
     time_to_finish = time.time() - start_time
     time_to_finish = int(round(time_to_finish, 0))

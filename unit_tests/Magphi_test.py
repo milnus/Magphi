@@ -26,7 +26,7 @@ from io import StringIO
 try:
     os.chdir('/Magphi/unit_tests/unit_test_data/')
 except FileNotFoundError:
-    os.chdir('../unit_test_data/')
+    os.chdir('../unit_tests/unit_test_data/')
 
 
 class TestExitWithError(unittest.TestCase):
@@ -193,6 +193,32 @@ class TestFileRecognition(unittest.TestCase):
         files = ['TestFileRecognition/Fasta_files/GCA_005163865.fna']
 
         self.assertEqual(False, check_inputs.check_if_gzip(files, self.logger))
+
+
+class TestSeedRecognition(unittest.TestCase):
+    ''' Test that seeds of invalid, nucleotide, and protein origin can be recognized when inputted '''
+    @classmethod
+    def setUpClass(cls):
+        cls.logger = logging.getLogger('test_logger.log')
+        cls.logger.setLevel(logging.INFO)
+
+    def test_faulty_seeds(self):
+        input_seed_file = 'TestSeedRecognition/invalid_seeds.fasta'
+
+        with self.assertRaises(SystemExit):
+            check_inputs.check_seed_type(input_seed_file, self.logger)
+
+    def test_protein_seeds(self):
+        input_seed_file = 'TestSeedRecognition/amino_acid_seeds.fasta'
+        return_value = check_inputs.check_seed_type(input_seed_file, self.logger)
+
+        self.assertEqual(True, return_value)
+
+    def test_nucleotide_seeds(self):
+        input_seed_file = 'TestSeedRecognition/nucleotide_seeds.fasta'
+        return_value = check_inputs.check_seed_type(input_seed_file, self.logger)
+
+        self.assertEqual(return_value, False)
 
 
 class TestSplittingGff(unittest.TestCase):

@@ -16,7 +16,7 @@ import time
 import logging
 from sys import argv
 from math import ceil
-import pkg_resources # ??
+import pkg_resources
 import concurrent.futures
 
 try:
@@ -35,9 +35,9 @@ except ModuleNotFoundError:
     from exit_with_error import exit_with_error
 
 try:
-    from Magphi.check_inputs import check_inputs
+    from Magphi.check_inputs import check_inputs, check_seed_type
 except ModuleNotFoundError:
-    from check_inputs import check_inputs
+    from check_inputs import check_inputs, check_seed_type
 
 try:
     from Magphi.split_gff_file import split_gff_files
@@ -141,7 +141,6 @@ def main():
     start_time = time.time()
 
     # Retrieve the flags given by the user in the commandline
-    # TODO - add in argument to change tmp directory to user defined place (scratch which is faster?)
     cmd_args = get_commandline_arguments(argv[1:], PROGRAM_VERSION)
 
     # Try to construct the output folder and except if it does exist
@@ -150,11 +149,8 @@ def main():
     except FileExistsError:
         warnings.warn("Output folder already exists")
         pass
-
-    # add in proteins flag
-    proteins = cmd_args.protein_seed
     
-    "Orchestrate the execution of the program"
+    # Orchestrate the execution of the program
     file_logger = init_logging(cmd_args.log, cmd_args.quiet, cmd_args.out_path)
 
     # Check dependencies for Magphi and logging of versions to file
@@ -173,7 +169,14 @@ def main():
     # Check the input files
     file_type, is_input_gzipped = check_inputs(cmd_args.genomes, file_logger)
 
+    # Check if input seeds are nucleotide or proteins
+    protein_seed_check = check_seed_type(cmd_args.seeds, file_logger)
+    if cmd_args.protein_seed is not protein_seed_check:
+        warnings.warn('Detected seed type does not match user specified seed type - Assuming seeds are protein sequences')
+        cmd_args.protein_seed = protein_seed_check
+
     # construct a temporary folder to hold files
+    # TODO - Use the standard pythonic way of constructing temporary dicts! - See Corekaburra
     file_logger.debug("Try to construct output folder")
     tmp_folder = os.path.join(cmd_args.out_path, "Magphi_tmp_folder")
     try:
@@ -210,7 +213,7 @@ def main():
     with concurrent.futures.ThreadPoolExecutor(max_workers=cmd_args.cpu) as executor:
         results = [executor.submit(screen_genome_for_seeds, cmd_args.genomes[i], seed_pairs, cmd_args.seeds,
                                    tmp_folder, cmd_args.include_seeds, file_type,
-                                   cmd_args.out_path, cmd_args.max_seed_dist, file_logger, is_input_gzipped, print_seq_out, proteins)
+                                   cmd_args.out_path, cmd_args.max_seed_dist, file_logger, is_input_gzipped, print_seq_out, cmd_args.protein_seed)
                    for i, genome in enumerate(cmd_args.genomes)]
 
         for f in concurrent.futures.as_completed(results):

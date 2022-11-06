@@ -7,7 +7,7 @@ except ModuleNotFoundError:
 
 EXIT_COMMAND_LINE_ERROR = 2
 
-# def get_commandline_arguments(args, version):
+
 def get_commandline_arguments(args, version):
     """
     Command line interface for Magphi.
@@ -79,11 +79,11 @@ def get_commandline_arguments(args, version):
                                default=True)
     
     # Add flag for tblastn option (translated protein seed search for nucleotide sequences) 
-    parser.add_argument("-p", "--protein_seed", 
-                                help="to use tblastn instead of blastn when protein seeds are supplied - useful for hits across diverse genomes",
-                                required=False,
-                                action="store_true",
-                                default=False)
+    parser.add_argument("-p", "--protein_seed",
+                        help="to use tblastn instead of blastn when protein seeds are supplied - useful for hits across diverse genomes",
+                        required=False,
+                        action="store_true",
+                        default=False)
 
     # Add the flag for the output folder
     parser.add_argument('-o',

@@ -1,5 +1,5 @@
 usage: Magphi [-h] -g .fa/.gff [.fa/.gff ...] -s multi_fasta_file.fa [-is]
-              [-md int] [-b | -n] [-o path/to/output] [-c int] [-l | -q]
+              [-md int] [-b | -n] [-p] [-o path/to/output] [-c int] [-l | -q]
               [--check] [-v]
 
 Welcome to Magphi! This program will extract sequences and possible
@@ -26,6 +26,8 @@ optional arguments:
   -n, --no_sequences    Argument to not print outputs related to annotations
                         or sequences found between seeds [default: sequences
                         are printed]
+  -p, --protein_seed    to use tblastn instead of blastn when protein seeds
+                        are supplied - useful for hits across diverse genomes
   -o path/to/output, --output_folder path/to/output
                         Give path to output folder [default: current folder]
   -c int, --cpu int     Give max number of CPUs [default: 1]

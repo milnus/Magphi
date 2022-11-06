@@ -182,3 +182,65 @@ def check_inputs(input_files, file_logger):
                         exit_status=EXIT_INPUT_FILE_ERROR)
 
     return file_type, is_input_gzipped
+
+
+def check_string_alphabet(string_dict, alphabet):
+    # Test if all seeds use the alphabet given
+    seed_list = []
+    for seed in string_dict.values():
+        seed_char_list = []
+        for char in set(seed):
+            if char.upper() in alphabet:
+                seed_char_list.append(True)
+            else:
+                seed_char_list.append(False)
+
+        seed_list.append(all(seed_char_list))
+        # stop if one non alphabet matching sequence is identified
+        if not all(seed_list):
+            break
+
+    return all(seed_list)
+
+
+def check_seed_type(seed_file_path, file_logger):
+    """
+    Function to take a seed file input and determine seeds are likely to be nucleotide, protein, or invalid.
+    :param seed_file_path: Filepath for the seed file, holding all input seeds to be searched
+    :param file_logger: Logger for outputs.
+    :return: Boolean indicating if the seed file hold protein seed sequences.
+    """
+    file_logger.debug('Testing input seeds')
+
+    amino_acids = ['A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y']
+    nucleotides = ['A', 'T', 'C', 'G']
+
+    # Construct dict to hold seeds
+    seed_dict = {}
+    # Read in seed file
+    with open(seed_file_path, 'r') as seed_file:
+        for line in seed_file:
+            line = line.strip()
+            if ">" in line:
+                seed_dict[line] = ''
+                current_line = line
+            else:
+                seed_dict[current_line] = seed_dict[current_line] + line
+
+    # Test if nucleotide:
+    is_nucleotide = check_string_alphabet(seed_dict, nucleotides)
+
+    if not is_nucleotide:
+        # Check if seeds are amino acids
+        is_aminoacids = check_string_alphabet(seed_dict, amino_acids)
+    else:
+        file_logger.debug('Testing input seeds are nucleotide')
+        # Everything is nucleotide - return
+        return False
+
+    if not is_aminoacids:
+        file_logger.debug('Testing input seeds are faulty!')
+        exit_with_error(message='Bad input seeds - Could be illegal characters', exit_status=EXIT_INPUT_FILE_ERROR)
+    else:
+        file_logger.debug('Testing input seeds are protein')
+        return True

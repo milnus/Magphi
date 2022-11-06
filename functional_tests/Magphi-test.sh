@@ -350,6 +350,22 @@ test_output_file test_out_folder/master_seed_evidence.csv larger_Magphi_test/mas
 rm -r test_out_folder
 
 
+# Test input seeds being proteins and the tblastn function
+call_new_test "Test input seeds being proteins and the tblastn function - with correct -p flag"
+Magphi -g tblasn_test/tblastn_genome.fasta -s tblasn_test/prot_seeds.fasta -o test_out_folder -md 140 -p
+test_output_file test_out_folder/master_seed_evidence.csv tblastn_simple_expected/master_seed_evidence.expected
+test_output_file test_out_folder/inter_seed_distance.csv tblastn_simple_expected/inter_seed_distance.expected
+test_output_file test_out_folder/contig_hit_matrix.csv tblastn_simple_expected/master_seed_evidence.expected
+rm -r test_out_folder
+
+# Test input seeds being proteins and the tblastn function
+call_new_test "Test input seeds being proteins and the tblastn function - No -p flag"
+Magphi -g tblasn_test/tblastn_genome.fasta -s tblasn_test/prot_seeds.fasta -o test_out_folder -md 140
+test_output_file test_out_folder/master_seed_evidence.csv tblastn_simple_expected/master_seed_evidence.expected
+test_output_file test_out_folder/inter_seed_distance.csv tblastn_simple_expected/inter_seed_distance.expected
+test_output_file test_out_folder/contig_hit_matrix.csv tblastn_simple_expected/master_seed_evidence.expected
+rm -r test_out_folder
+
 
 # 3. End of testing - check if any errors occurrred
 if [ "$num_errors" -gt 0 ]; then

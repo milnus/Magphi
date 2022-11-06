@@ -60,6 +60,7 @@ def tblastn_insertion_site(seeds, genome_file, tmp_name):
 
     return blast_out_xml
 
+
 def blast_insertion_site(seeds, genome_file, tmp_name):
     """
     Function to BLAST seed sequences against a given genome
@@ -812,8 +813,8 @@ def extract_seqs_n_annots(merged_bed_files, file_type, genome_file, annotation_f
 
 
 def screen_genome_for_seeds(genome_file, seed_pairs, seed_path, tmp_folder,
-                              include_seeds, file_type, out_path, max_seed_dist, file_logger,
-                              is_input_gzipped, print_seq_out, proteins):
+                            include_seeds, file_type, out_path, max_seed_dist, file_logger,
+                            is_input_gzipped, print_seq_out, proteins):
     """
     Function that summarise the search of seeds sequences, determination of position and extraction.
     :param genome_file: Path to genome to be searched for seed sequences
@@ -828,6 +829,7 @@ def screen_genome_for_seeds(genome_file, seed_pairs, seed_path, tmp_folder,
     :param file_logger: File to with debug log statements should be written.
     :param is_input_gzipped: Bool to tell if the input file is gzipped
     :param print_seq_out: Bool to indicate if outputs related to fasta and gff sequences should be given
+    :param proteins: Boolean indicator if input search seqeunce is proteins
     :return: Number of times a seed sequence pairs hit the genome,
     number of annotations in the interval found between seed sequences,
     name of the genome extracted from,
@@ -872,16 +874,18 @@ def screen_genome_for_seeds(genome_file, seed_pairs, seed_path, tmp_folder,
     
     # run blastn or tblastn depending on --protein flag present
     if proteins:
+        file_logger.debug('\tUsing tblastn')
         blast_xml_output = tblastn_insertion_site(seed_path, genome_file, f'{genome_name}_blast')
     else:
+        file_logger.debug('\tUsing regular blast')
         blast_xml_output = blast_insertion_site(seed_path, genome_file, f'{genome_name}_blast')  
     
     # Construct a bedfile from blast output
     file_logger.debug(f"\tConstructing bed file: {genome_file}")
     blast_hit_beds, exclude_seed_list, seed_hits = blast_out_to_sorted_bed(blast_xml_output,
-                                                                               include_seeds,
-                                                                               genome_name,
-                                                                               seed_pairs)
+                                                                           include_seeds,
+                                                                           genome_name,
+                                                                           seed_pairs)
 
     # Examine the seed hits and try to find solutions when multiple seeds hit at once
     file_logger.debug(f"\tChecking seed sequence placement: {genome_file}")
@@ -892,6 +896,8 @@ def screen_genome_for_seeds(genome_file, seed_pairs, seed_path, tmp_folder,
     file_logger.debug(f"\tMerging seed sequences: {genome_file}")
     merged_bed_files, seed_evidence = bed_merge_handling(blast_hit_beds, include_seeds, exclude_seed_list,
                                                            max_seed_dist, seed_evidence)
+
+    # TODO - Find a way to fix the orientation of connected segments based on the first primer for better use of the output.
 
     # Extract sequences and annotations using merged intervals.
     file_logger.debug(f"\tExtracting sequences from intervals: {genome_file}")

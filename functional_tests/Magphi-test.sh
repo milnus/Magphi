@@ -367,8 +367,62 @@ test_output_file test_out_folder/contig_hit_matrix.csv tblastn_simple_expected/c
 rm -r test_out_folder
 
 # TODO - Test the orientation of output sequences
+# TODO - Test the orientation of gff files
+# Test output fasta when they are reverse complemented to orient seed
+call_new_test "Test output fasta when they are reverse complemented to orient seed"
+Magphi -g Fix_start_genome.fasta -s fixstart_seeds.fasta -o test_out_folder -b -md 5
+test_output_file test_out_folder/fixstart/Fix_start_genome-fixstart.fasta fix_start/Fix_start_genome-fixstart_rev_comp.fasta.expected
+rm -r test_out_folder
 
-# 3. End of testing - check if any errors occurrred
+# Test output fasta when they are complemented to orient seed
+call_new_test "Test output fasta when they are complemented to orient seed"
+Magphi -g Fix_start_genome.fasta -s fixstart_seeds_2.fasta -o test_out_folder -b -md 5
+test_output_file test_out_folder/fixstart/Fix_start_genome-fixstart.fasta fix_start/Fix_start_genome-fixstart_complement.fasta.expected
+rm -r test_out_folder
+
+# Test output fasta when they are reversed to orient seed
+call_new_test "Test output fasta when they are reversed to orient seed"
+Magphi -g Fix_start_genome.fasta -s fixstart_seeds_3.fasta -o test_out_folder -b -md 5
+test_output_file test_out_folder/fixstart/Fix_start_genome-fixstart.fasta fix_start/Fix_start_genome-fixstart_reverse.fasta.expected
+rm -r test_out_folder
+
+# Test output gff when they are reverse complemented to orient seed
+call_new_test "Test output gff when they are reverse complemented to orient seed"
+Magphi -g Fix_start_genome.gff -s fixstart_seeds.fasta -o test_out_folder -b -md 5
+test_output_file test_out_folder/fixstart/Fix_start_genome-fixstart.fasta fix_start/Fix_start_genome-fixstart_reverse_complemented.gff.expected
+rm -r test_out_folder
+
+# Test output gff when they are complemented to orient seed
+call_new_test "Test output gff when they are complemented to orient seed"
+Magphi -g Fix_start_genome.gff -s fixstart_seeds_2.fasta -o test_out_folder -b -md 5
+test_output_file test_out_folder/fixstart/Fix_start_genome-fixstart.fasta fix_start/Fix_start_genome-fixstart_complemented.gff.expected
+rm -r test_out_folder
+
+# Test output gff when they are reversed to orient seed
+call_new_test "Test output gff when they are reversed to orient seed"
+Magphi -g Fix_start_genome.gff -s fixstart_seeds_3.fasta -o test_out_folder -b -md 5
+test_output_file test_out_folder/fixstart/Fix_start_genome-fixstart.fasta fix_start/Fix_start_genome-fixstart_reverse.gff.expected
+rm -r test_out_folder
+
+# Test output gff when two genes are present and they are reverse complemented to orient seed
+call_new_test "Test output gff when they are reverse complemented to orient seed"
+Magphi -g Fix_start_genome_2.gff -s fixstart_seeds.fasta -o test_out_folder -b -md 5
+test_output_file test_out_folder/fixstart/Fix_start_genome-fixstart.fasta fix_start/Fix_start_genome_2-fixstart_reverse_complement.gff.expected
+rm -r test_out_folder
+
+# Test output gff when two genes are present and they are complemented to orient seed
+call_new_test "Test output gff when they are complemented to orient seed"
+Magphi -g Fix_start_genome_2.gff -s fixstart_seeds_2.fasta -o test_out_folder -b -md 5
+test_output_file test_out_folder/fixstart/Fix_start_genome-fixstart.fasta fix_start/Fix_start_genome_2-fixstart_complemented.gff.expected
+rm -r test_out_folder
+
+# Test output gff when two genes are present and they are reversed to orient seed
+call_new_test "Test output gff when they are reversed to orient seed"
+Magphi -g Fix_start_genome_2.gff -s fixstart_seeds_3.fasta -o test_out_folder -b -md 5
+test_output_file test_out_folder/fixstart/Fix_start_genome-fixstart.fasta fix_start/Fix_start_genome_2-fixstart_reverse.gff.expected
+rm -r test_out_folder
+
+# 3. End of testing - check if any errors occurred
 if [ "$num_errors" -gt 0 ]; then
     echo "$test_program failed $num_errors out of $num_tests tests"
     exit 1

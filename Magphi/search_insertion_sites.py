@@ -289,7 +289,7 @@ def examine_flanking_regions(seed_contig_hits, max_seed_dist, genome_file, bed_f
             intervals_bed = intervals_bed.sort()
 
             # merge
-            merged_intervals = intervals_bed.merge(d=0, c=[4, 4, 5], o='count,collapse,collapse')
+            merged_intervals = intervals_bed.merge(d=0, c=[4, 4, 7], o='count,collapse,collapse')
 
             # Check to see if some lines have been merged, if then record this in the interaction matrix
             interacting_lines = [list(line) for line in merged_intervals if int(line[3]) >= 2]
@@ -378,7 +378,7 @@ def examine_flanking_regions(seed_contig_hits, max_seed_dist, genome_file, bed_f
                 seed_extension_hits = end_reached_matrix[index]
 
                 # Get the seed in question, and remove the identifier at the end.
-                extend_seed = intervals[index][:4]
+                extend_seed = intervals[index][:6]
 
                 # Convert seed to a BedTools object
                 extend_seed = bedtools.BedTool(' '.join(extend_seed), from_string=True)
@@ -508,7 +508,7 @@ def check_seeds_placement(bed_files, seed_pairs, seed_hits, max_seed_dist, genom
                                                                                 f'{genome_file}.fai',
                                                                                 file+'_6')
 
-                            if alternative_return_value == '4B': # ADD alternative value 3?
+                            if alternative_return_value == '4B':
                                 seed_hit_support_dict[seed_name] = 2
                                 os.remove(file+'_5')
                                 try:
@@ -528,6 +528,7 @@ def check_seeds_placement(bed_files, seed_pairs, seed_hits, max_seed_dist, genom
                                                             max_seed_dist,
                                                             f'{genome_file}.fai',
                                                             file)
+
                     if return_value == 1 and seed_hits[seed_name] == 2 and uniq_seeds == 2:
                         seed_hit_support_dict[seed_name] = '4A'
                     elif return_value == 2:
@@ -836,7 +837,6 @@ def extract_seqs_n_annots(merged_bed_files, file_type, genome_file, annotation_f
                 if any(output_modifications):
                     oriented_fasta_return = make_output_orientation(output_modifications, output_genome, 'fasta')
                     with open(output_genome, 'w') as fasta_output_file:
-                        print(oriented_fasta_return)
                         fasta_output_file.writelines(oriented_fasta_return)
                         # fasta_writer = csv.writer(fasta_output_file)
                         # for line in oriented_fasta_return:

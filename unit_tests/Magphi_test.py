@@ -605,7 +605,7 @@ class TestSeedsPlacement(unittest.TestCase):
 
         # Check altered input file
         with open(bed_files[0], 'r') as altered_file:
-            self.assertEqual(['Contig_1\t100\t300\tprimer_close_placement_1\n', 'Contig_1\t350\t550\tprimer_close_placement_2\n'],
+            self.assertEqual(['Contig_1\t100\t300\tprimer_close_placement_1\t.\t+\n', 'Contig_1\t350\t550\tprimer_close_placement_2\t.\t+\n'],
                              altered_file.readlines())
 
         # Copy back input file
@@ -668,9 +668,8 @@ class TestSeedsPlacement(unittest.TestCase):
         # Check altered input file
         with open(bed_files[0], 'r') as altered_file:
             self.assertEqual(
-                ['Contig_1\t0\t300\tprimer_long_placement_1\n', 'Contig_2\t0\t75\tprimer_long_placement_2\n'],
+                ['Contig_1\t0\t300\tprimer_long_placement_1\t.\t+\n', 'Contig_2\t0\t75\tprimer_long_placement_2\t.\t+\n'],
                 altered_file.readlines())
-
 
         # Copy back input file
         os.rename(bed_files[0] + 'original', bed_files[0])
@@ -871,7 +870,7 @@ class TestFlankingRegion(unittest.TestCase):
         self.assertEqual(2, flanking_return)
 
     def test_multiple_hit_single_contig_w_no_overlaps(self):
-        ''' Test the handling of multiple hits from both seed sequneces in a pair but no connection between them '''
+        ''' Test the handling of multiple hits from both seed sequences in a pair but no connection between them '''
         with open('TestFlankingRegion/single_contig/single_contig_multi_hit.json', 'r') as seed_hit_json:
             seed_hit_dict = json.load(seed_hit_json)
         genome_fai_file = 'TestFlankingRegion/single_contig/single_contig_1200N.fasta.fai'

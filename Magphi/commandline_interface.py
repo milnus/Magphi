@@ -65,6 +65,15 @@ def get_commandline_arguments(args, version):
                         action="store_true",
                         default=False)
 
+    parser.add_argument('-S',
+                        '--stop_orientation',
+                        help='Argument to NOT reorient output sequences and annotations by first seed in pair (Only for connected seed not contig breaks)'
+                             ' [default: sequences and annotations are oriented]',
+                        dest='orient_by_seed',
+                        required=False,
+                        action='store_false',
+                        default=True)
+
     output_amount = parser.add_mutually_exclusive_group()
     output_amount.add_argument('-b',
                                '--print_breaks',
@@ -80,15 +89,6 @@ def get_commandline_arguments(args, version):
                                help='Argument to not print outputs related to annotations or sequences found between seeds'
                                     ' [default: sequences are printed]',
                                dest='no_seqs',
-                               required=False,
-                               action='store_false',
-                               default=True)
-
-    output_amount.add_argument('-S',
-                               '--stop_orientation',
-                               help='Argument to NOT reorient output sequences and annotations by first seed in pair (Only for connected seed not contig breaks)'
-                                    ' [default: sequences and annotations are oriented]',
-                               dest='orient_by_seed',
                                required=False,
                                action='store_false',
                                default=True)

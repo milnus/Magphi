@@ -99,6 +99,7 @@ function test_stdout_exit {
     difference=$(diff <(echo "$output") $expected_output_file)
     if [ -n "$difference" ]; then 
         let num_errors+=1
+        echo "TEST FAILED!"
         echo "Test output failed: $1"
         echo "Actual output:"
         echo "$output"

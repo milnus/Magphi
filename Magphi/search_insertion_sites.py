@@ -671,7 +671,6 @@ def bed_merge_handling(blast_hit_beds, include_seeds, exclude_seed_list, max_see
 
 
 def make_output_orientation(orientation_modifications, line_list, file_type):
-    print(f'{orientation_modifications = }')
     return_list = []
     if file_type == 'fasta':
         with open(line_list, 'r') as fasta_file:

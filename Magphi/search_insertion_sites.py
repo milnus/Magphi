@@ -679,13 +679,13 @@ def make_output_orientation(orientation_modifications, line_list, file_type):
 
             # Check if fasta file is to be reversed and complemented
             if all(orientation_modifications):
-                return_list.append(Seq(fasta_file.readline().strip()).reverse_complement()+'\n')
+                return_list.append(str(Seq(fasta_file.readline().strip()).reverse_complement())+'\n')
             # Check if reversed
             elif orientation_modifications[1]:
                 return_list.append(fasta_file.readline().strip()[::-1]+'\n')
             # Check if complemented
             elif orientation_modifications[0]:
-                return_list.append(Seq(fasta_file.readline().strip()).complement()+'\n')
+                return_list.append(str(Seq(fasta_file.readline().strip()).complement())+'\n')
 
     else:
         with open(line_list, 'r') as gff_file:

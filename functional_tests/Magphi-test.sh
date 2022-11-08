@@ -129,6 +129,7 @@ function test_output_file {
     difference=$(diff $output $expected_output_file) || let num_errors+=1
     if [ -n "$difference" ]; then
         let num_errors+=1
+        echo "TEST FAILED!"
         echo "Test output failed: $1"
         echo "Actual output:"
         cat $output
@@ -156,6 +157,7 @@ function test_exit_status {
     verbose_message "Testing exit status: $1"
     if [ "$exit_status" -ne "$expected_exit_status" ]; then
         let num_errors+=1
+        echo "TEST FAILED!"
         echo "Test exit status failed: $1"
         echo "Actual exit status: $exit_status"
         echo "Expected exit status: $expected_exit_status"

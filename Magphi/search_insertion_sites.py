@@ -12,6 +12,7 @@ from Bio.Blast.Applications import NcbiblastnCommandline
 from Bio.Sequencing.Applications import SamtoolsFaidxCommandline
 from Bio.Application import ApplicationError
 from Bio import SearchIO
+from Bio.Seq import Seq, complement, reverse_complement
 import pybedtools as bedtools
 try:
     from Magphi.exit_with_error import exit_with_error
@@ -111,7 +112,7 @@ def blast_out_to_sorted_bed(blast_xml_output, include_seeds, genome_name, seed_p
     # Construct list to hold lines for seed bed files
     bed_list = []
     for qresult in blast_output:
-        bed_line = [None]*4
+        bed_line = ['.']*6
         # Insert the name of the seed
         bed_line[3] = qresult.id
         for hit in qresult:
@@ -124,6 +125,8 @@ def blast_out_to_sorted_bed(blast_xml_output, include_seeds, genome_name, seed_p
                 bed_line_hsp[1] = hsp.hit_start
                 # Extract the end of the seed (extract on to make 0-based for BED file)
                 bed_line_hsp[2] = hsp.hit_end
+                # Extract the strand information off seeds
+                bed_line_hsp[5] = '+' if hsp.hit_strand > 0 else '-'
 
                 # Add the bed line for the hit to the bed file list
                 bed_list.append(bed_line_hsp)
@@ -431,7 +434,6 @@ def check_seeds_placement(bed_files, seed_pairs, seed_hits, max_seed_dist, genom
     except ApplicationError:
         exit_with_error(f"Samtools failed when running the command 'samtools faidx {genome_file}'", EXIT_INPUT_FILE_ERROR)
 
-
     # Initialise the dict to hold the support for a seed hit
     seed_hit_support_dict = dict.fromkeys(seed_pairs)
 
@@ -461,7 +463,7 @@ def check_seeds_placement(bed_files, seed_pairs, seed_hits, max_seed_dist, genom
                     seed_to_contig[contig] = [list(line)]
 
             # Find number of different seeds that hit the contigs
-            # Get all hits on contigs an unpack them into a single list of lists, then count the number of unique seed sequence hits
+            # Get all hits on contigs and unpack them into a single list of lists, then count the number of unique seed sequence hits
             seed_bed_lines = [seed_to_contig[key] for key in seed_to_contig.keys()]
             seed_bed_lines = [hit for contig in seed_bed_lines for hit in contig]
             uniq_seeds = len(set([hit[3] for hit in seed_bed_lines]))
@@ -571,7 +573,27 @@ def check_seeds_placement(bed_files, seed_pairs, seed_hits, max_seed_dist, genom
     return genome_file, seed_hit_support_dict
 
 
-def bed_merge_handling(blast_hit_beds, include_seeds, exclude_seed_list, max_seed_dist, seed_evidence):
+def orientation_detector(bed_list, first_seeds):
+    complement_seq = None
+    orient_seed_start = None
+
+    # Go through all features in bed file to find the seed used to orient output, store strand and store start of all seed
+    feature_starts = []
+    for feature in bed_list:
+        feature_starts.append(feature.start)
+        # Check if seed to orient by feature, if store its stand
+        if feature.name in first_seeds:
+            complement_seq = False if feature.strand == '+' else True
+
+            orient_seed_start = feature.start
+
+    # Find if the sequence should be reversed based on the start of the seed to orient by
+    reverse_seq = False if min(feature_starts) == orient_seed_start else True
+
+    return complement_seq, reverse_seq
+
+
+def bed_merge_handling(blast_hit_beds, include_seeds, exclude_seed_list, max_seed_dist, seed_evidence, first_seeds, orient_by_seed):
     """
     Function to merge lines (seed sequence hits) in a BED file into single lines (coordinate intervals)
     :param blast_hit_beds: List of BED files to be merged
@@ -585,6 +607,7 @@ def bed_merge_handling(blast_hit_beds, include_seeds, exclude_seed_list, max_see
     """
     # initialise list to hold merged bed file names:
     merged_bed_files = []
+    output_modifications = (False, False)
 
     # Process the bed file for each seed pair
     for i, bed_file in enumerate(blast_hit_beds):
@@ -601,27 +624,31 @@ def bed_merge_handling(blast_hit_beds, include_seeds, exclude_seed_list, max_see
 
         # Merge the bed file and collapse the column containing the names and count the number of intervals collapsed
         if len(seed_hits) > 0:
-            seed_hits = seed_hits.merge(c=[4, 4], o='collapse,count', d=max_seed_dist)
+            seed_hits_merged = seed_hits.merge(c=[4, 4], o='collapse,count', d=max_seed_dist)
         else:
             seed_evidence[seed_name] = 0
             continue
 
         # Check if the evidence level for the seeds should increase due to seeds being merged.
         # Check that there is one line and that two seeds have been merged and not just one seed hit
-        if len(seed_hits) == 1 and int(seed_hits[0][4]) == 2:
+        if len(seed_hits_merged) == 1 and int(seed_hits_merged[0][4]) == 2:
             seed_evidence[seed_name] = '5B'
+
+            # Find if sequence is to be reversed or complemented to orient seed
+            if orient_by_seed:
+                output_modifications = orientation_detector(list(seed_hits.features()), first_seeds)
 
         # Evaluate if seeds are to be excluded from the intervals
         if not include_seeds:
             # Load bed containing seeds to be excluded
             exclusion_bed = bedtools.BedTool(exclude_seed_list[i])
 
-            pre_deletion_intervals = len(seed_hits)
+            pre_deletion_intervals = len(seed_hits_merged)
 
             # Remove the seed intervals
-            seed_hits = seed_hits.subtract(exclusion_bed)
+            seed_hits_merged = seed_hits_merged.subtract(exclusion_bed)
 
-            if pre_deletion_intervals > len(seed_hits) and (str(seed_evidence[seed_name]) < '3' or seed_evidence[seed_name] == '5B' or seed_evidence[seed_name] == '4B'):
+            if pre_deletion_intervals > len(seed_hits_merged) and (str(seed_evidence[seed_name]) < '3' or seed_evidence[seed_name] == '5B' or seed_evidence[seed_name] == '4B'):
                 seed_evidence[seed_name] = 3
 
         # Save the merged intervals
@@ -631,19 +658,102 @@ def bed_merge_handling(blast_hit_beds, include_seeds, exclude_seed_list, max_see
         # Save
         # Check if there is any interval to report,
         # else notify by setting the return evidence level
-        if len(seed_hits):
-            seed_hits.saveas(merged_bed_file)
+        if len(seed_hits_merged):
+            seed_hits_merged.saveas(merged_bed_file)
             # Add to list
             merged_bed_files.append(merged_bed_file)
         else:
             if str(seed_evidence[seed_name]) < '3':
                 seed_evidence[seed_name] = 3
 
-    return merged_bed_files, seed_evidence
+    return merged_bed_files, seed_evidence, output_modifications
+
+
+def make_output_orientation(orientation_modifications, line_list, file_type):
+    return_list = []
+    if file_type == 'fasta':
+        with open(line_list, 'r') as fasta_file:
+            # Save header
+            return_list.append(fasta_file.readline())
+
+            # Check if fasta file is to be reversed and complemented
+            if all(orientation_modifications):
+                return_list.append(Seq(fasta_file.readline().strip()).reverse_complement()+'\n')
+            # Check if reversed
+            elif orientation_modifications[1]:
+                return_list.append(fasta_file.readline().strip()[::-1]+'\n')
+            # Check if complemented
+            elif orientation_modifications[0]:
+                return_list.append(Seq(fasta_file.readline().strip()).complement()+'\n')
+
+    else:
+        with open(line_list, 'r') as gff_file:
+            # Check reverse
+            if orientation_modifications[1]:
+                # Save first list
+                return_list.append(gff_file.readline())
+
+                # Take second like and get the length
+                seq_info_line = gff_file.readline()
+                return_list.append(seq_info_line)
+
+                # Find length of sequence
+                seq_length = int(seq_info_line.split(' ')[-1])
+
+                # read remaining lines into lists
+                annotation_lines = []
+                fasta_lines = []
+                fasta_part = False
+                for line in gff_file.readlines():
+                    if not fasta_part:
+                        if line == '##FASTA\n':
+                            fasta_part = True
+                            fasta_lines.append(line)
+                        else:
+                            annotation_lines.append(line.strip().split('\t'))
+
+                    else:
+                        fasta_lines.append(line)
+
+                # Adjust intervals by seq length when reversed
+                for i, annotation in enumerate(annotation_lines):
+                    # Subtract sequence length to get new intervals
+                    adj_interval = [seq_length - int(coord) for coord in annotation[3:5]]
+                    # Add the new intervals back
+                    annotation_lines[i][3] = str(adj_interval[1])
+                    annotation_lines[i][4] = str(adj_interval[0])
+
+                    # check if sequence should be complemented as well
+                    if orientation_modifications[0]:
+                        annotation_lines[i][6] = '+' if annotation_lines[i][6] == '-' else '-'
+
+                    # Reform the annotation line with tabs separators and newline
+                    annotation_lines[i] = '\t'.join(annotation_lines[i])+'\n'
+
+                # Reverse the annotations and add to return list
+                return_list.extend(annotation_lines[::-1])
+
+                # Add fasta sequence into return list
+                return_list.extend(fasta_lines)
+
+            # Check complement
+            elif orientation_modifications[0]:
+                fasta_part = False
+                for line in gff_file.readlines():
+                    if fasta_part or '##' in line:
+                        return_list.append(line)
+                        if line == '##FASTA\n':
+                            fasta_part = True
+                    else:
+                        line = line.strip().split('\t')
+                        line[6] = '+' if line[6] == '-' else '-'
+                        return_list.append('\t'.join(line) + '\n')
+
+    return return_list
 
 
 def extract_seqs_n_annots(merged_bed_files, file_type, genome_file, annotation_file, tmp_folder, out_path, seed_pairs,
-                          seed_evidence, print_seq_out):
+                          seed_evidence, print_seq_out, output_modifications):
     """
     Function to extract the nucleotide sequence and potential genomic features from FASTA and GFF files
     :param merged_bed_files: List of filepaths to merged BED files
@@ -722,6 +832,17 @@ def extract_seqs_n_annots(merged_bed_files, file_type, genome_file, annotation_f
                 except bedtools.helpers.BEDToolsError:
                     interval.sequence(fi=genome_file, fo=output_genome, name=True)
 
+                # TODO - Make any modifications to the output
+                if any(output_modifications):
+                    oriented_fasta_return = make_output_orientation(output_modifications, output_genome, 'fasta')
+                    with open(output_genome, 'w') as fasta_output_file:
+                        print(oriented_fasta_return)
+                        fasta_output_file.writelines(oriented_fasta_return)
+                        # fasta_writer = csv.writer(fasta_output_file)
+                        # for line in oriented_fasta_return:
+                        #     fasta_writer.writerow(line)
+
+
             # extract annotations if gff is provided as input
             if file_type == 'gff':
                 # Load in the gff as a BedTool object
@@ -791,6 +912,15 @@ def extract_seqs_n_annots(merged_bed_files, file_type, genome_file, annotation_f
                         gff_output_file.close()
                         fasta_file.close()
 
+                    # Reorient Gff output and rewrite file
+                    if any(output_modifications):
+                        oriented_gff_return = make_output_orientation(output_modifications, output_gff, file_type='gff')
+                        with open(output_gff, 'w') as gff_output_file:
+                            gff_output_file.writelines(oriented_gff_return)
+                            # gff_writer = csv.writer(gff_output_file, delimiter='\t')
+                            # for line in oriented_gff_return:
+                            #     gff_writer.writerow(line)
+
                 # Delete the file containing the current merged bed interval
                 os.remove(interval_save)
 
@@ -814,7 +944,7 @@ def extract_seqs_n_annots(merged_bed_files, file_type, genome_file, annotation_f
 
 def screen_genome_for_seeds(genome_file, seed_pairs, seed_path, tmp_folder,
                             include_seeds, file_type, out_path, max_seed_dist, file_logger,
-                            is_input_gzipped, print_seq_out, proteins):
+                            is_input_gzipped, print_seq_out, proteins, orient_by_seed, first_seeds):
     """
     Function that summarise the search of seeds sequences, determination of position and extraction.
     :param genome_file: Path to genome to be searched for seed sequences
@@ -869,7 +999,7 @@ def screen_genome_for_seeds(genome_file, seed_pairs, seed_path, tmp_folder,
     # genome_name = os.path.join(tmp_folder, genome_name)
     genome_name = os.path.join(tmp_genome_folder, genome_name)
 
-    # Run blast with genome and insertion site sequences
+    # Run blast with genome and seed sequences
     file_logger.debug(f"\tBLASTing: {genome_file}")
     
     # run blastn or tblastn depending on --protein flag present
@@ -894,22 +1024,25 @@ def screen_genome_for_seeds(genome_file, seed_pairs, seed_path, tmp_folder,
 
     # sort and merge the bed files
     file_logger.debug(f"\tMerging seed sequences: {genome_file}")
-    merged_bed_files, seed_evidence = bed_merge_handling(blast_hit_beds, include_seeds, exclude_seed_list,
-                                                           max_seed_dist, seed_evidence)
+    merged_bed_files, seed_evidence, output_modifications = bed_merge_handling(blast_hit_beds, include_seeds, exclude_seed_list,
+                                                                                max_seed_dist, seed_evidence, first_seeds, orient_by_seed)
+
 
     # TODO - Find a way to fix the orientation of connected segments based on the first primer for better use of the output.
 
     # Extract sequences and annotations using merged intervals.
     file_logger.debug(f"\tExtracting sequences from intervals: {genome_file}")
     annots_per_interval, break_seeds, seed_evidence, inter_seed_dist = extract_seqs_n_annots(merged_bed_files,
-                                                                                                   file_type,
-                                                                                                   genome_file,
-                                                                                                   annotation_file,
-                                                                                                   tmp_folder,
-                                                                                                   out_path,
-                                                                                                   seed_pairs,
-                                                                                                   seed_evidence,
-                                                                                                   print_seq_out)
+                                                                                             file_type,
+                                                                                             genome_file,
+                                                                                             annotation_file,
+                                                                                             tmp_folder,
+                                                                                             out_path,
+                                                                                             seed_pairs,
+                                                                                             seed_evidence,
+                                                                                             print_seq_out,
+                                                                                             output_modifications)
+
 
     # clean up by removing blast xml output, and merged and seed hit beds from tmp folder:
     os.remove(blast_xml_output)

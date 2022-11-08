@@ -177,20 +177,17 @@ def main():
         cmd_args.protein_seed = protein_seed_check
 
     # construct a temporary folder to hold files
-    # TODO - Use the standard pythonic way of constructing temporary dicts! - See Corekaburra
     file_logger.debug("Construct temporary folder")
     tmp_folder = TemporaryDirectory()
-    # tmp_folder = os.path.join(cmd_args.out_path, "Magphi_tmp_folder")
-    # try:
-        # os.mkdir(tmp_folder)
-        # file_logger.debug("Output folder construction successful")
-    # except FileExistsError:
-    #     file_logger.warning("A temporary folder already exists at the given output location. "
-    #                                  "Most likely from an incomplete analysis")
 
     # Read in and combine seeds into pairs
     file_logger.debug("Start handling of input seed sequences")
     seed_pairs = handle_seeds(cmd_args.seeds, file_logger)
+    # Find first seed if orienting by seed
+    if cmd_args.orient_by_seed:
+        first_seeds = [seed_list[0] for seed_list in seed_pairs.values()]
+    else:
+        first_seeds = []
 
     print_seq_out = 'output' if cmd_args.no_seqs else 'None'
     if print_seq_out == 'output':
@@ -203,7 +200,6 @@ def main():
     seeds_w_breaks = seed_pairs.copy()
     master_inter_seed_dist = {}
 
-    # num_genomes = len(genomes)
     num_genomes = len(cmd_args.genomes)
     # Calculate when to log progress:
     progress_num = num_genomes / 10
@@ -215,7 +211,8 @@ def main():
     with concurrent.futures.ThreadPoolExecutor(max_workers=cmd_args.cpu) as executor:
         results = [executor.submit(screen_genome_for_seeds, cmd_args.genomes[i], seed_pairs, cmd_args.seeds,
                                    tmp_folder.name, cmd_args.include_seeds, file_type,
-                                   cmd_args.out_path, cmd_args.max_seed_dist, file_logger, is_input_gzipped, print_seq_out, cmd_args.protein_seed)
+                                   cmd_args.out_path, cmd_args.max_seed_dist, file_logger, is_input_gzipped,
+                                   print_seq_out, cmd_args.protein_seed, cmd_args.orient_by_seed, first_seeds)
                    for i, genome in enumerate(cmd_args.genomes)]
 
         for f in concurrent.futures.as_completed(results):

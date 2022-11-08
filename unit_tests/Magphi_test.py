@@ -9,6 +9,7 @@ import os
 import json
 from shutil import copyfile
 import logging
+import pybedtools as bedtools
 
 from Magphi import check_inputs
 from Magphi import split_gff_file
@@ -334,43 +335,56 @@ class TestseedFunctions(unittest.TestCase):
  #                                                               seed_pairs = seed_pairs)
  #           self.assertEqual(result,blast_xml)'''
 
-# TODO - test blast_out_to_sorted_bed function - use an input file of blast xml output - use two sets of seeds
-#  Test both inclusion and exclution of seeds. - Andrew's responsitibily.
-#   - We want to test that a blast output is converted correctly to Bed format.
-#   1. Produce mock fasta to blast against. (Should have known sites that seeds match. Maybe repeat single Base or gap with seeds being unique)
-#   2. Produce mock seeds
-#   3. Blast mock seeds against mock fasta using similar settings as Magphi
-#   4. Manually curate the positions are as expected
-#   5. Manually determine the expected bed file information
-#   6. Convert expected bed file format into .json or staight python code to be used for assertion.
-#   7. write test.
-#   8. Run
 
 class TestBlastOutToSortedBed(unittest.TestCase):
-        
-        def test_make_bed_list(self):
-            ''' test that the blast xml is correctly being converted to a bed file '''
-            blast_xml = 'TestBlastOutToSortedBed/Mock_blast_out.xml'
-            bed_file = 'TestBlastOutToSortedBed/Mock_fasta~~seed.bed'
-            bed_list=open(bed_file,'r')
-            genome_name = 'Mock_fasta'
-            seed_pairs = {'seed': ['seed_1', 'seed_2']}
-            blast_hit_beds_file, exclusion_list, seed_hits = search_insertion_sites.blast_out_to_sorted_bed(blast_xml_output = blast_xml,
+    def test_make_bed_list(self):
+        ''' test that the blast xml is correctly being converted to a bed file '''
+        blast_xml = 'TestBlastOutToSortedBed/Mock_blast_out.xml'
+        bed_file = 'TestBlastOutToSortedBed/Mock_fasta~~seed.bed'
+        bed_list=open(bed_file,'r')
+        genome_name = 'Mock_fasta'
+        seed_pairs = {'seed': ['seed_1', 'seed_2']}
+        blast_hit_beds_file, exclusion_list, seed_hits = search_insertion_sites.blast_out_to_sorted_bed(blast_xml_output = blast_xml,
                                                                                                         include_seeds = True,
                                                                                                         genome_name = genome_name,
                                                                                                         seed_pairs = seed_pairs)
-            blast_hit_beds = open(blast_hit_beds_file[0],'r')
-            blast_hits_list = blast_hit_beds.readlines()
-            expected_seed_hits = {'seed': 2}
-            expected_exclusions = []
-            expected_blast_hit_beds = bed_list.readlines()
-            self.assertEqual(expected_seed_hits, seed_hits)
-            self.assertEqual(expected_exclusions, exclusion_list)
-            self.assertEqual(expected_blast_hit_beds, blast_hits_list)
+        blast_hit_beds = open(blast_hit_beds_file[0], 'r')
+        blast_hits_list = blast_hit_beds.readlines()
+        expected_seed_hits = {'seed': 2}
+        expected_exclusions = []
+        expected_blast_hit_beds = bed_list.readlines()
+        self.assertEqual(expected_seed_hits, seed_hits)
+        self.assertEqual(expected_exclusions, exclusion_list)
+        self.assertEqual(expected_blast_hit_beds, blast_hits_list)
 
-            # close the files
-            bed_list.close()
-            blast_hit_beds.close()
+        # close the files
+        bed_list.close()
+        blast_hit_beds.close()
+
+    def test_strandedness_identification(self):
+        ''' Test the capture of strandedness based on the hsp_hit-frame value in the XML '''
+        blast_xml = 'TestBlastOutToSortedBed/Mock_blast_out_diff_dir.xml'
+        bed_file = 'TestBlastOutToSortedBed/Mock_fasta~~seed_diff_dir.bed'
+        bed_list = open(bed_file, 'r')
+        genome_name = 'Mock_fasta'
+        seed_pairs = {'seed': ['seed_1', 'seed_2']}
+        blast_hit_beds_file, exclusion_list, seed_hits = search_insertion_sites.blast_out_to_sorted_bed(
+            blast_xml_output=blast_xml,
+            include_seeds=True,
+            genome_name=genome_name,
+            seed_pairs=seed_pairs)
+        blast_hit_beds = open(blast_hit_beds_file[0], 'r')
+        blast_hits_list = blast_hit_beds.readlines()
+        expected_seed_hits = {'seed': 2}
+        expected_exclusions = []
+        expected_blast_hit_beds = bed_list.readlines()
+        self.assertEqual(expected_seed_hits, seed_hits)
+        self.assertEqual(expected_exclusions, exclusion_list)
+        self.assertEqual(expected_blast_hit_beds, blast_hits_list)
+
+        # close the files
+        bed_list.close()
+        blast_hit_beds.close()
 
 
 class TestSeedsPlacement(unittest.TestCase):
@@ -1066,6 +1080,117 @@ class TestBedMergeHandling(unittest.TestCase):
 
         os.remove('TestBedMergeHandling/double_contig~~primer_edge_placement_merged.bed')
 
+
+class TestReverseComplementDetection(unittest.TestCase):
+    def test_no_orientation_needed(self):
+        bed_object = bedtools.BedTool('TestReverseComplementDetection/No_orientation_needed.bed')
+
+        seed_to_orient_by = ['seed_1']
+
+        return_values = search_insertion_sites.orientation_detector(bed_object, seed_to_orient_by)
+
+        self.assertEqual((False, False), return_values)
+
+    def test_reverse_sequence(self):
+        bed_object = bedtools.BedTool('TestReverseComplementDetection/reverse_orientation_needed.bed')
+
+        seed_to_orient_by = ['seed_1']
+
+        return_values = search_insertion_sites.orientation_detector(bed_object, seed_to_orient_by)
+
+        self.assertEqual((False, True), return_values)
+
+    def test_reverse_complement_sequence_1(self):
+        bed_object = bedtools.BedTool('TestReverseComplementDetection/reverse_complement_needed_1.bed')
+
+        seed_to_orient_by = ['seed_1']
+
+        return_values = search_insertion_sites.orientation_detector(bed_object, seed_to_orient_by)
+
+        self.assertEqual((True, True), return_values)
+
+    def test_reverse_complement_sequence_2(self):
+        bed_object = bedtools.BedTool('TestReverseComplementDetection/reverse_complement_needed_2.bed')
+
+        seed_to_orient_by = ['seed_1']
+
+        return_values = search_insertion_sites.orientation_detector(bed_object, seed_to_orient_by)
+
+        self.assertEqual((True, True), return_values)
+
+    def test_complement_sequence_1(self):
+        bed_object = bedtools.BedTool('TestReverseComplementDetection/complement_needed_1.bed')
+
+        seed_to_orient_by = ['seed_1']
+
+        return_values = search_insertion_sites.orientation_detector(bed_object, seed_to_orient_by)
+
+        self.assertEqual((True, False), return_values)
+
+    def test_complement_sequence_2(self):
+        bed_object = bedtools.BedTool('TestReverseComplementDetection/complement_needed_2.bed')
+
+        seed_to_orient_by = ['seed_1']
+
+        return_values = search_insertion_sites.orientation_detector(bed_object, seed_to_orient_by)
+
+        self.assertEqual((True, False), return_values)
+
+
+class TestMakingOutputOrientationChanges(unittest.TestCase):
+    def test_fasta_reverse(self):
+        returned_list = search_insertion_sites.make_output_orientation((False, True), 'TestMakingOutputOrientationChanges/Test_genome.fasta', file_type='fasta')
+
+        with open('TestMakingOutputOrientationChanges/Test_genome_reversed.fasta', 'r') as expected_file:
+            expected_list = expected_file.readlines()
+
+            self.assertEqual(expected_list, returned_list)
+
+    def test_fasta_complement(self):
+        returned_list = search_insertion_sites.make_output_orientation((True, False), 'TestMakingOutputOrientationChanges/Test_genome.fasta', file_type='fasta')
+
+        with open('TestMakingOutputOrientationChanges/Test_genome_complemented.fasta', 'r') as expected_file:
+            expected_list = expected_file.readlines()
+
+            self.assertEqual(expected_list, returned_list)
+
+    def test_fasta_reverse_complement(self):
+        returned_list = search_insertion_sites.make_output_orientation((True, True), 'TestMakingOutputOrientationChanges/Test_genome.fasta', file_type='fasta')
+
+        with open('TestMakingOutputOrientationChanges/Test_genome_reversed_complemented.fasta', 'r') as expected_file:
+            expected_list = expected_file.readlines()
+
+            self.assertEqual(expected_list, returned_list)
+
+    def test_gff_reverse(self):
+        returned_list = search_insertion_sites.make_output_orientation((False, True),
+                                                                       'TestMakingOutputOrientationChanges/Test_genome_in_reversed.gff',
+                                                                       file_type='gff')
+
+        with open('TestMakingOutputOrientationChanges/Test_genome_reversed.gff', 'r') as expected_file:
+            expected_list = expected_file.readlines()
+
+            self.assertEqual(expected_list, returned_list)
+
+    def test_gff_complement(self):
+        returned_list = search_insertion_sites.make_output_orientation((True, False),
+                                                                       'TestMakingOutputOrientationChanges/Test_genome_in_complemented.gff',
+                                                                       file_type='gff')
+
+        with open('TestMakingOutputOrientationChanges/Test_genome_complemented.gff', 'r') as expected_file:
+            expected_list = expected_file.readlines()
+
+            self.assertEqual(expected_list, returned_list)
+
+    def test_gff_reverse_complement(self):
+        returned_list = search_insertion_sites.make_output_orientation((True, True),
+                                                                       'TestMakingOutputOrientationChanges/Test_genome_in_reverse_complemented.gff',
+                                                                       file_type='gff')
+
+        with open('TestMakingOutputOrientationChanges/Test_genome_reverse_complemented.gff', 'r') as expected_file:
+            expected_list = expected_file.readlines()
+
+            self.assertEqual(expected_list, returned_list)
 
 class TestExtractSeqsNAnnots(unittest.TestCase):
     def test_same_contig_fasta_extraction(self):

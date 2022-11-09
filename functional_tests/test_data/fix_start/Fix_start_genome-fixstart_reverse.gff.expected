@@ -1,6 +1,6 @@
 ##gff-version 3
 ##sequence-region Fix_start_genome_fixstart 1 4
-Fix_start_genome_fixstart	.	gene	1	3	.	+	0	tag=gene_00001
+Fix_start_genome_fixstart	.	gene	2	4	.	+	0	tag=gene_00001
 ##FASTA
 >Fix_start_genome_fixstart
 ATAA

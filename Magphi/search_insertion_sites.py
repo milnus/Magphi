@@ -719,7 +719,9 @@ def make_output_orientation(orientation_modifications, line_list, file_type):
                 # Adjust intervals by seq length when reversed
                 for i, annotation in enumerate(annotation_lines):
                     # Subtract sequence length to get new intervals
-                    adj_interval = [seq_length - int(coord) for coord in annotation[3:5]]
+                    print(f'{annotation = }')
+                    adj_interval = [seq_length+1 - int(coord) for coord in annotation[3:5]]
+                    print(f'{adj_interval = }')
                     # Add the new intervals back
                     annotation_lines[i][3] = str(adj_interval[1])
                     annotation_lines[i][4] = str(adj_interval[0])

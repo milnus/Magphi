@@ -1,6 +1,6 @@
 [![Test](https://github.com/milnus/Magphi/actions/workflows/test.yml/badge.svg)](https://github.com/milnus/Magphi/actions/workflows/test.yml)
 [![DOI](https://joss.theoj.org/papers/10.21105/joss.04369/status.svg)](https://doi.org/10.21105/joss.04369)
-<a href="https://conda.anaconda.org/bioconda"> <img src="https://anaconda.org/bioconda/magphi/badges/installer/conda.svg" /> </a>
+[![install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg?style=flat)](http://bioconda.github.io/recipes/magphi/README.html)
 
 
 # Magphi
@@ -31,21 +31,41 @@ Make sure you have the right versions of Samtools and Bedtools installed
 
 ## Help command
 ```
-usage: Magphi [-h] -g .fa/.gff [.fa/.gff ...] -s multi_fasta_file.fa [-is] [-md int] [-b | -n] [-o path/to/output] [-c int] [-l | -q] [--check] [-v]
+usage: Magphi [-h] -g .fa/.gff [.fa/.gff ...] -s multi_fasta_file.fa [-is]
+              [-md int] [-p] [-S] [-b | -n] [-o path/to/output] [-c int]
+              [-l | -q] [--check] [-v]
 
-Welcome to Magphi! This program will extract sequences and possible annotations within a set of seed sequences given as input.
+Welcome to Magphi! This program will extract sequences and possible
+annotations within a set of seed sequences given as input.
 
 optional arguments:
   -h, --help            show this help message and exit
   -g .fa/.gff [.fa/.gff ...], --input_genomes .fa/.gff [.fa/.gff ...]
-                        Give the fasta or gff3 files. (gff3 files should contain the genome fasta sequence)
+                        Give the fasta or gff3 files. (gff3 files should
+                        contain the genome fasta sequence)
   -s multi_fasta_file.fa, --input_seeds multi_fasta_file.fa
-                        Give the multi fasta containing the seed sequences to be used for extracting sequences
-  -is, --include_seeds  Argument to include the seeds in the sequence/annotations extracted [default: seeds are removed]
+                        Give the multi fasta containing the seed sequences to
+                        be used for extracting sequnces
+  -is, --include_seeds  Argument to include the seeds in the
+                        sequence/annotations extracted [default: seeds are
+                        removed]
   -md int, --max_seed_distance int
-                        The maximum distance with which seeds will be merged. This can often be set a bit higher than an expected size of a region If no maximum distance is wanted then set to 0 [default: 50,000bp]
-  -b, --print_breaks    Argument to print outputs when seeds are next to contig breaks [default: sequences are not printed]
-  -n, --no_sequences    Argument to not print outputs related to annotations or sequences found between seeds [default: sequences are printed]
+                        The maximum distance with which seeds will be merged.
+                        This can often be set a bit higher than an expected
+                        size of a region If no maximum distance is wanted then
+                        set to 0 [default: 50,000bp]
+  -p, --protein_seed    to use tblastn instead of blastn when protein seeds
+                        are supplied - useful for hits across diverse genomes
+  -S, --stop_orientation
+                        Argument to NOT reorient output sequences and
+                        annotations by first seed in pair (Only for connected
+                        seed not contig breaks) [default: sequences and
+                        annotations are oriented]
+  -b, --print_breaks    Argument to print outputs when seeds are next to
+                        contig breaks [default: sequences are not printed]
+  -n, --no_sequences    Argument to not print outputs related to annotations
+                        or sequences found between seeds [default: sequences
+                        are printed]
   -o path/to/output, --output_folder path/to/output
                         Give path to output folder [default: current folder]
   -c int, --cpu int     Give max number of CPUs [default: 1]
@@ -53,6 +73,7 @@ optional arguments:
   -q, --quiet           Only print warnings
   --check               Check dependencies for Magphi and exit
   -v, --version         show program's version number and exit
+
   ```
 
 ## Constructing seed sequence file
@@ -103,6 +124,7 @@ Additional outputs related to extracted fasta sequences and gff annotations can 
 * Default parameters (no ```-b``` or ```-n``` arguments to Magphi), Fasta outputs can be expected for evidence levels 5B and 5C. A Gff output can be expected with evidence level 5C.
 * When ```-b``` is given to Magphi, Fasta outputs can be expected for evidence levels mentioned above, and 4B and 4C. Gff outputs can be expected for 4C as well.
 * No output is expected when ```-n``` is given as a parameter.
+* As a default output fasta and Gff files are oriented so that the first seed in a pair (see ```seed_pairing.tsv``` file) is at the beginning of the sequence on the positive strand
 
 ```-n``` and ```-b``` are mutually exclusive as they both alter the expected output and therefore Magphi does not allow both to be given in a single command.
 

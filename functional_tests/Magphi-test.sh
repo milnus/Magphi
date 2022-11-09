@@ -369,8 +369,6 @@ test_output_file test_out_folder/inter_seed_distance.csv tblastn_simple_expected
 test_output_file test_out_folder/contig_hit_matrix.csv tblastn_simple_expected/contig_hit_matrix.expected
 rm -r test_out_folder
 
-# TODO - Test the orientation of output sequences
-# TODO - Test the orientation of gff files
 # Test output fasta when they are reverse complemented to orient seed
 call_new_test "Test output fasta when they are reverse complemented to orient seed"
 Magphi -g Fix_start_genome.fasta -s fixstart_seeds.fasta -o test_out_folder -b -md 5
@@ -378,7 +376,7 @@ test_output_file test_out_folder/fixstart/Fix_start_genome-fixstart.fasta fix_st
 rm -r test_out_folder
 
 # Test output fasta when they are complemented to orient seed
-call_new_test "Test output fasta when they are complemented to orient seed" # TODO - reverse complements
+call_new_test "Test output fasta when they are complemented to orient seed"
 Magphi -g Fix_start_genome.fasta -s fixstart_seeds_2.fasta -o test_out_folder -b -md 5
 test_output_file test_out_folder/fixstart/Fix_start_genome-fixstart.fasta fix_start/Fix_start_genome-fixstart_complement.fasta.expected
 rm -r test_out_folder

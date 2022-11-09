@@ -833,15 +833,11 @@ def extract_seqs_n_annots(merged_bed_files, file_type, genome_file, annotation_f
                 except bedtools.helpers.BEDToolsError:
                     interval.sequence(fi=genome_file, fo=output_genome, name=True)
 
-                # TODO - Make any modifications to the output
+                # Make any modifications to reorient the output
                 if any(output_modifications):
                     oriented_fasta_return = make_output_orientation(output_modifications, output_genome, 'fasta')
                     with open(output_genome, 'w') as fasta_output_file:
                         fasta_output_file.writelines(oriented_fasta_return)
-                        # fasta_writer = csv.writer(fasta_output_file)
-                        # for line in oriented_fasta_return:
-                        #     fasta_writer.writerow(line)
-
 
             # extract annotations if gff is provided as input
             if file_type == 'gff':
@@ -917,9 +913,6 @@ def extract_seqs_n_annots(merged_bed_files, file_type, genome_file, annotation_f
                         oriented_gff_return = make_output_orientation(output_modifications, output_gff, file_type='gff')
                         with open(output_gff, 'w') as gff_output_file:
                             gff_output_file.writelines(oriented_gff_return)
-                            # gff_writer = csv.writer(gff_output_file, delimiter='\t')
-                            # for line in oriented_gff_return:
-                            #     gff_writer.writerow(line)
 
                 # Delete the file containing the current merged bed interval
                 os.remove(interval_save)
@@ -1027,8 +1020,6 @@ def screen_genome_for_seeds(genome_file, seed_pairs, seed_path, tmp_folder,
     merged_bed_files, seed_evidence, output_modifications = bed_merge_handling(blast_hit_beds, include_seeds, exclude_seed_list,
                                                                                 max_seed_dist, seed_evidence, first_seeds, orient_by_seed)
 
-
-    # TODO - Find a way to fix the orientation of connected segments based on the first primer for better use of the output.
 
     # Extract sequences and annotations using merged intervals.
     file_logger.debug(f"\tExtracting sequences from intervals: {genome_file}")

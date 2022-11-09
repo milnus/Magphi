@@ -9,6 +9,7 @@ import os
 import json
 from shutil import copyfile
 import logging
+import pybedtools as bedtools
 
 from Magphi import check_inputs
 from Magphi import split_gff_file
@@ -26,7 +27,7 @@ from io import StringIO
 try:
     os.chdir('/Magphi/unit_tests/unit_test_data/')
 except FileNotFoundError:
-    os.chdir('../unit_test_data/')
+    os.chdir('../unit_tests/unit_test_data/')
 
 
 class TestExitWithError(unittest.TestCase):
@@ -195,6 +196,32 @@ class TestFileRecognition(unittest.TestCase):
         self.assertEqual(False, check_inputs.check_if_gzip(files, self.logger))
 
 
+class TestSeedRecognition(unittest.TestCase):
+    ''' Test that seeds of invalid, nucleotide, and protein origin can be recognized when inputted '''
+    @classmethod
+    def setUpClass(cls):
+        cls.logger = logging.getLogger('test_logger.log')
+        cls.logger.setLevel(logging.INFO)
+
+    def test_faulty_seeds(self):
+        input_seed_file = 'TestSeedRecognition/invalid_seeds.fasta'
+
+        with self.assertRaises(SystemExit):
+            check_inputs.check_seed_type(input_seed_file, self.logger)
+
+    def test_protein_seeds(self):
+        input_seed_file = 'TestSeedRecognition/amino_acid_seeds.fasta'
+        return_value = check_inputs.check_seed_type(input_seed_file, self.logger)
+
+        self.assertEqual(True, return_value)
+
+    def test_nucleotide_seeds(self):
+        input_seed_file = 'TestSeedRecognition/nucleotide_seeds.fasta'
+        return_value = check_inputs.check_seed_type(input_seed_file, self.logger)
+
+        self.assertEqual(return_value, False)
+
+
 class TestSplittingGff(unittest.TestCase):
     def test_gff_split_single_file(self):
         ''' test the function that splits a gff file into annotations and genome. Assess the number of lines in output '''
@@ -249,7 +276,7 @@ class TestSplittingGff(unittest.TestCase):
         os.remove(annotation)
 
 
-class TestseedFunctions(unittest.TestCase):
+class TestSeedFunctions(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.logger = logging.getLogger('test_logger.log')
@@ -308,43 +335,56 @@ class TestseedFunctions(unittest.TestCase):
  #                                                               seed_pairs = seed_pairs)
  #           self.assertEqual(result,blast_xml)'''
 
-# TODO - test blast_out_to_sorted_bed function - use an input file of blast xml output - use two sets of seeds
-#  Test both inclusion and exclution of seeds. - Andrew's responsitibily.
-#   - We want to test that a blast output is converted correctly to Bed format.
-#   1. Produce mock fasta to blast against. (Should have known sites that seeds match. Maybe repeat single Base or gap with seeds being unique)
-#   2. Produce mock seeds
-#   3. Blast mock seeds against mock fasta using similar settings as Magphi
-#   4. Manually curate the positions are as expected
-#   5. Manually determine the expected bed file information
-#   6. Convert expected bed file format into .json or staight python code to be used for assertion.
-#   7. write test.
-#   8. Run
 
 class TestBlastOutToSortedBed(unittest.TestCase):
-        
-        def test_make_bed_list(self):
-            ''' test that the blast xml is correctly being converted to a bed file '''
-            blast_xml = 'TestBlastOutToSortedBed/Mock_blast_out.xml'
-            bed_file = 'TestBlastOutToSortedBed/Mock_fasta~~seed.bed'
-            bed_list=open(bed_file,'r')
-            genome_name = 'Mock_fasta'
-            seed_pairs = {'seed': ['seed_1', 'seed_2']}
-            blast_hit_beds_file, exclusion_list, seed_hits = search_insertion_sites.blast_out_to_sorted_bed(blast_xml_output = blast_xml,
+    def test_make_bed_list(self):
+        ''' test that the blast xml is correctly being converted to a bed file '''
+        blast_xml = 'TestBlastOutToSortedBed/Mock_blast_out.xml'
+        bed_file = 'TestBlastOutToSortedBed/Mock_fasta~~seed.bed'
+        bed_list=open(bed_file,'r')
+        genome_name = 'Mock_fasta'
+        seed_pairs = {'seed': ['seed_1', 'seed_2']}
+        blast_hit_beds_file, exclusion_list, seed_hits = search_insertion_sites.blast_out_to_sorted_bed(blast_xml_output = blast_xml,
                                                                                                         include_seeds = True,
                                                                                                         genome_name = genome_name,
                                                                                                         seed_pairs = seed_pairs)
-            blast_hit_beds = open(blast_hit_beds_file[0],'r')
-            blast_hits_list = blast_hit_beds.readlines()
-            expected_seed_hits = {'seed': 2}
-            expected_exclusions = []
-            expected_blast_hit_beds = bed_list.readlines()
-            self.assertEqual(expected_seed_hits, seed_hits)
-            self.assertEqual(expected_exclusions, exclusion_list)
-            self.assertEqual(expected_blast_hit_beds, blast_hits_list)
+        blast_hit_beds = open(blast_hit_beds_file[0], 'r')
+        blast_hits_list = blast_hit_beds.readlines()
+        expected_seed_hits = {'seed': 2}
+        expected_exclusions = []
+        expected_blast_hit_beds = bed_list.readlines()
+        self.assertEqual(expected_seed_hits, seed_hits)
+        self.assertEqual(expected_exclusions, exclusion_list)
+        self.assertEqual(expected_blast_hit_beds, blast_hits_list)
 
-            # close the files
-            bed_list.close()
-            blast_hit_beds.close()
+        # close the files
+        bed_list.close()
+        blast_hit_beds.close()
+
+    def test_strandedness_identification(self):
+        ''' Test the capture of strandedness based on the hsp_hit-frame value in the XML '''
+        blast_xml = 'TestBlastOutToSortedBed/Mock_blast_out_diff_dir.xml'
+        bed_file = 'TestBlastOutToSortedBed/Mock_fasta~~seed_diff_dir.bed'
+        bed_list = open(bed_file, 'r')
+        genome_name = 'Mock_fasta'
+        seed_pairs = {'seed': ['seed_1', 'seed_2']}
+        blast_hit_beds_file, exclusion_list, seed_hits = search_insertion_sites.blast_out_to_sorted_bed(
+            blast_xml_output=blast_xml,
+            include_seeds=True,
+            genome_name=genome_name,
+            seed_pairs=seed_pairs)
+        blast_hit_beds = open(blast_hit_beds_file[0], 'r')
+        blast_hits_list = blast_hit_beds.readlines()
+        expected_seed_hits = {'seed': 2}
+        expected_exclusions = []
+        expected_blast_hit_beds = bed_list.readlines()
+        self.assertEqual(expected_seed_hits, seed_hits)
+        self.assertEqual(expected_exclusions, exclusion_list)
+        self.assertEqual(expected_blast_hit_beds, blast_hits_list)
+
+        # close the files
+        bed_list.close()
+        blast_hit_beds.close()
 
 
 class TestSeedsPlacement(unittest.TestCase):
@@ -565,7 +605,7 @@ class TestSeedsPlacement(unittest.TestCase):
 
         # Check altered input file
         with open(bed_files[0], 'r') as altered_file:
-            self.assertEqual(['Contig_1\t100\t300\tprimer_close_placement_1\n', 'Contig_1\t350\t550\tprimer_close_placement_2\n'],
+            self.assertEqual(['Contig_1\t100\t300\tprimer_close_placement_1\t.\t+\n', 'Contig_1\t350\t550\tprimer_close_placement_2\t.\t+\n'],
                              altered_file.readlines())
 
         # Copy back input file
@@ -628,9 +668,8 @@ class TestSeedsPlacement(unittest.TestCase):
         # Check altered input file
         with open(bed_files[0], 'r') as altered_file:
             self.assertEqual(
-                ['Contig_1\t0\t300\tprimer_long_placement_1\n', 'Contig_2\t0\t75\tprimer_long_placement_2\n'],
+                ['Contig_1\t0\t300\tprimer_long_placement_1\t.\t+\n', 'Contig_2\t0\t75\tprimer_long_placement_2\t.\t+\n'],
                 altered_file.readlines())
-
 
         # Copy back input file
         os.rename(bed_files[0] + 'original', bed_files[0])
@@ -831,7 +870,7 @@ class TestFlankingRegion(unittest.TestCase):
         self.assertEqual(2, flanking_return)
 
     def test_multiple_hit_single_contig_w_no_overlaps(self):
-        ''' Test the handling of multiple hits from both seed sequneces in a pair but no connection between them '''
+        ''' Test the handling of multiple hits from both seed sequences in a pair but no connection between them '''
         with open('TestFlankingRegion/single_contig/single_contig_multi_hit.json', 'r') as seed_hit_json:
             seed_hit_dict = json.load(seed_hit_json)
         genome_fai_file = 'TestFlankingRegion/single_contig/single_contig_1200N.fasta.fai'
@@ -921,7 +960,7 @@ class TestFlankingRegion(unittest.TestCase):
         self.assertEqual(2, flanking_return)
 
 
-class TestWriteBedFromseeds(unittest.TestCase):
+class TestWriteBedFromSeeds(unittest.TestCase):
 
     def test_writing_two_seeds(self):
         ''' Test function for writing a bed file from a set of seeds '''
@@ -947,17 +986,21 @@ class TestBedMergeHandling(unittest.TestCase):
         exclude_seed_list = ['TestBedMergeHandling/Contig_1~~simple_connect_exclude_primers_file.bed']
         max_seed_dist = 101
         seed_evidence = {'simple_connect': '5A'}
+        first_seeds = []
+        orient_by_seed = False
 
-        merged_bed_files, seed_evidence = search_insertion_sites.bed_merge_handling(blast_hit_beds,
+        merged_bed_files, seed_evidence, output_modifications = search_insertion_sites.bed_merge_handling(blast_hit_beds,
                                                   include_seeds,
                                                   exclude_seed_list,
                                                   max_seed_dist,
-                                                  seed_evidence)
+                                                  seed_evidence, orient_by_seed, first_seeds)
 
         self.assertEqual('5B', seed_evidence['simple_connect'])
 
         with open(merged_bed_files[0], 'r') as result:
             self.assertEqual(['Contig_1\t600\t700\tsimple_connect_1,simple_connect_2\t2\n'], result.readlines())
+
+        self.assertEqual(output_modifications, (False, False))
 
         os.remove('TestBedMergeHandling/Contig_1~~simple_connect_merged.bed')
 
@@ -968,17 +1011,21 @@ class TestBedMergeHandling(unittest.TestCase):
         exclude_seed_list = ['TestBedMergeHandling/Contig_1~~simple_connect_exclude_primers_file.bed']
         max_seed_dist = 101
         seed_evidence = {'simple_connect': '5B'}
+        first_seeds = []
+        orient_by_seed = False
 
-        merged_bed_files, seed_evidence = search_insertion_sites.bed_merge_handling(blast_hit_beds,
+        merged_bed_files, seed_evidence, output_modifications = search_insertion_sites.bed_merge_handling(blast_hit_beds,
                                                   include_seeds,
                                                   exclude_seed_list,
                                                   max_seed_dist,
-                                                  seed_evidence)
+                                                  seed_evidence, orient_by_seed, first_seeds)
 
         self.assertEqual('5B', seed_evidence['simple_connect'])
 
         with open(merged_bed_files[0], 'r') as result:
             self.assertEqual(['Contig_1\t500\t800\tsimple_connect_1,simple_connect_2\t2\n'], result.readlines())
+
+        self.assertEqual(output_modifications, (False, False))
 
         os.remove('TestBedMergeHandling/Contig_1~~simple_connect_merged.bed')
 
@@ -989,14 +1036,18 @@ class TestBedMergeHandling(unittest.TestCase):
         exclude_seed_list = ['TestBedMergeHandling/Contig_1~~overlap_connect_exclude_primers_file.bed']
         max_seed_dist = 101
         seed_evidence = {'overlap_connect': '5B'}
+        first_seeds = []
+        orient_by_seed = False
 
-        merged_bed_files, seed_evidence = search_insertion_sites.bed_merge_handling(blast_hit_beds,
+        merged_bed_files, seed_evidence, output_modifications = search_insertion_sites.bed_merge_handling(blast_hit_beds,
                                                   include_seeds,
                                                   exclude_seed_list,
                                                   max_seed_dist,
-                                                  seed_evidence)
+                                                  seed_evidence, orient_by_seed, first_seeds)
 
         self.assertEqual(3, seed_evidence['overlap_connect'])
+
+        self.assertEqual(output_modifications, (False, False))
 
     def test_overlap_connection_of_seed_sequences_include_seeds(self):
         ''' test the merge of already overlapping seed sequence and include the seeds '''
@@ -1005,17 +1056,21 @@ class TestBedMergeHandling(unittest.TestCase):
         exclude_seed_list = ['TestBedMergeHandling/Contig_1~~overlap_connect_exclude_primers_file.bed']
         max_seed_dist = 101
         seed_evidence = {'overlap_connect': 7}
+        first_seeds = []
+        orient_by_seed = False
 
-        merged_bed_files, seed_evidence = search_insertion_sites.bed_merge_handling(blast_hit_beds,
+        merged_bed_files, seed_evidence, output_modifications = search_insertion_sites.bed_merge_handling(blast_hit_beds,
                                                   include_seeds,
                                                   exclude_seed_list,
                                                   max_seed_dist,
-                                                  seed_evidence)
+                                                  seed_evidence, orient_by_seed, first_seeds)
 
         self.assertEqual('5B', seed_evidence['overlap_connect'])
 
         with open(merged_bed_files[0], 'r') as result:
             self.assertEqual(['Contig_1\t500\t800\toverlap_connect_1,overlap_connect_2\t2\n'], result.readlines())
+
+        self.assertEqual(output_modifications, (False, False))
 
         os.remove('TestBedMergeHandling/Contig_1~~overlap_connect_merged.bed')
 
@@ -1026,19 +1081,198 @@ class TestBedMergeHandling(unittest.TestCase):
         exclude_seed_list = ['TestBedMergeHandling/double_contig~~primer_edge_primers.bed']
         max_seed_dist = 101
         seed_evidence = {'primer_edge_placement': 3}
+        first_seeds = []
+        orient_by_seed = False
 
-        merged_bed_files, seed_evidence = search_insertion_sites.bed_merge_handling(blast_hit_beds,
+        merged_bed_files, seed_evidence, output_modifications = search_insertion_sites.bed_merge_handling(blast_hit_beds,
                                                                                       include_seeds,
                                                                                       exclude_seed_list,
                                                                                       max_seed_dist,
-                                                                                      seed_evidence)
+                                                                                      seed_evidence, orient_by_seed, first_seeds)
 
         self.assertEqual(3, seed_evidence['primer_edge_placement'])
 
         with open(merged_bed_files[0], 'r') as result:
             self.assertEqual(['Contig_2\t0\t100\tprimer_edge_placement_2\t1\n'], result.readlines())
 
+        self.assertEqual(output_modifications, (False, False))
+
         os.remove('TestBedMergeHandling/double_contig~~primer_edge_placement_merged.bed')
+
+    def test_identification_of_reversing_output(self):
+        ''' Test that a need to reverse the sequence in the output can be identified '''
+        blast_hit_beds = ['TestBedMergeHandling/Contig_1~~simple_connect.bed']
+        include_seeds = False
+        exclude_seed_list = ['TestBedMergeHandling/Contig_1~~simple_connect_exclude_primers_file.bed']
+        max_seed_dist = 101
+        seed_evidence = {'simple_connect': '5A'}
+        first_seeds = ['simple_connect_2']
+        orient_by_seed = True
+
+        _, _, output_modifications = search_insertion_sites.bed_merge_handling(
+            blast_hit_beds,
+            include_seeds,
+            exclude_seed_list,
+            max_seed_dist,
+            seed_evidence, first_seeds, orient_by_seed)
+
+        self.assertEqual(output_modifications, (False, True))
+
+        os.remove('TestBedMergeHandling/Contig_1~~simple_connect_merged.bed')
+
+    def test_identification_of_complementing_output(self):
+        ''' Test that a need to complement the sequence in the output can be identified '''
+        blast_hit_beds = ['TestBedMergeHandling/Contig_1~~simple_connect_complement.bed']
+        include_seeds = False
+        exclude_seed_list = ['TestBedMergeHandling/Contig_1~~simple_connect_exclude_primers_file.bed']
+        max_seed_dist = 101
+        seed_evidence = {'simple_connect': '5A'}
+        first_seeds = ['simple_connect_1']
+        orient_by_seed = True
+
+        _, _, output_modifications = search_insertion_sites.bed_merge_handling(
+            blast_hit_beds,
+            include_seeds,
+            exclude_seed_list,
+            max_seed_dist,
+            seed_evidence, first_seeds, orient_by_seed)
+
+        self.assertEqual(output_modifications, (True, False))
+
+        os.remove('TestBedMergeHandling/Contig_1~~simple_connect_complement_merged.bed')
+
+    def test_identification_of_reverse_complementing_output(self):
+        ''' Test that a need to reverse and complement the sequence in the output can be identified '''
+        blast_hit_beds = ['TestBedMergeHandling/Contig_1~~simple_connect_complement.bed']
+        include_seeds = False
+        exclude_seed_list = ['TestBedMergeHandling/Contig_1~~simple_connect_exclude_primers_file.bed']
+        max_seed_dist = 101
+        seed_evidence = {'simple_connect': '5A'}
+        first_seeds = ['simple_connect_2']
+        orient_by_seed = True
+
+        _, _, output_modifications = search_insertion_sites.bed_merge_handling(
+            blast_hit_beds,
+            include_seeds,
+            exclude_seed_list,
+            max_seed_dist,
+            seed_evidence, first_seeds, orient_by_seed)
+
+        self.assertEqual(output_modifications, (True, True))
+
+        os.remove('TestBedMergeHandling/Contig_1~~simple_connect_complement_merged.bed')
+
+
+class TestReverseComplementDetection(unittest.TestCase):
+    def test_no_orientation_needed(self):
+        bed_object = bedtools.BedTool('TestReverseComplementDetection/No_orientation_needed.bed')
+
+        seed_to_orient_by = ['seed_1']
+
+        return_values = search_insertion_sites.orientation_detector(bed_object, seed_to_orient_by)
+
+        self.assertEqual((False, False), return_values)
+
+    def test_reverse_sequence(self):
+        bed_object = bedtools.BedTool('TestReverseComplementDetection/reverse_orientation_needed.bed')
+
+        seed_to_orient_by = ['seed_1']
+
+        return_values = search_insertion_sites.orientation_detector(bed_object, seed_to_orient_by)
+
+        self.assertEqual((False, True), return_values)
+
+    def test_reverse_complement_sequence_1(self):
+        bed_object = bedtools.BedTool('TestReverseComplementDetection/reverse_complement_needed_1.bed')
+
+        seed_to_orient_by = ['seed_1']
+
+        return_values = search_insertion_sites.orientation_detector(bed_object, seed_to_orient_by)
+
+        self.assertEqual((True, True), return_values)
+
+    def test_reverse_complement_sequence_2(self):
+        bed_object = bedtools.BedTool('TestReverseComplementDetection/reverse_complement_needed_2.bed')
+
+        seed_to_orient_by = ['seed_1']
+
+        return_values = search_insertion_sites.orientation_detector(bed_object, seed_to_orient_by)
+
+        self.assertEqual((True, True), return_values)
+
+    def test_complement_sequence_1(self):
+        bed_object = bedtools.BedTool('TestReverseComplementDetection/complement_needed_1.bed')
+
+        seed_to_orient_by = ['seed_1']
+
+        return_values = search_insertion_sites.orientation_detector(bed_object, seed_to_orient_by)
+
+        self.assertEqual((True, False), return_values)
+
+    def test_complement_sequence_2(self):
+        bed_object = bedtools.BedTool('TestReverseComplementDetection/complement_needed_2.bed')
+
+        seed_to_orient_by = ['seed_1']
+
+        return_values = search_insertion_sites.orientation_detector(bed_object, seed_to_orient_by)
+
+        self.assertEqual((True, False), return_values)
+
+
+class TestMakingOutputOrientationChanges(unittest.TestCase):
+    def test_fasta_reverse(self):
+        returned_list = search_insertion_sites.make_output_orientation((False, True), 'TestMakingOutputOrientationChanges/Test_genome.fasta', file_type='fasta')
+
+        with open('TestMakingOutputOrientationChanges/Test_genome_reversed.fasta', 'r') as expected_file:
+            expected_list = expected_file.readlines()
+
+            self.assertEqual(expected_list, returned_list)
+
+    def test_fasta_complement(self):
+        returned_list = search_insertion_sites.make_output_orientation((True, False), 'TestMakingOutputOrientationChanges/Test_genome.fasta', file_type='fasta')
+
+        with open('TestMakingOutputOrientationChanges/Test_genome_complemented.fasta', 'r') as expected_file:
+            expected_list = expected_file.readlines()
+
+            self.assertEqual(expected_list, returned_list)
+
+    def test_fasta_reverse_complement(self):
+        returned_list = search_insertion_sites.make_output_orientation((True, True), 'TestMakingOutputOrientationChanges/Test_genome.fasta', file_type='fasta')
+
+        with open('TestMakingOutputOrientationChanges/Test_genome_reversed_complemented.fasta', 'r') as expected_file:
+            expected_list = expected_file.readlines()
+
+            self.assertEqual(expected_list, returned_list)
+
+    def test_gff_reverse(self):
+        returned_list = search_insertion_sites.make_output_orientation((False, True),
+                                                                       'TestMakingOutputOrientationChanges/Test_genome_in_reversed.gff',
+                                                                       file_type='gff')
+
+        with open('TestMakingOutputOrientationChanges/Test_genome_reversed.gff', 'r') as expected_file:
+            expected_list = expected_file.readlines()
+
+            self.assertEqual(expected_list, returned_list)
+
+    def test_gff_complement(self):
+        returned_list = search_insertion_sites.make_output_orientation((True, False),
+                                                                       'TestMakingOutputOrientationChanges/Test_genome_in_complemented.gff',
+                                                                       file_type='gff')
+
+        with open('TestMakingOutputOrientationChanges/Test_genome_complemented.gff', 'r') as expected_file:
+            expected_list = expected_file.readlines()
+
+            self.assertEqual(expected_list, returned_list)
+
+    def test_gff_reverse_complement(self):
+        returned_list = search_insertion_sites.make_output_orientation((True, True),
+                                                                       'TestMakingOutputOrientationChanges/Test_genome_in_reverse_complemented.gff',
+                                                                       file_type='gff')
+
+        with open('TestMakingOutputOrientationChanges/Test_genome_reverse_complemented.gff', 'r') as expected_file:
+            expected_list = expected_file.readlines()
+
+            self.assertEqual(expected_list, returned_list)
 
 
 class TestExtractSeqsNAnnots(unittest.TestCase):
@@ -1053,13 +1287,14 @@ class TestExtractSeqsNAnnots(unittest.TestCase):
         seed_pairs = {'Single_contig_primer': ['Single_contig_primer_1', 'Single_contig_primer_2']}
         seed_evidence = {'Single_contig_primer': '5B'}
         print_seq_out = 'All'
+        output_modifications = (False, False)
 
         copyfile(genome_file, genome_file+'_original')
 
         annots_pr_interval, break_seed_sequence_seeds, seed_sequence_evidence, inter_seed_sequence_dist = \
             search_insertion_sites.extract_seqs_n_annots(merged_bed_files, file_type, genome_file,
                                                          annotation_file, tmp_folder, out_path,
-                                                         seed_pairs, seed_evidence, print_seq_out)
+                                                         seed_pairs, seed_evidence, print_seq_out, output_modifications)
 
         os.rename(genome_file+'_original', genome_file)
 
@@ -1088,6 +1323,7 @@ class TestExtractSeqsNAnnots(unittest.TestCase):
         seed_pairs = {'Single_contig_primer': ['Single_contig_primer_1', 'Single_contig_primer_2']}
         seed_evidence = {'Single_contig_primer': '5B'}
         print_seq_out = 'All'
+        output_modifications = (False, False)
 
         copyfile(genome_file, genome_file + '_original')
         copyfile(annotation_file, annotation_file + '_original')
@@ -1095,7 +1331,7 @@ class TestExtractSeqsNAnnots(unittest.TestCase):
         annots_pr_interval, break_seed_sequence_seeds, seed_sequence_evidence, inter_seed_sequence_dist = \
             search_insertion_sites.extract_seqs_n_annots(merged_bed_files, file_type, genome_file,
                                                          annotation_file, tmp_folder, out_path,
-                                                         seed_pairs, seed_evidence, print_seq_out)
+                                                         seed_pairs, seed_evidence, print_seq_out, output_modifications)
 
         os.rename(genome_file + '_original', genome_file)
         os.rename(annotation_file + '_original', annotation_file)
@@ -1125,6 +1361,7 @@ class TestExtractSeqsNAnnots(unittest.TestCase):
         seed_pairs = {'Single_contig_primer': ['Single_contig_primer_1', 'Single_contig_primer_2']}
         seed_evidence = {'Single_contig_primer': '5B'}
         print_seq_out = 'All'
+        output_modifications = (False, False)
 
         copyfile(genome_file, genome_file + '_original')
         copyfile(annotation_file, annotation_file + '_original')
@@ -1132,7 +1369,7 @@ class TestExtractSeqsNAnnots(unittest.TestCase):
         annots_pr_interval, break_seed_sequence_seeds, seed_sequence_evidence, inter_seed_sequence_dist = \
             search_insertion_sites.extract_seqs_n_annots(merged_bed_files, file_type, genome_file,
                                                          annotation_file, tmp_folder, out_path,
-                                                         seed_pairs, seed_evidence, print_seq_out)
+                                                         seed_pairs, seed_evidence, print_seq_out, output_modifications)
 
         os.rename(genome_file + '_original', genome_file)
         os.rename(annotation_file + '_original', annotation_file)
@@ -1173,13 +1410,14 @@ class TestExtractSeqsNAnnots(unittest.TestCase):
         seed_pairs = {'Multi_contig_primer': ['Multi_contig_primer_1', 'Multi_contig_primer_2']}
         seed_evidence = {'Multi_contig_primer': '4B'}
         print_seq_out = 'All'
+        output_modifications = (False, False)
 
         copyfile(genome_file, genome_file+'_original')
 
         annots_pr_interval, break_seed_sequence_seeds, seed_sequence_evidence, inter_seed_sequence_dist = \
             search_insertion_sites.extract_seqs_n_annots(merged_bed_files, file_type, genome_file,
                                                          annotation_file, tmp_folder, out_path,
-                                                         seed_pairs, seed_evidence, print_seq_out)
+                                                         seed_pairs, seed_evidence, print_seq_out, output_modifications)
 
         os.rename(genome_file+'_original', genome_file)
 
@@ -1215,6 +1453,7 @@ class TestExtractSeqsNAnnots(unittest.TestCase):
         seed_pairs = {'Multi_contig_primer': ['Multi_contig_primer_1', 'Multi_contig_primer_2']}
         seed_evidence = {'Multi_contig_primer': '4B'}
         print_seq_out = 'All'
+        output_modifications = (False, False)
 
         copyfile(genome_file, genome_file + '_original')
         copyfile(annotation_file, annotation_file + '_original')
@@ -1222,7 +1461,7 @@ class TestExtractSeqsNAnnots(unittest.TestCase):
         annots_pr_interval, break_seed_sequence_seeds, seed_sequence_evidence, inter_seed_sequence_dist = \
             search_insertion_sites.extract_seqs_n_annots(merged_bed_files, file_type, genome_file,
                                                          annotation_file, tmp_folder, out_path,
-                                                         seed_pairs, seed_evidence, print_seq_out)
+                                                         seed_pairs, seed_evidence, print_seq_out, output_modifications)
 
         os.rename(genome_file + '_original', genome_file)
         os.rename(annotation_file + '_original', annotation_file)
@@ -1258,6 +1497,7 @@ class TestExtractSeqsNAnnots(unittest.TestCase):
         seed_pairs = {'Multi_contig_extraction_primer': ['Multi_contig_extraction_primer_1', 'Multi_contig_extraction_primer_2']}
         seed_evidence = {'Multi_contig_extraction_primer': '4B'}
         print_seq_out = 'All'
+        output_modifications = (False, False)
 
         copyfile(genome_file, genome_file + '_original')
         copyfile(annotation_file, annotation_file + '_original')
@@ -1265,7 +1505,7 @@ class TestExtractSeqsNAnnots(unittest.TestCase):
         annots_pr_interval, break_seed_sequence_seeds, seed_sequence_evidence, inter_seed_sequence_dist = \
             search_insertion_sites.extract_seqs_n_annots(merged_bed_files, file_type, genome_file,
                                                          annotation_file, tmp_folder, out_path,
-                                                         seed_pairs, seed_evidence, print_seq_out)
+                                                         seed_pairs, seed_evidence, print_seq_out, output_modifications)
 
         os.rename(genome_file + '_original', genome_file)
         os.rename(annotation_file + '_original', annotation_file)
@@ -1305,13 +1545,14 @@ class TestExtractSeqsNAnnots(unittest.TestCase):
         seed_pairs = {'Single_contig_primer': ['Single_contig_primer_1', 'Single_contig_primer_2']}
         seed_evidence = {'Single_contig_primer': '5B'}
         print_seq_out = 'None'
+        output_modifications = (False, False)
 
         copyfile(genome_file, genome_file + '_original')
 
         annots_pr_interval, break_seed_sequence_seeds, seed_sequence_evidence, inter_seed_sequence_dist = \
             search_insertion_sites.extract_seqs_n_annots(merged_bed_files, file_type, genome_file,
                                                          annotation_file, tmp_folder, out_path,
-                                                         seed_pairs, seed_evidence, print_seq_out)
+                                                         seed_pairs, seed_evidence, print_seq_out, output_modifications)
 
         os.rename(genome_file + '_original', genome_file)
 
@@ -1339,6 +1580,7 @@ class TestExtractSeqsNAnnots(unittest.TestCase):
         seed_pairs = {'Single_contig_primer': ['Single_contig_primer_1', 'Single_contig_primer_2']}
         seed_evidence = {'Single_contig_primer': '5B'}
         print_seq_out = 'None'
+        output_modifications = (False, False)
 
         copyfile(genome_file, genome_file + '_original')
         copyfile(annotation_file, annotation_file + '_original')
@@ -1346,7 +1588,7 @@ class TestExtractSeqsNAnnots(unittest.TestCase):
         annots_pr_interval, break_seed_sequence_seeds, seed_sequence_evidence, inter_seed_sequence_dist = \
             search_insertion_sites.extract_seqs_n_annots(merged_bed_files, file_type, genome_file,
                                                          annotation_file, tmp_folder, out_path,
-                                                         seed_pairs, seed_evidence, print_seq_out)
+                                                         seed_pairs, seed_evidence, print_seq_out, output_modifications)
 
         os.rename(genome_file + '_original', genome_file)
         os.rename(annotation_file + '_original', annotation_file)
@@ -1381,6 +1623,7 @@ class TestExtractSeqsNAnnots(unittest.TestCase):
         seed_pairs = {'Multi_contig_extraction_primer': ['Multi_contig_extraction_primer_1', 'Multi_contig_extraction_primer_2']}
         seed_evidence = {'Multi_contig_extraction_primer': '4B'}
         print_seq_out = 'output'
+        output_modifications = (False, False)
 
         copyfile(genome_file, genome_file + '_original')
         copyfile(annotation_file, annotation_file + '_original')
@@ -1388,7 +1631,7 @@ class TestExtractSeqsNAnnots(unittest.TestCase):
         annots_pr_interval, break_seed_sequence_seeds, seed_sequence_evidence, inter_seed_sequence_dist = \
             search_insertion_sites.extract_seqs_n_annots(merged_bed_files, file_type, genome_file,
                                                          annotation_file, tmp_folder, out_path,
-                                                         seed_pairs, seed_evidence, print_seq_out)
+                                                         seed_pairs, seed_evidence, print_seq_out, output_modifications)
 
         os.rename(genome_file + '_original', genome_file)
         os.rename(annotation_file + '_original', annotation_file)
@@ -1433,6 +1676,7 @@ class TestExtractSeqsNAnnots(unittest.TestCase):
         seed_pairs = {'Single_contig_primer': ['Single_contig_primer_1', 'Single_contig_primer_2']}
         seed_evidence = {'Single_contig_primer': '5B'}
         print_seq_out = 'output'
+        output_modifications = (False, False)
 
         copyfile(genome_file, genome_file + '_original')
         copyfile(annotation_file, annotation_file + '_original')
@@ -1440,7 +1684,7 @@ class TestExtractSeqsNAnnots(unittest.TestCase):
         annots_pr_interval, break_seed_sequence_seeds, seed_sequence_evidence, inter_seed_sequence_dist = \
             search_insertion_sites.extract_seqs_n_annots(merged_bed_files, file_type, genome_file,
                                                          annotation_file, tmp_folder, out_path,
-                                                         seed_pairs, seed_evidence, print_seq_out)
+                                                         seed_pairs, seed_evidence, print_seq_out, output_modifications)
 
         os.rename(genome_file + '_original', genome_file)
         os.rename(annotation_file + '_original', annotation_file)

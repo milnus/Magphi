@@ -7,7 +7,7 @@ except ModuleNotFoundError:
 
 EXIT_COMMAND_LINE_ERROR = 2
 
-# def get_commandline_arguments(args, version):
+
 def get_commandline_arguments(args, version):
     """
     Command line interface for Magphi.
@@ -58,6 +58,21 @@ def get_commandline_arguments(args, version):
                         type=int,
                         metavar='int',
                         dest='max_seed_dist')
+
+    parser.add_argument("-p", "--protein_seed",
+                        help="to use tblastn instead of blastn when protein seeds are supplied - useful for hits across diverse genomes",
+                        required=False,
+                        action="store_true",
+                        default=False)
+
+    parser.add_argument('-S',
+                        '--stop_orientation',
+                        help='Argument to NOT reorient output sequences and annotations by first seed in pair (Only for connected seed not contig breaks)'
+                             ' [default: sequences and annotations are oriented]',
+                        dest='orient_by_seed',
+                        required=False,
+                        action='store_false',
+                        default=True)
 
     output_amount = parser.add_mutually_exclusive_group()
     output_amount.add_argument('-b',

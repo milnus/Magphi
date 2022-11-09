@@ -1,1 +1,0 @@
-blastn -query seeds.fa -db Mock_db -evalue 0.001 -outfmt 5 -qcov_hsp_perc 50 -out Mock_blast_out.xml

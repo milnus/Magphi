@@ -16,8 +16,9 @@ import time
 import logging
 from sys import argv
 from math import ceil
-import pkg_resources # ??
+import pkg_resources
 import concurrent.futures
+from tempfile import TemporaryDirectory
 
 try:
     from Magphi.commandline_interface import get_commandline_arguments
@@ -35,9 +36,9 @@ except ModuleNotFoundError:
     from exit_with_error import exit_with_error
 
 try:
-    from Magphi.check_inputs import check_inputs
+    from Magphi.check_inputs import check_inputs, check_seed_type
 except ModuleNotFoundError:
-    from check_inputs import check_inputs
+    from check_inputs import check_inputs, check_seed_type
 
 try:
     from Magphi.split_gff_file import split_gff_files
@@ -141,7 +142,6 @@ def main():
     start_time = time.time()
 
     # Retrieve the flags given by the user in the commandline
-    # TODO - add in argument to change tmp directory to user defined place (scratch which is faster?)
     cmd_args = get_commandline_arguments(argv[1:], PROGRAM_VERSION)
 
     # Try to construct the output folder and except if it does exist
@@ -150,8 +150,8 @@ def main():
     except FileExistsError:
         warnings.warn("Output folder already exists")
         pass
-
-    "Orchestrate the execution of the program"
+    
+    # Orchestrate the execution of the program
     file_logger = init_logging(cmd_args.log, cmd_args.quiet, cmd_args.out_path)
 
     # Check dependencies for Magphi and logging of versions to file
@@ -170,19 +170,24 @@ def main():
     # Check the input files
     file_type, is_input_gzipped = check_inputs(cmd_args.genomes, file_logger)
 
+    # Check if input seeds are nucleotide or proteins
+    protein_seed_check = check_seed_type(cmd_args.seeds, file_logger)
+    if cmd_args.protein_seed is not protein_seed_check:
+        warnings.warn('Detected seed type does not match user specified seed type - Assuming seeds are protein sequences')
+        cmd_args.protein_seed = protein_seed_check
+
     # construct a temporary folder to hold files
-    file_logger.debug("Try to construct output folder")
-    tmp_folder = os.path.join(cmd_args.out_path, "Magphi_tmp_folder")
-    try:
-        os.mkdir(tmp_folder)
-        file_logger.debug("Output folder construction successful")
-    except FileExistsError:
-        file_logger.warning("A temporary folder already exists at the given output location. "
-                                     "Most likely from an incomplete analysis")
+    file_logger.debug("Construct temporary folder")
+    tmp_folder = TemporaryDirectory()
 
     # Read in and combine seeds into pairs
     file_logger.debug("Start handling of input seed sequences")
     seed_pairs = handle_seeds(cmd_args.seeds, file_logger)
+    # Find first seed if orienting by seed
+    if cmd_args.orient_by_seed:
+        first_seeds = [seed_list[0] for seed_list in seed_pairs.values()]
+    else:
+        first_seeds = []
 
     print_seq_out = 'output' if cmd_args.no_seqs else 'None'
     if print_seq_out == 'output':
@@ -195,7 +200,6 @@ def main():
     seeds_w_breaks = seed_pairs.copy()
     master_inter_seed_dist = {}
 
-    # num_genomes = len(genomes)
     num_genomes = len(cmd_args.genomes)
     # Calculate when to log progress:
     progress_num = num_genomes / 10
@@ -206,8 +210,9 @@ def main():
     genomes_processed = 0
     with concurrent.futures.ThreadPoolExecutor(max_workers=cmd_args.cpu) as executor:
         results = [executor.submit(screen_genome_for_seeds, cmd_args.genomes[i], seed_pairs, cmd_args.seeds,
-                                   tmp_folder, cmd_args.include_seeds, file_type,
-                                   cmd_args.out_path, cmd_args.max_seed_dist, file_logger, is_input_gzipped, print_seq_out)
+                                   tmp_folder.name, cmd_args.include_seeds, file_type,
+                                   cmd_args.out_path, cmd_args.max_seed_dist, file_logger, is_input_gzipped,
+                                   print_seq_out, cmd_args.protein_seed, cmd_args.orient_by_seed, first_seeds)
                    for i, genome in enumerate(cmd_args.genomes)]
 
         for f in concurrent.futures.as_completed(results):
@@ -260,7 +265,7 @@ def main():
 
     # log quick stats for the evidence levels
     file_logger.debug("Remove temporary folder")
-    os.rmdir(tmp_folder)
+    tmp_folder.cleanup()
 
     time_to_finish = time.time() - start_time
     time_to_finish = int(round(time_to_finish, 0))

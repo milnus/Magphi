@@ -97,6 +97,8 @@ def construct_pair_seeds(seed_names, file_logger):
             if common_name[-1] == '_':
                 common_name = common_name[:-1]
 
+            # Sort the seed pair
+            seed_pair.sort()
             # Insert pair into seed dict
             seed_pairs[common_name] = seed_pair
 

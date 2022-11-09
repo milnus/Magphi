@@ -1,6 +1,6 @@
 usage: Magphi [-h] -g .fa/.gff [.fa/.gff ...] -s multi_fasta_file.fa [-is]
-              [-md int] [-b | -n] [-o path/to/output] [-c int] [-l | -q]
-              [--check] [-v]
+              [-md int] [-p] [-S] [-b | -n] [-o path/to/output] [-c int]
+              [-l | -q] [--check] [-v]
 
 Welcome to Magphi! This program will extract sequences and possible
 annotations within a set of seed sequences given as input.
@@ -21,6 +21,13 @@ optional arguments:
                         This can often be set a bit higher than an expected
                         size of a region If no maximum distance is wanted then
                         set to 0 [default: 50,000bp]
+  -p, --protein_seed    to use tblastn instead of blastn when protein seeds
+                        are supplied - useful for hits across diverse genomes
+  -S, --stop_orientation
+                        Argument to NOT reorient output sequences and
+                        annotations by first seed in pair (Only for connected
+                        seed not contig breaks) [default: sequences and
+                        annotations are oriented]
   -b, --print_breaks    Argument to print outputs when seeds are next to
                         contig breaks [default: sequences are not printed]
   -n, --no_sequences    Argument to not print outputs related to annotations

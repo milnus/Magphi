@@ -1,3 +1,3 @@
-Contig_1	100	300	primer_long_placement_1
-Contig_1	700	950	primer_long_placement_2
-Contig_2	50	75	primer_long_placement_2
+Contig_1	100	300	primer_long_placement_1	.	+
+Contig_1	700	950	primer_long_placement_2	.	+
+Contig_2	50	75	primer_long_placement_2	.	+

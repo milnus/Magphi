@@ -25,7 +25,7 @@ setup(
     description=('A bioinformatics tool allowing for examnination and extraction of genomic features using seed sequences.'),
     long_description=LONG_DESCRIPTION,
     install_requires=['biopython>=1.79',
-                      'pybedtools'],
+                      'pybedtools==0.8.2'],
     keywords=['Genomic', 'extraction', 'bacteria', 'prokaryotes', 'bioinformatics'],
     classifiers=[
         'Programming Language :: Python :: 3.9',

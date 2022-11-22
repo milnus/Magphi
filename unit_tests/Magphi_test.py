@@ -1000,7 +1000,7 @@ class TestBedMergeHandling(unittest.TestCase):
         with open(merged_bed_files[0], 'r') as result:
             self.assertEqual(['Contig_1\t600\t700\tsimple_connect_1,simple_connect_2\t2\n'], result.readlines())
 
-        self.assertEqual(output_modifications, (False, False))
+        self.assertEqual(output_modifications, False)
 
         os.remove('TestBedMergeHandling/Contig_1~~simple_connect_merged.bed')
 
@@ -1025,7 +1025,7 @@ class TestBedMergeHandling(unittest.TestCase):
         with open(merged_bed_files[0], 'r') as result:
             self.assertEqual(['Contig_1\t500\t800\tsimple_connect_1,simple_connect_2\t2\n'], result.readlines())
 
-        self.assertEqual(output_modifications, (False, False))
+        self.assertEqual(output_modifications, False)
 
         os.remove('TestBedMergeHandling/Contig_1~~simple_connect_merged.bed')
 
@@ -1047,7 +1047,7 @@ class TestBedMergeHandling(unittest.TestCase):
 
         self.assertEqual(3, seed_evidence['overlap_connect'])
 
-        self.assertEqual(output_modifications, (False, False))
+        self.assertEqual(output_modifications, False)
 
     def test_overlap_connection_of_seed_sequences_include_seeds(self):
         ''' test the merge of already overlapping seed sequence and include the seeds '''
@@ -1070,7 +1070,7 @@ class TestBedMergeHandling(unittest.TestCase):
         with open(merged_bed_files[0], 'r') as result:
             self.assertEqual(['Contig_1\t500\t800\toverlap_connect_1,overlap_connect_2\t2\n'], result.readlines())
 
-        self.assertEqual(output_modifications, (False, False))
+        self.assertEqual(output_modifications, False)
 
         os.remove('TestBedMergeHandling/Contig_1~~overlap_connect_merged.bed')
 
@@ -1095,7 +1095,7 @@ class TestBedMergeHandling(unittest.TestCase):
         with open(merged_bed_files[0], 'r') as result:
             self.assertEqual(['Contig_2\t0\t100\tprimer_edge_placement_2\t1\n'], result.readlines())
 
-        self.assertEqual(output_modifications, (False, False))
+        self.assertEqual(output_modifications, False)
 
         os.remove('TestBedMergeHandling/double_contig~~primer_edge_placement_merged.bed')
 
@@ -1116,7 +1116,7 @@ class TestBedMergeHandling(unittest.TestCase):
             max_seed_dist,
             seed_evidence, first_seeds, orient_by_seed)
 
-        self.assertEqual(output_modifications, (False, True))
+        self.assertEqual(output_modifications, True)
 
         os.remove('TestBedMergeHandling/Contig_1~~simple_connect_merged.bed')
 
@@ -1137,7 +1137,7 @@ class TestBedMergeHandling(unittest.TestCase):
             max_seed_dist,
             seed_evidence, first_seeds, orient_by_seed)
 
-        self.assertEqual(output_modifications, (True, False))
+        self.assertEqual(output_modifications, False)
 
         os.remove('TestBedMergeHandling/Contig_1~~simple_connect_complement_merged.bed')
 
@@ -1158,7 +1158,7 @@ class TestBedMergeHandling(unittest.TestCase):
             max_seed_dist,
             seed_evidence, first_seeds, orient_by_seed)
 
-        self.assertEqual(output_modifications, (True, True))
+        self.assertEqual(output_modifications, True)
 
         os.remove('TestBedMergeHandling/Contig_1~~simple_connect_complement_merged.bed')
 
@@ -1171,7 +1171,7 @@ class TestReverseComplementDetection(unittest.TestCase):
 
         return_values = search_insertion_sites.orientation_detector(bed_object, seed_to_orient_by)
 
-        self.assertEqual((False, False), return_values)
+        self.assertEqual(False, return_values)
 
     def test_reverse_sequence(self):
         bed_object = bedtools.BedTool('TestReverseComplementDetection/reverse_orientation_needed.bed')
@@ -1180,7 +1180,7 @@ class TestReverseComplementDetection(unittest.TestCase):
 
         return_values = search_insertion_sites.orientation_detector(bed_object, seed_to_orient_by)
 
-        self.assertEqual((False, True), return_values)
+        self.assertEqual(True, return_values)
 
     def test_reverse_complement_sequence_1(self):
         bed_object = bedtools.BedTool('TestReverseComplementDetection/reverse_complement_needed_1.bed')
@@ -1189,7 +1189,7 @@ class TestReverseComplementDetection(unittest.TestCase):
 
         return_values = search_insertion_sites.orientation_detector(bed_object, seed_to_orient_by)
 
-        self.assertEqual((True, True), return_values)
+        self.assertEqual(True, return_values)
 
     def test_reverse_complement_sequence_2(self):
         bed_object = bedtools.BedTool('TestReverseComplementDetection/reverse_complement_needed_2.bed')
@@ -1198,7 +1198,7 @@ class TestReverseComplementDetection(unittest.TestCase):
 
         return_values = search_insertion_sites.orientation_detector(bed_object, seed_to_orient_by)
 
-        self.assertEqual((True, True), return_values)
+        self.assertEqual(True, return_values)
 
     def test_complement_sequence_1(self):
         bed_object = bedtools.BedTool('TestReverseComplementDetection/complement_needed_1.bed')
@@ -1207,7 +1207,7 @@ class TestReverseComplementDetection(unittest.TestCase):
 
         return_values = search_insertion_sites.orientation_detector(bed_object, seed_to_orient_by)
 
-        self.assertEqual((True, False), return_values)
+        self.assertEqual(False, return_values)
 
     def test_complement_sequence_2(self):
         bed_object = bedtools.BedTool('TestReverseComplementDetection/complement_needed_2.bed')
@@ -1216,56 +1216,20 @@ class TestReverseComplementDetection(unittest.TestCase):
 
         return_values = search_insertion_sites.orientation_detector(bed_object, seed_to_orient_by)
 
-        self.assertEqual((True, False), return_values)
+        self.assertEqual(False, return_values)
 
 
 class TestMakingOutputOrientationChanges(unittest.TestCase):
-    def test_fasta_reverse(self):
-        returned_list = search_insertion_sites.make_output_orientation((False, True), 'TestMakingOutputOrientationChanges/Test_genome.fasta', file_type='fasta')
-
-        with open('TestMakingOutputOrientationChanges/Test_genome_reversed.fasta', 'r') as expected_file:
-            expected_list = expected_file.readlines()
-
-            self.assertEqual(expected_list, returned_list)
-
-    def test_fasta_complement(self):
-        returned_list = search_insertion_sites.make_output_orientation((True, False), 'TestMakingOutputOrientationChanges/Test_genome.fasta', file_type='fasta')
-
-        with open('TestMakingOutputOrientationChanges/Test_genome_complemented.fasta', 'r') as expected_file:
-            expected_list = expected_file.readlines()
-
-            self.assertEqual(expected_list, returned_list)
-
     def test_fasta_reverse_complement(self):
-        returned_list = search_insertion_sites.make_output_orientation((True, True), 'TestMakingOutputOrientationChanges/Test_genome.fasta', file_type='fasta')
+        returned_list = search_insertion_sites.make_output_orientation(True, 'TestMakingOutputOrientationChanges/Test_genome.fasta', file_type='fasta')
 
         with open('TestMakingOutputOrientationChanges/Test_genome_reversed_complemented.fasta', 'r') as expected_file:
             expected_list = expected_file.readlines()
 
             self.assertEqual(expected_list, returned_list)
 
-    def test_gff_reverse(self):
-        returned_list = search_insertion_sites.make_output_orientation((False, True),
-                                                                       'TestMakingOutputOrientationChanges/Test_genome_in_reversed.gff',
-                                                                       file_type='gff')
-
-        with open('TestMakingOutputOrientationChanges/Test_genome_reversed.gff', 'r') as expected_file:
-            expected_list = expected_file.readlines()
-
-            self.assertEqual(expected_list, returned_list)
-
-    def test_gff_complement(self):
-        returned_list = search_insertion_sites.make_output_orientation((True, False),
-                                                                       'TestMakingOutputOrientationChanges/Test_genome_in_complemented.gff',
-                                                                       file_type='gff')
-
-        with open('TestMakingOutputOrientationChanges/Test_genome_complemented.gff', 'r') as expected_file:
-            expected_list = expected_file.readlines()
-
-            self.assertEqual(expected_list, returned_list)
-
     def test_gff_reverse_complement(self):
-        returned_list = search_insertion_sites.make_output_orientation((True, True),
+        returned_list = search_insertion_sites.make_output_orientation(True,
                                                                        'TestMakingOutputOrientationChanges/Test_genome_in_reverse_complemented.gff',
                                                                        file_type='gff')
 
@@ -1287,7 +1251,7 @@ class TestExtractSeqsNAnnots(unittest.TestCase):
         seed_pairs = {'Single_contig_primer': ['Single_contig_primer_1', 'Single_contig_primer_2']}
         seed_evidence = {'Single_contig_primer': '5B'}
         print_seq_out = 'All'
-        output_modifications = (False, False)
+        output_modifications = False
 
         copyfile(genome_file, genome_file+'_original')
 
@@ -1323,7 +1287,7 @@ class TestExtractSeqsNAnnots(unittest.TestCase):
         seed_pairs = {'Single_contig_primer': ['Single_contig_primer_1', 'Single_contig_primer_2']}
         seed_evidence = {'Single_contig_primer': '5B'}
         print_seq_out = 'All'
-        output_modifications = (False, False)
+        output_modifications = False
 
         copyfile(genome_file, genome_file + '_original')
         copyfile(annotation_file, annotation_file + '_original')
@@ -1361,7 +1325,7 @@ class TestExtractSeqsNAnnots(unittest.TestCase):
         seed_pairs = {'Single_contig_primer': ['Single_contig_primer_1', 'Single_contig_primer_2']}
         seed_evidence = {'Single_contig_primer': '5B'}
         print_seq_out = 'All'
-        output_modifications = (False, False)
+        output_modifications = False
 
         copyfile(genome_file, genome_file + '_original')
         copyfile(annotation_file, annotation_file + '_original')
@@ -1410,7 +1374,7 @@ class TestExtractSeqsNAnnots(unittest.TestCase):
         seed_pairs = {'Multi_contig_primer': ['Multi_contig_primer_1', 'Multi_contig_primer_2']}
         seed_evidence = {'Multi_contig_primer': '4B'}
         print_seq_out = 'All'
-        output_modifications = (False, False)
+        output_modifications = False
 
         copyfile(genome_file, genome_file+'_original')
 
@@ -1453,7 +1417,7 @@ class TestExtractSeqsNAnnots(unittest.TestCase):
         seed_pairs = {'Multi_contig_primer': ['Multi_contig_primer_1', 'Multi_contig_primer_2']}
         seed_evidence = {'Multi_contig_primer': '4B'}
         print_seq_out = 'All'
-        output_modifications = (False, False)
+        output_modifications = False
 
         copyfile(genome_file, genome_file + '_original')
         copyfile(annotation_file, annotation_file + '_original')
@@ -1497,7 +1461,7 @@ class TestExtractSeqsNAnnots(unittest.TestCase):
         seed_pairs = {'Multi_contig_extraction_primer': ['Multi_contig_extraction_primer_1', 'Multi_contig_extraction_primer_2']}
         seed_evidence = {'Multi_contig_extraction_primer': '4B'}
         print_seq_out = 'All'
-        output_modifications = (False, False)
+        output_modifications = False
 
         copyfile(genome_file, genome_file + '_original')
         copyfile(annotation_file, annotation_file + '_original')
@@ -1545,7 +1509,7 @@ class TestExtractSeqsNAnnots(unittest.TestCase):
         seed_pairs = {'Single_contig_primer': ['Single_contig_primer_1', 'Single_contig_primer_2']}
         seed_evidence = {'Single_contig_primer': '5B'}
         print_seq_out = 'None'
-        output_modifications = (False, False)
+        output_modifications = False
 
         copyfile(genome_file, genome_file + '_original')
 
@@ -1580,7 +1544,7 @@ class TestExtractSeqsNAnnots(unittest.TestCase):
         seed_pairs = {'Single_contig_primer': ['Single_contig_primer_1', 'Single_contig_primer_2']}
         seed_evidence = {'Single_contig_primer': '5B'}
         print_seq_out = 'None'
-        output_modifications = (False, False)
+        output_modifications = False
 
         copyfile(genome_file, genome_file + '_original')
         copyfile(annotation_file, annotation_file + '_original')
@@ -1623,7 +1587,7 @@ class TestExtractSeqsNAnnots(unittest.TestCase):
         seed_pairs = {'Multi_contig_extraction_primer': ['Multi_contig_extraction_primer_1', 'Multi_contig_extraction_primer_2']}
         seed_evidence = {'Multi_contig_extraction_primer': '4B'}
         print_seq_out = 'output'
-        output_modifications = (False, False)
+        output_modifications = False
 
         copyfile(genome_file, genome_file + '_original')
         copyfile(annotation_file, annotation_file + '_original')
@@ -1676,7 +1640,7 @@ class TestExtractSeqsNAnnots(unittest.TestCase):
         seed_pairs = {'Single_contig_primer': ['Single_contig_primer_1', 'Single_contig_primer_2']}
         seed_evidence = {'Single_contig_primer': '5B'}
         print_seq_out = 'output'
-        output_modifications = (False, False)
+        output_modifications = False
 
         copyfile(genome_file, genome_file + '_original')
         copyfile(annotation_file, annotation_file + '_original')

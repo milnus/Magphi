@@ -575,7 +575,6 @@ def check_seeds_placement(bed_files, seed_pairs, seed_hits, max_seed_dist, genom
 
 
 def orientation_detector(bed_list, first_seeds):
-    complement_seq = None
     orient_seed_start = None
 
     # Go through all features in bed file to find the seed used to orient output, store strand and store start of all seed
@@ -584,14 +583,12 @@ def orientation_detector(bed_list, first_seeds):
         feature_starts.append(feature.start)
         # Check if seed to orient by feature, if store its stand
         if feature.name in first_seeds:
-            complement_seq = False if feature.strand == '+' else True
-
             orient_seed_start = feature.start
 
     # Find if the sequence should be reversed based on the start of the seed to orient by
-    reverse_seq = False if min(feature_starts) == orient_seed_start else True
+    reverse_comp_seq = False if min(feature_starts) == orient_seed_start else True
 
-    return complement_seq, reverse_seq
+    return reverse_comp_seq
 
 
 def bed_merge_handling(blast_hit_beds, include_seeds, exclude_seed_list, max_seed_dist, seed_evidence, first_seeds, orient_by_seed):
@@ -608,7 +605,7 @@ def bed_merge_handling(blast_hit_beds, include_seeds, exclude_seed_list, max_see
     """
     # initialise list to hold merged bed file names:
     merged_bed_files = []
-    output_modifications = (False, False)
+    output_modifications = False
 
     # Process the bed file for each seed pair
     for i, bed_file in enumerate(blast_hit_beds):
@@ -678,77 +675,54 @@ def make_output_orientation(orientation_modifications, line_list, file_type):
             return_list.append(fasta_file.readline())
 
             # Check if fasta file is to be reversed and complemented
-            if all(orientation_modifications):
-                return_list.append(str(Seq(fasta_file.readline().strip()).reverse_complement())+'\n')
-            # Check if reversed
-            elif orientation_modifications[1]:
-                return_list.append(fasta_file.readline().strip()[::-1]+'\n')
-            # Check if complemented
-            elif orientation_modifications[0]:
-                return_list.append(str(Seq(fasta_file.readline().strip()).complement())+'\n')
+            return_list.append(str(Seq(fasta_file.readline().strip()).reverse_complement())+'\n')
 
     else:
         with open(line_list, 'r') as gff_file:
-            # Check reverse
-            if orientation_modifications[1]:
-                # Save first list
-                return_list.append(gff_file.readline())
+            # Save first list
+            return_list.append(gff_file.readline())
 
-                # Take second like and get the length
-                seq_info_line = gff_file.readline()
-                return_list.append(seq_info_line)
+            # Take second like and get the length
+            seq_info_line = gff_file.readline()
+            return_list.append(seq_info_line)
 
-                # Find length of sequence
-                seq_length = int(seq_info_line.split(' ')[-1])
+            # Find length of sequence
+            seq_length = int(seq_info_line.split(' ')[-1])
 
-                # read remaining lines into lists
-                annotation_lines = []
-                fasta_lines = []
-                fasta_part = False
-                for line in gff_file.readlines():
-                    if not fasta_part:
-                        if line == '##FASTA\n':
-                            fasta_part = True
-                            fasta_lines.append(line)
-                        else:
-                            annotation_lines.append(line.strip().split('\t'))
-
-                    else:
+            # read remaining lines into lists
+            annotation_lines = []
+            fasta_lines = []
+            fasta_part = False
+            for line in gff_file.readlines():
+                if not fasta_part:
+                    if line == '##FASTA\n':
+                        fasta_part = True
                         fasta_lines.append(line)
-
-                # Adjust intervals by seq length when reversed
-                for i, annotation in enumerate(annotation_lines):
-                    # Subtract sequence length to get new intervals
-                    adj_interval = [seq_length+1 - int(coord) for coord in annotation[3:5]]
-                    # Add the new intervals back
-                    annotation_lines[i][3] = str(adj_interval[1])
-                    annotation_lines[i][4] = str(adj_interval[0])
-
-                    # check if sequence should be complemented as well
-                    if orientation_modifications[0]:
-                        annotation_lines[i][6] = '+' if annotation_lines[i][6] == '-' else '-'
-
-                    # Reform the annotation line with tabs separators and newline
-                    annotation_lines[i] = '\t'.join(annotation_lines[i])+'\n'
-
-                # Reverse the annotations and add to return list
-                return_list.extend(annotation_lines[::-1])
-
-                # Add fasta sequence into return list
-                return_list.extend(fasta_lines)
-
-            # Check complement
-            elif orientation_modifications[0]:
-                fasta_part = False
-                for line in gff_file.readlines():
-                    if fasta_part or '##' in line:
-                        return_list.append(line)
-                        if line == '##FASTA\n':
-                            fasta_part = True
                     else:
-                        line = line.strip().split('\t')
-                        line[6] = '+' if line[6] == '-' else '-'
-                        return_list.append('\t'.join(line) + '\n')
+                        annotation_lines.append(line.strip().split('\t'))
+
+                else:
+                    fasta_lines.append(line)
+
+            # Adjust intervals by seq length when reversed
+            for i, annotation in enumerate(annotation_lines):
+                # Subtract sequence length to get new intervals
+                adj_interval = [seq_length+1 - int(coord) for coord in annotation[3:5]]
+                # Add the new intervals back
+                annotation_lines[i][3] = str(adj_interval[1])
+                annotation_lines[i][4] = str(adj_interval[0])
+
+                # Complement sequence as well
+                annotation_lines[i][6] = '+' if annotation_lines[i][6] == '-' else '-'
+
+                # Reform the annotation line with tabs separators and newline
+                annotation_lines[i] = '\t'.join(annotation_lines[i])+'\n'
+
+            # Reverse the annotations and add to return list
+            return_list.extend(annotation_lines[::-1])
+
+            # Add fasta sequence into return list
+            return_list.extend(fasta_lines)
 
     return return_list
 
@@ -834,7 +808,7 @@ def extract_seqs_n_annots(merged_bed_files, file_type, genome_file, annotation_f
                     interval.sequence(fi=genome_file, fo=output_genome, name=True)
 
                 # Make any modifications to reorient the output
-                if any(output_modifications):
+                if output_modifications:
                     oriented_fasta_return = make_output_orientation(output_modifications, output_genome, 'fasta')
                     with open(output_genome, 'w') as fasta_output_file:
                         fasta_output_file.writelines(oriented_fasta_return)
@@ -909,7 +883,7 @@ def extract_seqs_n_annots(merged_bed_files, file_type, genome_file, annotation_f
                         fasta_file.close()
 
                     # Reorient Gff output and rewrite file
-                    if any(output_modifications):
+                    if output_modifications:
                         oriented_gff_return = make_output_orientation(output_modifications, output_gff, file_type='gff')
                         with open(output_gff, 'w') as gff_output_file:
                             gff_output_file.writelines(oriented_gff_return)

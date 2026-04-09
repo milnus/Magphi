@@ -24,7 +24,7 @@ setup(
     license='MIT license',
     description=('A bioinformatics tool allowing for examnination and extraction of genomic features using seed sequences.'),
     long_description=LONG_DESCRIPTION,
-    install_requires=['biopython>=1.87',
+    install_requires=['biopython>=1.79',
                       'setuptools',
                       'packaging',
                       'pybedtools>=0.12.0'],

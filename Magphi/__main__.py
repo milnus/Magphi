@@ -16,9 +16,9 @@ import time
 import logging
 from sys import argv
 from math import ceil
-import pkg_resources
 import concurrent.futures
 from tempfile import TemporaryDirectory
+from importlib.metadata import version, PackageNotFoundError
 
 try:
     from Magphi.commandline_interface import get_commandline_arguments
@@ -79,8 +79,8 @@ PROGRAM_NAME = "Magphi"
 
 
 try:
-    PROGRAM_VERSION = pkg_resources.require(PROGRAM_NAME)[0].version
-except pkg_resources.DistributionNotFound:
+    PROGRAM_VERSION = version(PROGRAM_NAME)
+except PackageNotFoundError:
     PROGRAM_VERSION = "undefined_version"
 
 

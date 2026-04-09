@@ -7,3 +7,6 @@ code_to_transfer/
 extractor.yml
 functional_tests/test_data/test_folder/
 venv/
+CLAUDE.md
+build/
+Magphi.egg-info/

@@ -73,7 +73,7 @@ def check_for_bedtools(verbose):
                 print("Bedtools was successfully found")
 
             cmd_return = subprocess.run(['bedtools', '-version'], capture_output=True)
-            version = cmd_return.stdout.decode().rsplit('v', 1)[-1]
+            version = cmd_return.stdout.decode('utf-8', errors='ignore').rsplit('v', 1)[-1]
             if Version(version) >= Version('2.29.2'):
                 if verbose:
                     print("Bedtools version is valid")
@@ -110,7 +110,7 @@ def check_for_samtools(verbose):
 
             cmd_return = subprocess.run(['samtools', '--version'], capture_output=True)
             # Isolate version tag
-            version = cmd_return.stdout.decode().split(' ', 1)[-1]
+            version = cmd_return.stdout.decode('utf-8', errors='ignore').split(' ', 1)[-1]
             version = version.split('\n', 1)[0]
 
             if Version(version) >= Version('1.11'):
@@ -147,7 +147,7 @@ def check_for_blast_plus(verbose=False):
                 print("Blast+ was successfully found")
 
             # Isolate version tag
-            version = cmd_return.stdout.decode().split('\n')[1]
+            version = cmd_return.stdout.decode('utf-8', errors='ignore').split('\n')[1]
             version = version.split(' ')[3]
             version = version.rsplit(',', 1)[0]
 

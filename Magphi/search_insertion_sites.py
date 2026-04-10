@@ -935,6 +935,7 @@ def screen_genome_for_seeds(genome_file, seed_pairs, seed_path, tmp_folder,
     tmp_genome_folder = os.path.join(tmp_folder, genome_name)
     os.mkdir(tmp_genome_folder)
 
+    annotation_file = None
     if file_type == 'fasta':
         tmp_genome = os.path.join(tmp_genome_folder, genome_file.rsplit('/')[-1])
 

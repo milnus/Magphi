@@ -164,6 +164,41 @@ function test_exit_status {
     fi 
 }
 
+# Run a command and check that all expected strings appear in the output
+# ARG1: command we want to test as a string
+# ARG2: expected exit status
+# ARG3+: strings that must appear in the output
+function test_stdout_contains {
+    let num_tests+=1
+    local cmd=$1
+    local expected_exit_status=$2
+    shift 2
+    local expected_strings=("$@")
+    output=$(eval $cmd 2>&1)
+    exit_status=$?
+    verbose_message "Testing stdout contains strings: $cmd"
+    local failed=0
+    for s in "${expected_strings[@]}"; do
+        if [[ "$output" != *"$s"* ]]; then
+            let num_errors+=1
+            echo "TEST FAILED!"
+            echo "Test output failed (missing expected string): $cmd"
+            echo "Expected to find: $s"
+            echo "Actual output:"
+            echo "$output"
+            failed=1
+            break
+        fi
+    done
+    if [ "$failed" -eq 0 ] && [ "$exit_status" -ne "$expected_exit_status" ]; then
+        let num_errors+=1
+        echo "TEST FAILED!"
+        echo "Test exit status failed: $cmd"
+        echo "Actual exit status: $exit_status"
+        echo "Expected exit status: $expected_exit_status"
+    fi
+}
+
 function call_new_test {
   echo ''
   echo $1
@@ -172,15 +207,15 @@ function call_new_test {
 # 1. Parse command line arguments.
 parse_args $@
 # 2. Change to test directory
-cd $test_data_dir
+cd "$test_data_dir" || exit_with_error "could not cd to $test_data_dir" 1
 # 2. Run tests
 ## Test commandline exit status
 # Test output for no arguments
 call_new_test "Test output for no arguments"
-test_stdout_exit "$test_program" no_input.expected 2
+test_stdout_contains "$test_program" 2 "Magphi" "Welcome to Magphi" "--input_genomes" "--input_seeds" "--help"
 # Test output for -help argument given
 call_new_test "Test output for -help argument given"
-test_stdout_exit "$test_program -help" no_input.expected 0
+test_stdout_contains "$test_program -help" 0 "Magphi" "Welcome to Magphi" "--input_genomes" "--input_seeds" "--help"
 # Test exit status for a bad command line invocation
 call_new_test "Test exit status for a bad command line invocation"
 test_exit_status "$test_program --this_is_not_a_valid_argument > /dev/null 2>&1" 2
@@ -205,61 +240,61 @@ test_exit_status "$test_program -g empty_file -S -s empty_file > /dev/null 2>&1"
 
 # Run test for evidence level when no seed hits are found
 call_new_test "Run test for evidence level when no seed hits are found"
-Magphi -g evidence_levels_simple_genome.fasta -S -s no_primers_match_primers.fasta -o test_out_folder
+$test_program -g evidence_levels_simple_genome.fasta -S -s no_primers_match_primers.fasta -o test_out_folder
 test_output_file test_out_folder/master_seed_evidence.csv no_primers_match_evidence_levels.expected
 rm -r test_out_folder
 
 # Run test for evidence level when a single seed hit is found
 call_new_test "Test for evidence level when a single seed hit is found"
-Magphi -g evidence_levels_simple_genome.fasta -S -s single_primer_match_primers.fasta -o test_out_folder
+$test_program -g evidence_levels_simple_genome.fasta -S -s single_primer_match_primers.fasta -o test_out_folder
 test_output_file test_out_folder/master_seed_evidence.csv one_primer_match_evidence_level.expected
 rm -r test_out_folder
 
 # Run test for evidence level when two primers hit multiple times on same contig, but cannot connect
 call_new_test "Test for evidence level when two primers hit multiple times on same contig, but cannot connect"
-Magphi -g evidence_levels_simple_genome.fasta -S -s two_primers_simple_match_primers.fasta -o test_out_folder -md 1
+$test_program -g evidence_levels_simple_genome.fasta -S -s two_primers_simple_match_primers.fasta -o test_out_folder -md 1
 test_output_file test_out_folder/master_seed_evidence.csv two_primers_multiple_hits_single_contig_no_connections.expected
 rm -r test_out_folder
 
 # Run test for evidence level when two primers hit the same contig multiple times and they can connect multiple ways
 call_new_test "Test for evidence level when two primers hit the same contig multiple times and they can connect multiple ways"
-Magphi -g evidence_levels_simple_genome.fasta -S -s two_primers_simple_match_primers.fasta -o test_out_folder -md 1000
+$test_program -g evidence_levels_simple_genome.fasta -S -s two_primers_simple_match_primers.fasta -o test_out_folder -md 1000
 test_output_file test_out_folder/master_seed_evidence.csv two_primers_multiple_hits_single_contig_multiple_connections.expected
 rm -r test_out_folder
 
 # Run test for evidence level when two primers hit multiple contigs multiple times and no connection between them
 call_new_test "Test for evidence level when two primers hit multiple contigs multiple times and no connection between them"
-Magphi -g evidence_levels_simple_two_contigs.fasta -S -s two_primers_simple_match_primers.fasta -o test_out_folder -md 1
+$test_program -g evidence_levels_simple_two_contigs.fasta -S -s two_primers_simple_match_primers.fasta -o test_out_folder -md 1
 test_output_file test_out_folder/master_seed_evidence.csv two_primers_two_contigs_multipe_hits_no_connection.expected
 rm -r test_out_folder
 
 # run test for evidence level when two seeds hit multiple contigs multiple times and multiple connections
 call_new_test "Test for evidence level when two seeds hit multiple contigs multiple times and multiple connections"
-Magphi -g evidence_levels_simple_two_contigs.fasta -S -s two_primers_simple_match_primers.fasta -o test_out_folder -md 1000
+$test_program -g evidence_levels_simple_two_contigs.fasta -S -s two_primers_simple_match_primers.fasta -o test_out_folder -md 1000
 test_output_file test_out_folder/master_seed_evidence.csv two_primers_two_contigs_multi_hit_multi_connect.expected
 rm -r test_out_folder
 
 # Run test for evidence level when two seeds overlap and are excluded because primers are deleted
 call_new_test "Test for evidence level when two seeds overlap and are excluded because primers are deleted"
-Magphi -g evidence_levels_overlap_two_contigs.fasta -S -s overlap_primers.fasta -o test_out_folder -md 1
+$test_program -g evidence_levels_overlap_two_contigs.fasta -S -s overlap_primers.fasta -o test_out_folder -md 1
 test_output_file test_out_folder/master_seed_evidence.csv evidence_levels_overlapping_seeds.expected
 rm -r test_out_folder
 
 # Run test for evidence level when one seed is on the edge of a contig and is deleted due to being excluded
 call_new_test "Test for evidence level when one seed is on the edge of a contig and is deleted due to being excluded"
-Magphi -g evidence_levels_overlap_two_contigs.fasta -S -s contig_edge_primers.fasta -o test_out_folder -md 180
+$test_program -g evidence_levels_overlap_two_contigs.fasta -S -s contig_edge_primers.fasta -o test_out_folder -md 180
 test_output_file test_out_folder/master_seed_evidence.csv evidence_levels_contig_edge.expected
 rm -r test_out_folder
 
 # Run test for evidence level when only two unique seeds hit but can not connect
 call_new_test "Test for evidence level when only two unique seeds hit but can not connect"
-Magphi -g two_contigs_two_primers_single_hit.fasta -S -s two_primers_simple_match_primers.fasta -o test_out_folder -md 1
+$test_program -g two_contigs_two_primers_single_hit.fasta -S -s two_primers_simple_match_primers.fasta -o test_out_folder -md 1
 test_output_file test_out_folder/master_seed_evidence.csv evidence_levels_simple_hits_cross_contig_no_connect.expected
 rm -r test_out_folder
 
 # Run test for evidence level when only two unique seeds hit with connection but no annotation
 call_new_test "Test for evidence level when only two unique seeds hit with connection but no annotation"
-Magphi -g two_contigs_two_primers_single_hit.fasta -S -s two_primers_simple_match_primers.fasta -o test_out_folder -b -md 70
+$test_program -g two_contigs_two_primers_single_hit.fasta -S -s two_primers_simple_match_primers.fasta -o test_out_folder -b -md 70
 test_output_file test_out_folder/master_seed_evidence.csv evidence_levels_simple_hits_cross_contig_connected/master_seed_evidence.csv
 test_output_file test_out_folder/inter_seed_distance.csv evidence_levels_simple_hits_cross_contig_connected/inter_seed_distance.csv
 test_output_file test_out_folder/two_primers_simple/two_contigs_two_primers_single_hit-two_primers_simple_1_break.fasta evidence_levels_simple_hits_cross_contig_connected/two_contigs_two_primers_single_hit-two_primers_simple_1_break.fasta
@@ -268,7 +303,7 @@ rm -r test_out_folder
 
 # Run test for evidence level when only two unique seeds hit with connection and annotation
 call_new_test "Test for evidence level when only two unique seeds hit with connection and annotation"
-Magphi -g two_contigs_two_primers_single_hit.gff -S -s two_seeds_w_annotation_between.fasta -o test_out_folder -b -md 375
+$test_program -g two_contigs_two_primers_single_hit.gff -S -s two_seeds_w_annotation_between.fasta -o test_out_folder -b -md 375
 test_output_file test_out_folder/master_seed_evidence.csv evidence_levels_simple_primers_connect_cross_contig_with_annotations/master_seed_evidence.csv
 test_output_file test_out_folder/inter_seed_distance.csv evidence_levels_simple_primers_connect_cross_contig_with_annotations/inter_seed_distance.csv
 test_output_file test_out_folder/annotation_num_matrix.csv evidence_levels_simple_primers_connect_cross_contig_with_annotations/annotation_num_matrix.csv
@@ -280,13 +315,13 @@ rm -r test_out_folder
 
 # Run test on a gff with a single contig no connection between primers
 call_new_test 'Test of a gff with a single contig no connection between primers'
-Magphi -g evidence_levels_single_contig.gff -S -s two_primers_simple_match_primers.fasta -o test_out_folder -md 1
+$test_program -g evidence_levels_single_contig.gff -S -s two_primers_simple_match_primers.fasta -o test_out_folder -md 1
 test_output_file test_out_folder/master_seed_evidence.csv evidence_levels_single_contig_no_connection/master_seed_evidence.csv
 rm -r test_out_folder
 
 # Run test on a gff with a single contig with connection between primers
 call_new_test "Test of a gff with a single contig with connection between primers"
-Magphi -g evidence_levels_single_contig.gff -S -s two_primers_simple_match_primers.fasta -o test_out_folder -md 100
+$test_program -g evidence_levels_single_contig.gff -S -s two_primers_simple_match_primers.fasta -o test_out_folder -md 100
 test_output_file test_out_folder/master_seed_evidence.csv evidence_levels_single_contig_connection/master_seed_evidence.csv
 test_output_file test_out_folder/inter_seed_distance.csv evidence_levels_single_contig_connection/inter_seed_distance.csv
 test_output_file test_out_folder/two_primers_simple/evidence_levels_single_contig-two_primers_simple.fasta evidence_levels_single_contig_connection/evidence_levels_single_contig-two_primers_simple.fasta
@@ -295,7 +330,7 @@ rm -r test_out_folder
 
 # Run test on a gff with a single contig with connection and annotation between primers - exclude seeds
 call_new_test "Test of a gff with a single contig with connection and annotation between primers - exclude seeds"
-Magphi -g evidence_levels_single_contig.gff -S -s two_seeds_w_annotation_between.fasta -o test_out_folder -md 750 -is
+$test_program -g evidence_levels_single_contig.gff -S -s two_seeds_w_annotation_between.fasta -o test_out_folder -md 750 -is
 test_output_file test_out_folder/master_seed_evidence.csv evidence_level_single_contigs_connect_annotations_include_seeds/master_seed_evidence.csv
 test_output_file test_out_folder/inter_seed_distance.csv evidence_level_single_contigs_connect_annotations_include_seeds/inter_seed_distance.csv
 test_output_file test_out_folder/annotation_primers/evidence_levels_single_contig-annotation_primers.gff evidence_level_single_contigs_connect_annotations_include_seeds/evidence_levels_single_contig-annotation_primers.gff
@@ -305,7 +340,7 @@ rm -r test_out_folder
 
 # Test output when seeds hit multiple times and one and only one connection can be made between seeds on same contig
 call_new_test "Test output when seeds hit multiple times and one and only one connection can be made between seeds on same contig"
-Magphi -g evidence_levels_simple_two_contigs.fasta -S -s two_primers_simple_match_primers.fasta -o test_out_folder -md 130
+$test_program -g evidence_levels_simple_two_contigs.fasta -S -s two_primers_simple_match_primers.fasta -o test_out_folder -md 130
 test_output_file test_out_folder/master_seed_evidence.csv evidence_level_multi_hit_multi_contig_single_same_contig_overlap/master_seed_evidence.csv
 test_output_file test_out_folder/inter_seed_distance.csv evidence_level_multi_hit_multi_contig_single_same_contig_overlap/inter_seed_distance.csv
 test_output_file test_out_folder/contig_hit_matrix.csv evidence_level_multi_hit_multi_contig_single_same_contig_overlap/contig_hit_matrix.csv
@@ -314,7 +349,7 @@ rm -r test_out_folder
 
 # Test output when seeds hit multiple times and one and only one connection can be made between seeds on different contig
 call_new_test "Test output when seeds hit multiple times and one and only one connection can be made between seeds on different contig"
-Magphi -g evidence_levels_simple_two_contigs_cross_conenct.fasta -S -s two_primers_simple_match_primers.fasta -o test_out_folder -b -md 180
+$test_program -g evidence_levels_simple_two_contigs_cross_conenct.fasta -S -s two_primers_simple_match_primers.fasta -o test_out_folder -b -md 180
 test_output_file test_out_folder/master_seed_evidence.csv evidence_level_multi_seed_hit_cross_contig_connect/master_seed_evidence.csv
 test_output_file test_out_folder/inter_seed_distance.csv evidence_level_multi_seed_hit_cross_contig_connect/inter_seed_distance.csv
 test_output_file test_out_folder/contig_hit_matrix.csv evidence_level_multi_seed_hit_cross_contig_connect/contig_hit_matrix.csv
@@ -324,7 +359,7 @@ rm -r test_out_folder
 
 # Test gzipped gff file
 call_new_test 'Test gzipped file'
-test_exit_status "Magphi -g evidence_levels_single_contig.gff.gz -S -s two_seeds_w_annotation_between.fasta -o test_out_folder -md 750 -is" 0
+test_exit_status "$test_program -g evidence_levels_single_contig.gff.gz -S -s two_seeds_w_annotation_between.fasta -o test_out_folder -md 750 -is" 0
 test_output_file test_out_folder/master_seed_evidence.csv evidence_level_single_contigs_connect_annotations_include_seeds/master_seed_evidence.csv
 test_output_file test_out_folder/inter_seed_distance.csv evidence_level_single_contigs_connect_annotations_include_seeds/inter_seed_distance.csv
 test_output_file test_out_folder/annotation_primers/evidence_levels_single_contig-annotation_primers.gff evidence_level_single_contigs_connect_annotations_include_seeds/evidence_levels_single_contig-annotation_primers.gff
@@ -334,7 +369,7 @@ rm -r test_out_folder
 
 # Test gzipped fasta file evidence level when only two unique seeds hit with connection but no annotation
 call_new_test "Test gzipped fasta file evidence level when only two unique seeds hit with connection but no annotation"
-Magphi -g two_contigs_two_primers_single_hit.fasta.gz -S -s two_primers_simple_match_primers.fasta -o test_out_folder -b -md 70
+$test_program -g two_contigs_two_primers_single_hit.fasta.gz -S -s two_primers_simple_match_primers.fasta -o test_out_folder -b -md 70
 test_output_file test_out_folder/master_seed_evidence.csv evidence_levels_simple_hits_cross_contig_connected/master_seed_evidence.csv
 test_output_file test_out_folder/inter_seed_distance.csv evidence_levels_simple_hits_cross_contig_connected/inter_seed_distance.csv
 test_output_file test_out_folder/two_primers_simple/two_contigs_two_primers_single_hit-two_primers_simple_1_break.fasta evidence_levels_simple_hits_cross_contig_connected/two_contigs_two_primers_single_hit-two_primers_simple_1_break.fasta
@@ -344,7 +379,7 @@ rm -r test_out_folder
 
 # Chaws problem.
 call_new_test "Test larger mock up of problem reported in emm4"
-Magphi -g \
+$test_program -g \
 gff3_files_larger_test/*.gff -S -s larger_test_primers.fa -o test_out_folder -md 15000 -is
 test_output_file test_out_folder/annotation_num_matrix.csv larger_Magphi_test/annotation_num_matrix.csv
 test_output_file test_out_folder/inter_seed_distance.csv larger_Magphi_test/inter_seed_distance.csv
@@ -355,7 +390,7 @@ rm -r test_out_folder
 
 # Test input seeds being proteins and the tblastn function
 call_new_test "Test input seeds being proteins and the tblastn function - with correct -p flag"
-Magphi -g tblasn_test/tblastn_genome.fasta -S -s tblasn_test/prot_seeds.fasta -o test_out_folder -md 140 -p
+$test_program -g tblasn_test/tblastn_genome.fasta -S -s tblasn_test/prot_seeds.fasta -o test_out_folder -md 140 -p
 test_output_file test_out_folder/master_seed_evidence.csv tblastn_simple_expected/master_seed_evidence.expected
 test_output_file test_out_folder/inter_seed_distance.csv tblastn_simple_expected/inter_seed_distance.expected
 test_output_file test_out_folder/contig_hit_matrix.csv tblastn_simple_expected/contig_hit_matrix.expected
@@ -363,7 +398,7 @@ rm -r test_out_folder
 
 # Test input seeds being proteins and the tblastn function
 call_new_test "Test input seeds being proteins and the tblastn function - No -p flag"
-Magphi -g tblasn_test/tblastn_genome.fasta -S -s tblasn_test/prot_seeds.fasta -o test_out_folder -md 140
+$test_program -g tblasn_test/tblastn_genome.fasta -S -s tblasn_test/prot_seeds.fasta -o test_out_folder -md 140
 test_output_file test_out_folder/master_seed_evidence.csv tblastn_simple_expected/master_seed_evidence.expected
 test_output_file test_out_folder/inter_seed_distance.csv tblastn_simple_expected/inter_seed_distance.expected
 test_output_file test_out_folder/contig_hit_matrix.csv tblastn_simple_expected/contig_hit_matrix.expected
@@ -371,7 +406,7 @@ rm -r test_out_folder
 
 # Test output fasta when they are reverse complemented to orient seed
 call_new_test "Test output fasta when they are reverse complemented to orient seed"
-Magphi -g Fix_start_genome.fasta -s fixstart_seeds.fasta -o test_out_folder -b -md 5
+$test_program -g Fix_start_genome.fasta -s fixstart_seeds.fasta -o test_out_folder -b -md 5
 test_output_file test_out_folder/fixstart/Fix_start_genome-fixstart.fasta fix_start/Fix_start_genome-fixstart_rev_comp.fasta.expected
 rm -r test_out_folder
 
@@ -389,7 +424,7 @@ rm -r test_out_folder
 
 # Test output gff when they are reverse complemented to orient seed
 call_new_test "Test output gff when they are reverse complemented to orient seed"
-Magphi -g Fix_start_genome.gff -s fixstart_seeds.fasta -o test_out_folder -b -md 5
+$test_program -g Fix_start_genome.gff -s fixstart_seeds.fasta -o test_out_folder -b -md 5
 test_output_file test_out_folder/fixstart/Fix_start_genome-fixstart.gff fix_start/Fix_start_genome-fixstart_reverse_complemented.gff.expected
 rm -r test_out_folder
 
@@ -407,7 +442,7 @@ rm -r test_out_folder
 
 # Test output gff when two genes are present and they are reverse complemented to orient seed
 call_new_test "Test output gff when two genes are present and they are reverse complemented to orient seed"
-Magphi -g Fix_start_genome_2.gff -s fixstart_seeds.fasta -o test_out_folder -b -md 5
+$test_program -g Fix_start_genome_2.gff -s fixstart_seeds.fasta -o test_out_folder -b -md 5
 test_output_file test_out_folder/fixstart/Fix_start_genome_2-fixstart.gff fix_start/Fix_start_genome_2-fixstart_reverse_complement.gff.expected
 rm -r test_out_folder
 

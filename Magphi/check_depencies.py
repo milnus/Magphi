@@ -2,6 +2,8 @@ import subprocess
 import warnings
 import sys
 
+from packaging.version import Version
+
 try:
     from Magphi.exit_with_error import exit_with_error
 except ModuleNotFoundError:
@@ -20,10 +22,10 @@ def check_for_biopython(verbose):
         if verbose:
             print("Biopython was successfully found")
 
-        if float(Bio.__version__) >= 1.78:
+        if Version(Bio.__version__) >= Version('1.78'):
             if verbose:
                 print("Biopython version is valid")
-            return float(Bio.__version__)
+            return Bio.__version__
 
         warnings.warn('Biopython seems to be an untested version! Make sure it is version = 1.78 or above.')
         return False
@@ -44,7 +46,7 @@ def check_for_pybedtools(verbose):
         if verbose:
             print("pybedtools was successfully found")
 
-        if pybedtools.__version__ >= '0.8.2':
+        if Version(pybedtools.__version__) >= Version('0.8.2'):
             if verbose:
                 print("pybedtools version is valid")
             return pybedtools.__version__
@@ -71,8 +73,8 @@ def check_for_bedtools(verbose):
                 print("Bedtools was successfully found")
 
             cmd_return = subprocess.run(['bedtools', '-version'], capture_output=True)
-            version = cmd_return.stdout.decode().rsplit('v', 1)[-1]
-            if version >= '2.29.2':
+            version = cmd_return.stdout.decode('utf-8', errors='ignore').rsplit('v', 1)[-1]
+            if Version(version) >= Version('2.29.2'):
                 if verbose:
                     print("Bedtools version is valid")
                 return version
@@ -108,10 +110,10 @@ def check_for_samtools(verbose):
 
             cmd_return = subprocess.run(['samtools', '--version'], capture_output=True)
             # Isolate version tag
-            version = cmd_return.stdout.decode().split(' ', 1)[-1]
+            version = cmd_return.stdout.decode('utf-8', errors='ignore').split(' ', 1)[-1]
             version = version.split('\n', 1)[0]
 
-            if version >= '1.11':
+            if Version(version) >= Version('1.11'):
                 if verbose:
                     print("Samtools version is valid")
                 return version
@@ -145,11 +147,11 @@ def check_for_blast_plus(verbose=False):
                 print("Blast+ was successfully found")
 
             # Isolate version tag
-            version = cmd_return.stdout.decode().split('\n')[1]
+            version = cmd_return.stdout.decode('utf-8', errors='ignore').split('\n')[1]
             version = version.split(' ')[3]
             version = version.rsplit(',', 1)[0]
 
-            if version == '2.6.0' or version >= '2.11.0':
+            if Version(version) == Version('2.6.0') or Version(version) >= Version('2.11.0'):
                 if verbose:
                     print("Blast+ version is valid")
                 return version

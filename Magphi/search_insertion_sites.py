@@ -6,11 +6,7 @@ import sys
 import gzip
 from itertools import combinations
 from shutil import copyfile, copyfileobj
-from Bio.Blast.Applications import NcbimakeblastdbCommandline
-from Bio.Blast.Applications import NcbitblastnCommandline
-from Bio.Blast.Applications import NcbiblastnCommandline
-from Bio.Sequencing.Applications import SamtoolsFaidxCommandline
-from Bio.Application import ApplicationError
+import subprocess
 from Bio import SearchIO
 from Bio.Seq import Seq, complement, reverse_complement
 import pybedtools as bedtools
@@ -24,7 +20,6 @@ try:
     from Magphi.split_gff_file import split_single_gff
 except ModuleNotFoundError:
     from split_gff_file import split_single_gff
-# pylint: disable=E1123
 
 
 def tblastn_insertion_site(seeds, genome_file, tmp_name):
@@ -37,22 +32,20 @@ def tblastn_insertion_site(seeds, genome_file, tmp_name):
     """
     # Construct genome_db path and name
     genome_db = f'{genome_file}_tmp_db'
-    # Make blast database command for given genome
-    c_line_makedb = NcbimakeblastdbCommandline(dbtype='nucl', input_file=genome_file, out=genome_db)
-
-    # Run makeblastdb in command line
-    c_line_makedb()
+    # Make blast database command for given genome and run
+    subprocess.run(
+        ['makeblastdb', '-dbtype', 'nucl', '-in', genome_file, '-out', genome_db],
+        check=True, capture_output=True, text=True
+    )
 
     blast_out_xml = f'{tmp_name}.xml'
-    c_line = NcbitblastnCommandline(query=seeds,
-                                   db=genome_db,
-                                   evalue=0.001,
-                                   outfmt=5,
-                                   qcov_hsp_perc=50,
-                                   out=blast_out_xml)
-
     # Run the blast command in commandline blast
-    c_line()
+    subprocess.run(
+        ['tblastn', '-query', seeds, '-db', genome_db,
+         '-evalue', '0.001', '-outfmt', '5', '-qcov_hsp_perc', '50',
+         '-out', blast_out_xml],
+        check=True, capture_output=True, text=True
+    )
 
     # Delete blast database
     file_list = glob.glob(f'{genome_file}_tmp_db.*')
@@ -72,22 +65,20 @@ def blast_insertion_site(seeds, genome_file, tmp_name):
     """
     # Construct genome_db path and name
     genome_db = f'{genome_file}_tmp_db'
-    # Make blast database command for given genome
-    c_line_makedb = NcbimakeblastdbCommandline(dbtype='nucl', input_file=genome_file, out=genome_db)
-
-    # Run makeblastdb in command line
-    c_line_makedb()
+    # Make blast database command for given genome and run
+    subprocess.run(
+        ['makeblastdb', '-dbtype', 'nucl', '-in', genome_file, '-out', genome_db],
+        check=True, capture_output=True, text=True
+    )
 
     blast_out_xml = f'{tmp_name}.xml'
-    c_line = NcbiblastnCommandline(query=seeds,
-                                   db=genome_db,
-                                   evalue=0.001,
-                                   outfmt=5,
-                                   qcov_hsp_perc=50,
-                                   out=blast_out_xml)
-
     # Run the blast command in commandline blast
-    c_line()
+    subprocess.run(
+        ['blastn', '-query', seeds, '-db', genome_db,
+         '-evalue', '0.001', '-outfmt', '5', '-qcov_hsp_perc', '50',
+         '-out', blast_out_xml],
+        check=True, capture_output=True, text=True
+    )
 
     # Delete blast database
     file_list = glob.glob(f'{genome_file}_tmp_db.*')
@@ -428,10 +419,12 @@ def check_seeds_placement(bed_files, seed_pairs, seed_hits, max_seed_dist, genom
     :return: A genome file in the temporary directory and an evidence score for each bed file and its seed connections
     """
     # Produce genome index file using samtools
-    samtools_faidx_cmd = SamtoolsFaidxCommandline(ref=genome_file)
     try:
-        samtools_faidx_cmd()
-    except ApplicationError:
+        subprocess.run(
+            ['samtools', 'faidx', genome_file],
+            check=True, capture_output=True, text=True
+        )
+    except subprocess.CalledProcessError:
         exit_with_error(f"Samtools failed when running the command 'samtools faidx {genome_file}'", EXIT_INPUT_FILE_ERROR)
 
     # Initialise the dict to hold the support for a seed hit
@@ -942,6 +935,7 @@ def screen_genome_for_seeds(genome_file, seed_pairs, seed_path, tmp_folder,
     tmp_genome_folder = os.path.join(tmp_folder, genome_name)
     os.mkdir(tmp_genome_folder)
 
+    annotation_file = None
     if file_type == 'fasta':
         tmp_genome = os.path.join(tmp_genome_folder, genome_file.rsplit('/')[-1])
 

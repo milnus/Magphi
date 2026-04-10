@@ -1,17 +1,54 @@
-name: 'Test'
+name: Test
+
 on:
   push:
+    branches: [main, dev]
   pull_request:
-    branches:
-      - main
+    branches: [main]
+
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.9', '3.10', '3.11', '3.12']
+
     steps:
-      - uses: actions/checkout@v2
-      - name: 'Build Docker image'
-        run: docker build -t magphi .
-      - name: 'Run unit tests'
-        run: docker run --entrypoint /Magphi/.travis/unit-test.sh magphi
-      - name: 'Run functional tests'
-        run: docker run --entrypoint /Magphi/functional_tests/Magphi-test.sh magphi -p Magphi -d /Magphi/functional_tests/test_data -v
+      - uses: actions/checkout@v5
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y bedtools samtools ncbi-blast+
+
+      - name: Install Python dependencies
+        run: |
+          pip install --upgrade pip
+          pip install setuptools
+          pip install .
+          pip install -r requirements-dev.txt
+
+      - name: Verify installation
+        run: |
+          which Magphi
+          Magphi --check
+          blastn -version
+          samtools --version | head -1
+          bedtools --version
+
+      - name: Run unit tests
+        working-directory: unit_tests
+        run: python Magphi_test.py
+
+      - name: Run pylint
+        run: pylint -E Magphi/*.py
+
+      - name: Run functional tests
+        run: bash functional_tests/Magphi-test.sh -p Magphi -d functional_tests/test_data -v

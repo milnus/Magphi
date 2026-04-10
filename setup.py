@@ -12,7 +12,7 @@ The program takes in multiple fasta or GFF files at a single time and can also t
 
 setup(
     name='Magphi',
-    version='2.0.2',
+    version='2.1.0',
     author='Magnus Ganer Jespersen',
     author_email='magnus.ganer.j@gmail.com',
     packages=['Magphi'],
@@ -24,11 +24,13 @@ setup(
     license='MIT license',
     description=('A bioinformatics tool allowing for examnination and extraction of genomic features using seed sequences.'),
     long_description=LONG_DESCRIPTION,
-    install_requires=['biopython>=1.79',
-                      'pybedtools==0.8.2'],
+    install_requires=['biopython>=1.85',
+                      'setuptools',
+                      'packaging',
+                      'pybedtools>=0.12.0'],
     keywords=['Genomic', 'extraction', 'bacteria', 'prokaryotes', 'bioinformatics'],
     classifiers=[
-        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
         'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent',
         'Intended Audience :: Science/Research',

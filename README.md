@@ -124,7 +124,7 @@ Additional outputs related to extracted fasta sequences and gff annotations can 
 * Default parameters (no ```-b``` or ```-n``` arguments to Magphi), Fasta outputs can be expected for evidence levels 5B and 5C. A Gff output can be expected with evidence level 5C.
 * When ```-b``` is given to Magphi, Fasta outputs can be expected for evidence levels mentioned above, and 4B and 4C. Gff outputs can be expected for 4C as well.
 * No output is expected when ```-n``` is given as a parameter.
-* As a default output fasta and Gff files are oriented so that the first seed in a pair (see ```seed_pairing.tsv``` file) is at the beginning of the sequence on the positive strand
+* As a default output fasta and Gff files are oriented so that the first seed in a pair (see ```seed_pairing.tsv``` file) is at the beginning of the sequence
 
 ```-n``` and ```-b``` are mutually exclusive as they both alter the expected output and therefore Magphi does not allow both to be given in a single command.
 

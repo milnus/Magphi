@@ -8,7 +8,7 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
       matrix:
@@ -34,6 +34,14 @@ jobs:
           pip install setuptools
           pip install .
           pip install -r requirements-dev.txt
+
+      - name: Verify installation
+        run: |
+          which Magphi
+          Magphi --check
+          blastn -version
+          samtools --version | head -1
+          bedtools --version
 
       - name: Run unit tests
         working-directory: unit_tests

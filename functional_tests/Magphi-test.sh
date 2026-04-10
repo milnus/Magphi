@@ -164,6 +164,41 @@ function test_exit_status {
     fi 
 }
 
+# Run a command and check that all expected strings appear in the output
+# ARG1: command we want to test as a string
+# ARG2: expected exit status
+# ARG3+: strings that must appear in the output
+function test_stdout_contains {
+    let num_tests+=1
+    local cmd=$1
+    local expected_exit_status=$2
+    shift 2
+    local expected_strings=("$@")
+    output=$(eval $cmd 2>&1)
+    exit_status=$?
+    verbose_message "Testing stdout contains strings: $cmd"
+    local failed=0
+    for s in "${expected_strings[@]}"; do
+        if [[ "$output" != *"$s"* ]]; then
+            let num_errors+=1
+            echo "TEST FAILED!"
+            echo "Test output failed (missing expected string): $cmd"
+            echo "Expected to find: $s"
+            echo "Actual output:"
+            echo "$output"
+            failed=1
+            break
+        fi
+    done
+    if [ "$failed" -eq 0 ] && [ "$exit_status" -ne "$expected_exit_status" ]; then
+        let num_errors+=1
+        echo "TEST FAILED!"
+        echo "Test exit status failed: $cmd"
+        echo "Actual exit status: $exit_status"
+        echo "Expected exit status: $expected_exit_status"
+    fi
+}
+
 function call_new_test {
   echo ''
   echo $1
@@ -177,10 +212,10 @@ cd $test_data_dir
 ## Test commandline exit status
 # Test output for no arguments
 call_new_test "Test output for no arguments"
-test_stdout_exit "$test_program" no_input.expected 2
+test_stdout_contains "$test_program" 2 "Magphi" "Welcome to Magphi" "--input_genomes" "--input_seeds" "--help"
 # Test output for -help argument given
 call_new_test "Test output for -help argument given"
-test_stdout_exit "$test_program -help" no_input.expected 0
+test_stdout_contains "$test_program -help" 0 "Magphi" "Welcome to Magphi" "--input_genomes" "--input_seeds" "--help"
 # Test exit status for a bad command line invocation
 call_new_test "Test exit status for a bad command line invocation"
 test_exit_status "$test_program --this_is_not_a_valid_argument > /dev/null 2>&1" 2

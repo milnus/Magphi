@@ -1,6 +1,6 @@
 # Dependencies, with versions explicitly declared for development and testing
 biopython==1.87
-pybedtools==0.8.2
+pybedtools==0.12.0
 setuptools
 # Packages that are not dependencies but used for building or testing
 pylint
